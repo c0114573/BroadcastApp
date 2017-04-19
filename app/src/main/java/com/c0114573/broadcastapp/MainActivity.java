@@ -33,6 +33,28 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        setContentView(ll);
+
+        bt1 = new Button(this);
+        bt2 = new Button(this);
+
+        bt1.setText("開始");
+        bt2.setText("停止");
+
+        TextView tv_lat = new TextView(this);
+        tv_lat.setText("軽度");
+
+        ll.addView(bt1);
+        ll.addView(bt2);
+        ll.addView(tv_lat);
+
+        bt1.setOnClickListener(new SampleClickListener());
+        bt2.setOnClickListener(new SampleClickListener());
+
+
         // Android 6, API 23以上でパーミッシンの確認
         if(Build.VERSION.SDK_INT >= 23){
             checkPermission();
@@ -105,25 +127,6 @@ public class MainActivity extends Activity {
         }
 
 
-    LinearLayout ll = new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        setContentView(ll);
-
-        bt1 = new Button(this);
-        bt2 = new Button(this);
-
-        bt1.setText("開始");
-        bt2.setText("停止");
-
-        TextView tv_lat = new TextView(this);
-        tv_lat.setText("軽度");
-
-        ll.addView(bt1);
-        ll.addView(bt2);
-        ll.addView(tv_lat);
-
-        bt1.setOnClickListener(new SampleClickListener());
-        bt2.setOnClickListener(new SampleClickListener());
     }
 
     class SampleClickListener implements View.OnClickListener {

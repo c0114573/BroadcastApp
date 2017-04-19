@@ -27,10 +27,6 @@ public class ExampleService extends Service implements LocationListener {
     String yy;
 
 
-    int a;
-
-    String b;
-
     static double latitude1;
     static double longitude1;
 
