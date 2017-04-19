@@ -35,8 +35,6 @@ public class ExampleService extends Service implements LocationListener {
 
     private final int REQUEST_PERMISSION = 1000;
 
-    private LocationManager locationManager;
-
     static double ido;
     static double idoido;
 
@@ -108,41 +106,41 @@ public class ExampleService extends Service implements LocationListener {
         Toast.makeText(this, "緯度"+ location.getLatitude()+"軽度"+location.getLongitude(), Toast.LENGTH_LONG).show();
 
 
-        ido = location.getLatitude();
-        Log.e("GPS", String.valueOf(ido));
-
-
-        x = new BigDecimal(ido);
-        x = x.setScale(7, BigDecimal.ROUND_HALF_UP);
-        Log.e("keta", String.valueOf(x));
-
-        xx = String.valueOf(x);
-        Log.e("xx", xx);
-
-        idoido = Double.parseDouble(xx);
-        Log.e("idoido", String.valueOf(idoido));
-
-        latitude1 = idoido;
-
-        // 経度の表示
-//        TextView tv_lng = (TextView) findViewById(R.id.Longitude);
-//        tv_lng.setText("経度:" + location.getLongitude());
-
-//        int m = r.nextInt(str.length);
-//        Toast.makeText(this, str[m], Toast.LENGTH_LONG).show();
-
-        keido = location.getLongitude();
-        Log.e("GPS", String.valueOf(keido));
-
-        y = new BigDecimal(keido);
-        y = y.setScale(7, BigDecimal.ROUND_HALF_UP);
-        Log.e("keta", String.valueOf(y));
-
-        yy = String.valueOf(y);
-        Log.e("yy", yy);
-
-        keidokeido = Double.parseDouble(yy);
-        longitude1 = keidokeido;
+//        ido = location.getLatitude();
+//        Log.e("GPS", String.valueOf(ido));
+//
+//
+//        x = new BigDecimal(ido);
+//        x = x.setScale(7, BigDecimal.ROUND_HALF_UP);
+//        Log.e("keta", String.valueOf(x));
+//
+//        xx = String.valueOf(x);
+//        Log.e("xx", xx);
+//
+//        idoido = Double.parseDouble(xx);
+//        Log.e("idoido", String.valueOf(idoido));
+//
+//        latitude1 = idoido;
+//
+//        // 経度の表示
+////        TextView tv_lng = (TextView) findViewById(R.id.Longitude);
+////        tv_lng.setText("経度:" + location.getLongitude());
+//
+////        int m = r.nextInt(str.length);
+////        Toast.makeText(this, str[m], Toast.LENGTH_LONG).show();
+//
+//        keido = location.getLongitude();
+//        Log.e("GPS", String.valueOf(keido));
+//
+//        y = new BigDecimal(keido);
+//        y = y.setScale(7, BigDecimal.ROUND_HALF_UP);
+//        Log.e("keta", String.valueOf(y));
+//
+//        yy = String.valueOf(y);
+//        Log.e("yy", yy);
+//
+//        keidokeido = Double.parseDouble(yy);
+//        longitude1 = keidokeido;
     }
 
     @Override
