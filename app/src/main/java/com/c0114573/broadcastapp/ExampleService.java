@@ -103,7 +103,7 @@ public class ExampleService extends Service implements LocationListener {
 //        TextView tv_lat = new TextView(this);
 //        tv_lat.setText("緯度:" + location.getLatitude());
 
-        Toast.makeText(this, "緯度"+ location.getLatitude()+"軽度"+location.getLongitude(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "緯度"+ location.getLatitude()+"経度"+location.getLongitude(), Toast.LENGTH_LONG).show();
 
 
 //        ido = location.getLatitude();

@@ -42,13 +42,13 @@ public class MainActivity extends Activity {
 
         bt1.setText("開始");
         bt2.setText("停止");
-
-        TextView tv_lat = new TextView(this);
-        tv_lat.setText("軽度");
+//
+//        TextView tv_lat = new TextView(this);
+//        tv_lat.setText("軽度");
 
         ll.addView(bt1);
         ll.addView(bt2);
-        ll.addView(tv_lat);
+//        ll.addView(tv_lat);
 
         bt1.setOnClickListener(new SampleClickListener());
         bt2.setOnClickListener(new SampleClickListener());
