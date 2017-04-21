@@ -21,7 +21,7 @@ import android.widget.Toast;
  * Created by C011457331 on 2017/04/19.
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener{
 
     Button bt1,bt2;
     IntentFilter intentFilter;
@@ -33,26 +33,29 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LinearLayout ll = new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        setContentView(ll);
 
-        bt1 = new Button(this);
-        bt2 = new Button(this);
+        setContentView(R.layout.activity_boot_receiver);
 
-        bt1.setText("開始");
-        bt2.setText("停止");
+//        LinearLayout ll = new LinearLayout(this);
+//        ll.setOrientation(LinearLayout.VERTICAL);
+//        setContentView(ll);
 //
-//        TextView tv_lat = new TextView(this);
-//        tv_lat.setText("軽度");
-
-        ll.addView(bt1);
-        ll.addView(bt2);
-//        ll.addView(tv_lat);
-
-        bt1.setOnClickListener(new SampleClickListener());
-        bt2.setOnClickListener(new SampleClickListener());
-
+//        bt1 = new Button(this);
+//        bt2 = new Button(this);
+//
+//        bt1.setText("開始");
+//        bt2.setText("停止");
+////
+////        TextView tv_lat = new TextView(this);
+////        tv_lat.setText("経度");
+//
+//        ll.addView(bt1);
+//        ll.addView(bt2);
+////        ll.addView(tv_lat);
+//
+//        bt1.setOnClickListener(new SampleClickListener());
+//        bt2.setOnClickListener(new SampleClickListener());
+//
 
         // Android 6, API 23以上でパーミッシンの確認
         if(Build.VERSION.SDK_INT >= 23){
@@ -62,10 +65,13 @@ public class MainActivity extends Activity {
 //            locationActivity();
             startService(new Intent(getBaseContext(), ExampleService.class));
 
-            receiver = new BootReceiver();
-            intentFilter = new IntentFilter();
-            intentFilter.addAction("BOOT_COMPLETED");
-            registerReceiver(receiver, intentFilter);
+               /*
+                receiver = new BootReceiver();
+                intentFilter = new IntentFilter();
+                intentFilter.addAction("BOOT_COMPLETED");
+                registerReceiver(receiver, intentFilter);
+                return;
+                */
         }
     }
 
@@ -76,10 +82,13 @@ public class MainActivity extends Activity {
 //            locationActivity();
             startService(new Intent(getBaseContext(), ExampleService.class));
 
-            receiver = new BootReceiver();
-            intentFilter = new IntentFilter();
-            intentFilter.addAction("BOOT_COMPLETED");
-            registerReceiver(receiver, intentFilter);
+               /*
+                receiver = new BootReceiver();
+                intentFilter = new IntentFilter();
+                intentFilter.addAction("BOOT_COMPLETED");
+                registerReceiver(receiver, intentFilter);
+                return;
+                */
         }
         // 拒否していた場合
         else{
@@ -112,11 +121,13 @@ public class MainActivity extends Activity {
 //                locationActivity();
                 startService(new Intent(getBaseContext(), ExampleService.class));
 
+                /*
                 receiver = new BootReceiver();
                 intentFilter = new IntentFilter();
                 intentFilter.addAction("BOOT_COMPLETED");
                 registerReceiver(receiver, intentFilter);
                 return;
+                */
 
             } else {
                 // それでも拒否された時の対応
@@ -128,19 +139,22 @@ public class MainActivity extends Activity {
 
     }
 
-    class SampleClickListener implements View.OnClickListener {
+    @Override
         public  void onClick(View v){
-            if(v == bt1){
+        switch (v.getId()){
+            case  R.id.startButton:
+
                 startService(new Intent(getBaseContext(), ExampleService.class));
 
                 receiver = new BootReceiver();
                 intentFilter = new IntentFilter();
                 intentFilter.addAction("BOOT_COMPLETED");
                 registerReceiver(receiver, intentFilter);
-            }
-            else if(v == bt2){
+                break;
 
+            case R.id.stopButton:
+                stopService(new Intent(getBaseContext(), ExampleService.class));
+                break;
             }
-        }
     }
 }

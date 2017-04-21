@@ -1,6 +1,9 @@
 package com.c0114573.broadcastapp;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +22,7 @@ public class ExampleService extends Service implements LocationListener {
 
     static final String TAG = "ExampleService";
     private LocationManager mLocationManager;
+    NotificationManager nm;
 
     BigDecimal x;
     BigDecimal y;
@@ -55,16 +59,14 @@ public class ExampleService extends Service implements LocationListener {
         if (mLocationManager != null) {
             Log.d("LocationActivity", "locationManager.requestLocationUpdates");
             // バックグラウンドから戻ってしまうと例外が発生する場合がある
+
             try {
                 // minTime = 1000msec, minDistance = 50m
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 //                    return;
                 }
 
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-
-
-
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
 
 
 
@@ -82,10 +84,30 @@ public class ExampleService extends Service implements LocationListener {
         return START_STICKY;
     }
 
+    private void showNotification() {
+        Log.d("Debug TEST", "showNotification");
+
+        Intent i = new Intent(this, MainActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+
+        Notification nf = new Notification.Builder(this)
+                .setContentTitle("サンプル")
+                .setContentText("設定画面に移動")
+                .setContentIntent(pi)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setWhen(System.currentTimeMillis())
+                .build();
+        nm.notify(0, nf);
+
+    }
+
+
     @Override
     public void onDestroy() {
+        super.onDestroy();
+        // 重要：requestLocationUpdatesしたままアプリを終了すると挙動がおかしくなる。
+        mLocationManager.removeUpdates(this);
         Log.i(TAG, "onDestroy");
-//        mLocationManager.removeUpdates(this);
     }
 
     @Override
@@ -97,14 +119,12 @@ public class ExampleService extends Service implements LocationListener {
     public void onLocationChanged(Location location) {
 //        Toast.makeText(this, "位置情報を更新", Toast.LENGTH_LONG).show();
 
-
         // 緯度の表示
 //        TextView tv_lat = (TextView) findViewById(R.id.Latitude);
 //        TextView tv_lat = new TextView(this);
 //        tv_lat.setText("緯度:" + location.getLatitude());
 
         Toast.makeText(this, "緯度"+ location.getLatitude()+"経度"+location.getLongitude(), Toast.LENGTH_LONG).show();
-
 
 //        ido = location.getLatitude();
 //        Log.e("GPS", String.valueOf(ido));
