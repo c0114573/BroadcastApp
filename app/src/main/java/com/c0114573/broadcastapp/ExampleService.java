@@ -105,6 +105,8 @@ public class ExampleService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Toast.makeText(this, "バックグラウンドサービスを終了します。", Toast.LENGTH_SHORT).show();
+
         // 重要：requestLocationUpdatesしたままアプリを終了すると挙動がおかしくなる。
         mLocationManager.removeUpdates(this);
         Log.i(TAG, "onDestroy");

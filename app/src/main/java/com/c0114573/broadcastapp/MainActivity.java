@@ -21,7 +21,8 @@ import android.widget.Toast;
  * Created by C011457331 on 2017/04/19.
  */
 
-public class MainActivity extends Activity implements View.OnClickListener{
+public class MainActivity extends Activity {
+//    implements View.OnClickListener
 
     Button bt1,bt2;
     IntentFilter intentFilter;
@@ -56,6 +57,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
 //        bt1.setOnClickListener(new SampleClickListener());
 //        bt2.setOnClickListener(new SampleClickListener());
 //
+//
 
         // Android 6, API 23以上でパーミッシンの確認
         if(Build.VERSION.SDK_INT >= 23){
@@ -63,7 +65,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
         else{
 //            locationActivity();
-            startService(new Intent(getBaseContext(), ExampleService.class));
+//            startService(new Intent(getBaseContext(), ExampleService.class));
 
                /*
                 receiver = new BootReceiver();
@@ -80,7 +82,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         // 既に許可している
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
 //            locationActivity();
-            startService(new Intent(getBaseContext(), ExampleService.class));
+//            startService(new Intent(getBaseContext(), ExampleService.class));
 
                /*
                 receiver = new BootReceiver();
@@ -119,7 +121,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
             // 使用が許可された
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //                locationActivity();
-                startService(new Intent(getBaseContext(), ExampleService.class));
+//                startService(new Intent(getBaseContext(), ExampleService.class));
 
                 /*
                 receiver = new BootReceiver();
@@ -139,7 +141,6 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     }
 
-    @Override
         public  void onClick(View v){
         switch (v.getId()){
             case  R.id.startButton:
