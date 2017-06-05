@@ -12,7 +12,7 @@ public class BootReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             Toast.makeText(context, "BOOT_COMPLETED", Toast.LENGTH_LONG).show();
-            context.startService(new Intent(context, ExampleService.class));
+//            context.startService(new Intent(context, ExampleService.class));
         }else{
             Toast.makeText(context,action, Toast.LENGTH_LONG).show();
         }

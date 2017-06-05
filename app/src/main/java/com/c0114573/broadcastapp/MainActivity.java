@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -17,100 +19,72 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
 /**
  * Created by C011457331 on 2017/04/19.
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements LocationListener {
 //    implements View.OnClickListener
 
-    Button bt1,bt2;
-    IntentFilter intentFilter;
-    BootReceiver receiver;
-
     private final int REQUEST_PERMISSION = 1000;
+
+    TextView tv;
+    String str = "GPS読み取れてないよ";
+
+
+    //学校 35.625122, 139.342143
+    double confLatitude = 35.625122;    // 設定緯度
+    double confLongitude = 139.342143;   // 設定経度
+
+    double myLatitude = 0;    // 現在の緯度
+    double myLongitude = 0;   // 現在の経度
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_boot_receiver);
 
-//        LinearLayout ll = new LinearLayout(this);
-//        ll.setOrientation(LinearLayout.VERTICAL);
-//        setContentView(ll);
-//
-//        bt1 = new Button(this);
-//        bt2 = new Button(this);
-//
-//        bt1.setText("開始");
-//        bt2.setText("停止");
-////
-////        TextView tv_lat = new TextView(this);
-////        tv_lat.setText("経度");
-//
-//        ll.addView(bt1);
-//        ll.addView(bt2);
-////        ll.addView(tv_lat);
-//
-//        bt1.setOnClickListener(new SampleClickListener());
-//        bt2.setOnClickListener(new SampleClickListener());
-//
-//
+        tv = (TextView)findViewById(R.id.textView3);
+        tv.setText("テスト");
 
         // Android 6, API 23以上でパーミッシンの確認
-        if(Build.VERSION.SDK_INT >= 23){
+        if (Build.VERSION.SDK_INT >= 23) {
             checkPermission();
-        }
-        else{
-//            locationActivity();
-//            startService(new Intent(getBaseContext(), ExampleService.class));
-
-               /*
-                receiver = new BootReceiver();
-                intentFilter = new IntentFilter();
-                intentFilter.addAction("BOOT_COMPLETED");
-                registerReceiver(receiver, intentFilter);
-                return;
-                */
+        } else {
         }
     }
 
     // 位置情報許可の確認
     public void checkPermission() {
         // 既に許可している
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
-//            locationActivity();
-//            startService(new Intent(getBaseContext(), ExampleService.class));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-               /*
-                receiver = new BootReceiver();
-                intentFilter = new IntentFilter();
-                intentFilter.addAction("BOOT_COMPLETED");
-                registerReceiver(receiver, intentFilter);
-                return;
-                */
         }
-        // 拒否していた場合
-        else{
+        // 位置情報権限がなかった場合
+        else {
             requestLocationPermission();
         }
     }
 
-    // 許可を求める
+    // 位置情報許可を求める通知表示
     private void requestLocationPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
 
         } else {
             Toast toast = Toast.makeText(this, "許可されないとアプリが実行できません", Toast.LENGTH_SHORT);
             toast.show();
 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, REQUEST_PERMISSION);
-
         }
     }
 
@@ -120,16 +94,6 @@ public class MainActivity extends Activity {
         if (requestCode == REQUEST_PERMISSION) {
             // 使用が許可された
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                locationActivity();
-//                startService(new Intent(getBaseContext(), ExampleService.class));
-
-                /*
-                receiver = new BootReceiver();
-                intentFilter = new IntentFilter();
-                intentFilter.addAction("BOOT_COMPLETED");
-                registerReceiver(receiver, intentFilter);
-                return;
-                */
 
             } else {
                 // それでも拒否された時の対応
@@ -137,25 +101,83 @@ public class MainActivity extends Activity {
                 toast.show();
             }
         }
-
-
     }
 
-        public  void onClick(View v){
-        switch (v.getId()){
-            case  R.id.startButton:
 
+
+    // ローカルに文字列を保存
+    public void onFileClick(View v) {
+        switch (v.getId()) {
+            case R.id.file_save_button:
+                try {
+                    FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
+
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+//                    bw.write(tv.getText().toString());
+
+                    bw.write(str);
+                    bw.flush();
+
+//                    out.write(str.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case R.id.file_read_button:
+                try {
+                    FileInputStream fis = openFileInput("test.txt");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    String tmp;
+                    tv.setText("");
+                    while ((tmp = reader.readLine()) != null) {
+                        tv.append(tmp + "\n");
+                    }
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case R.id.file_delete_button:
+
+                deleteFile("test.txt");
+        }
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.startButton:
                 startService(new Intent(getBaseContext(), ExampleService.class));
-
-                receiver = new BootReceiver();
-                intentFilter = new IntentFilter();
-                intentFilter.addAction("BOOT_COMPLETED");
-                registerReceiver(receiver, intentFilter);
                 break;
 
             case R.id.stopButton:
                 stopService(new Intent(getBaseContext(), ExampleService.class));
                 break;
-            }
+        }
     }
+
+
+    // GPS関係
+    @Override
+    public void onLocationChanged(Location location) {
+        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(),
+                Toast.LENGTH_LONG).show();
+
+        myLatitude = location.getLatitude();
+        myLongitude = location.getLongitude();
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
 }

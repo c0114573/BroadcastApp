@@ -24,32 +24,17 @@ public class ExampleService extends Service implements LocationListener {
     private LocationManager mLocationManager;
     NotificationManager nm;
 
-    BigDecimal x;
-    BigDecimal y;
+    double confLatitude = 0;    // 設定緯度
+    double confLongitude = 0;   // 設定経度
 
-    String xx;
-    String yy;
-
-
-    static double latitude1;
-    static double longitude1;
-
-    double latitude2;
-    double longitude2;
-
-    private final int REQUEST_PERMISSION = 1000;
-
-    static double ido;
-    static double idoido;
-
-    static double keido;
-    static double keidokeido;
-
+    double myLatitude = 0;    // 現在の緯度
+    double myLongitude = 0;   // 現在の経度
 
     @Override
     public void onCreate() {
         Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
     }
 
     @Override
@@ -68,14 +53,12 @@ public class ExampleService extends Service implements LocationListener {
 
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
 
-
-
             } catch (Exception e) {
                 e.printStackTrace();
 
                 Toast toast = Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT);
                 toast.show();
-//
+
 //                //MainActivityに戻す
 //                finish();
             }
@@ -98,7 +81,6 @@ public class ExampleService extends Service implements LocationListener {
                 .setWhen(System.currentTimeMillis())
                 .build();
         nm.notify(0, nf);
-
     }
 
 
@@ -106,8 +88,6 @@ public class ExampleService extends Service implements LocationListener {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "バックグラウンドサービスを終了します。", Toast.LENGTH_SHORT).show();
-
-        // 重要：requestLocationUpdatesしたままアプリを終了すると挙動がおかしくなる。
         mLocationManager.removeUpdates(this);
         Log.i(TAG, "onDestroy");
     }
@@ -119,55 +99,15 @@ public class ExampleService extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-//        Toast.makeText(this, "位置情報を更新", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "緯度" + location.getLatitude() + "経度"+location.getLongitude(),
+                Toast.LENGTH_LONG).show();
 
-        // 緯度の表示
-//        TextView tv_lat = (TextView) findViewById(R.id.Latitude);
-//        TextView tv_lat = new TextView(this);
-//        tv_lat.setText("緯度:" + location.getLatitude());
-
-        Toast.makeText(this, "緯度"+ location.getLatitude()+"経度"+location.getLongitude(), Toast.LENGTH_LONG).show();
-
-//        ido = location.getLatitude();
-//        Log.e("GPS", String.valueOf(ido));
-//
-//
-//        x = new BigDecimal(ido);
-//        x = x.setScale(7, BigDecimal.ROUND_HALF_UP);
-//        Log.e("keta", String.valueOf(x));
-//
-//        xx = String.valueOf(x);
-//        Log.e("xx", xx);
-//
-//        idoido = Double.parseDouble(xx);
-//        Log.e("idoido", String.valueOf(idoido));
-//
-//        latitude1 = idoido;
-//
-//        // 経度の表示
-////        TextView tv_lng = (TextView) findViewById(R.id.Longitude);
-////        tv_lng.setText("経度:" + location.getLongitude());
-//
-////        int m = r.nextInt(str.length);
-////        Toast.makeText(this, str[m], Toast.LENGTH_LONG).show();
-//
-//        keido = location.getLongitude();
-//        Log.e("GPS", String.valueOf(keido));
-//
-//        y = new BigDecimal(keido);
-//        y = y.setScale(7, BigDecimal.ROUND_HALF_UP);
-//        Log.e("keta", String.valueOf(y));
-//
-//        yy = String.valueOf(y);
-//        Log.e("yy", yy);
-//
-//        keidokeido = Double.parseDouble(yy);
-//        longitude1 = keidokeido;
+        myLatitude = location.getLatitude();
+        myLongitude = location.getLongitude();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
     }
 
     @Override
