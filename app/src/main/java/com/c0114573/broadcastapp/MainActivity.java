@@ -10,9 +10,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -27,6 +29,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import static android.app.Service.START_STICKY;
+import static android.content.ContentValues.TAG;
+
 /**
  * Created by C011457331 on 2017/04/19.
  */
@@ -34,10 +39,13 @@ import java.io.OutputStreamWriter;
 public class MainActivity extends Activity implements LocationListener {
 //    implements View.OnClickListener
 
+    LocationManager lm;
+
     private final int REQUEST_PERMISSION = 1000;
 
     TextView tv;
-    String str = "GPS読み取れてないよ";
+    String str1 = "GPS読み取れてないよ";
+    String str2 = "結合";
 
 
     //学校 35.625122, 139.342143
@@ -61,7 +69,34 @@ public class MainActivity extends Activity implements LocationListener {
             checkPermission();
         } else {
         }
+        lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        if (lm != null) {
+            Log.d("LocationActivity", "locationManager.requestLocationUpdates");
+            // バックグラウンドから戻ってしまうと例外が発生する場合がある
+
+            try {
+                // minTime = 1000msec, minDistance = 50m
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                    return;
+                }
+
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                Toast toast = Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT);
+                toast.show();
+
+//                //MainActivityに戻す
+//                finish();
+            }
+        }
     }
+
+
+
 
     // 位置情報許可の確認
     public void checkPermission() {
@@ -105,6 +140,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 
 
+
     // ローカルに文字列を保存
     public void onFileClick(View v) {
         switch (v.getId()) {
@@ -115,7 +151,16 @@ public class MainActivity extends Activity implements LocationListener {
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 //                    bw.write(tv.getText().toString());
 
-                    bw.write(str);
+                    str1 =  Double.toString(myLatitude);
+                    str2 =  Double.toString(myLongitude);
+                    StringBuffer bf = new StringBuffer();
+                    bf.append(str1);
+                    bf.append(",");
+                    bf.append(str2);
+
+                    bw.write(bf.toString());
+
+
                     bw.flush();
 
 //                    out.write(str.getBytes());
