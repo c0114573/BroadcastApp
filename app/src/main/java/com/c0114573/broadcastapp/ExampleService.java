@@ -137,7 +137,7 @@ public class ExampleService extends Service implements LocationListener {
         confLatitude = Double.parseDouble(splitStr[0]);
         confLongitude =  Double.parseDouble(splitStr[1]);
 
-        Toast.makeText(this, "緯度" + confLatitude + "経度"+confLongitude,
+        Toast.makeText(this, "緯度" + confLatitude + "経度"+ confLongitude,
                 Toast.LENGTH_LONG).show();
 
     }
