@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.regex.Pattern;
 
 import static android.app.Service.START_STICKY;
 import static android.content.ContentValues.TAG;
@@ -55,6 +56,9 @@ public class MainActivity extends Activity implements LocationListener {
     double myLatitude = 0;    // 現在の緯度
     double myLongitude = 0;   // 現在の経度
 
+
+    String targetStr = new String("");    // 緯度経度を持ってくる
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +82,7 @@ public class MainActivity extends Activity implements LocationListener {
             try {
                 // minTime = 1000msec, minDistance = 50m
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                    return;
+                    return;
                 }
 
                 lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
@@ -177,11 +181,27 @@ public class MainActivity extends Activity implements LocationListener {
                     tv.setText("");
                     while ((tmp = reader.readLine()) != null) {
                         tv.append(tmp + "\n");
+
+                        targetStr = tmp;
                     }
                     reader.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+//                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
+
+                Pattern pattern = Pattern.compile(",");
+                String[] splitStr = pattern.split(targetStr);
+                for (int i = 0; i < splitStr.length; i++) {
+                    System.out.println(splitStr[i]);
+                }
+                confLatitude = Double.parseDouble(splitStr[0]);
+                confLongitude =  Double.parseDouble(splitStr[1]);
+
+                Toast.makeText(this, "緯度" + confLatitude + "経度"+confLongitude,
+                        Toast.LENGTH_LONG).show();
+
                 break;
 
             case R.id.file_delete_button:

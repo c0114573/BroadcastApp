@@ -16,7 +16,12 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 public class ExampleService extends Service implements LocationListener {
 
@@ -29,6 +34,9 @@ public class ExampleService extends Service implements LocationListener {
 
     double myLatitude = 0;    // 現在の緯度
     double myLongitude = 0;   // 現在の経度
+
+
+    String targetStr = new String("");    // 緯度経度を持ってくる
 
     @Override
     public void onCreate() {
@@ -99,11 +107,39 @@ public class ExampleService extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(this, "緯度" + location.getLatitude() + "経度"+location.getLongitude(),
-                Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "緯度" + location.getLatitude() + "経度"+location.getLongitude(),
+//                Toast.LENGTH_LONG).show();
 
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
+
+        // 登録位置情報読み取り
+        try {
+            FileInputStream fis = openFileInput("test.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+            String tmp;
+//            tv.setText("");
+            while ((tmp = reader.readLine()) != null) {
+//                tv.append(tmp + "\n");
+                targetStr += tmp;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        Pattern pattern = Pattern.compile(",");
+        String[] splitStr = pattern.split(targetStr);
+        for (int i = 0; i < splitStr.length; i++) {
+            System.out.println(splitStr[i]);
+        }
+        confLatitude = Double.parseDouble(splitStr[0]);
+        confLongitude =  Double.parseDouble(splitStr[1]);
+
+        Toast.makeText(this, "緯度" + confLatitude + "経度"+confLongitude,
+                Toast.LENGTH_LONG).show();
+
     }
 
     @Override
