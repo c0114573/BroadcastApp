@@ -122,7 +122,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Button" />
+                android:onClick="onListButtonClick"
+                android:text="リスト" />
 
             <Button
                 android:id="@+id/button3"

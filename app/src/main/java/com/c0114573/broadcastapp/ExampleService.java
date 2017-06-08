@@ -43,6 +43,29 @@ public class ExampleService extends Service implements LocationListener {
         Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+        // 登録位置情報読み取り
+        try {
+            FileInputStream fis = openFileInput("test.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+            String tmp;
+//            tv.setText("");
+            while ((tmp = reader.readLine()) != null) {
+//                tv.append(tmp + "\n");
+                targetStr += tmp;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // 読み取りを行った位置情報をdouble型にそれぞれ格納
+        Pattern pattern = Pattern.compile(",");
+        String[] splitStr = pattern.split(targetStr);
+        for (int i = 0; i < splitStr.length; i++) {
+            System.out.println(splitStr[i]);
+        }
+        confLatitude = Double.parseDouble(splitStr[0]);
+        confLongitude =  Double.parseDouble(splitStr[1]);
     }
 
     @Override
@@ -113,32 +136,32 @@ public class ExampleService extends Service implements LocationListener {
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
 
-        // 登録位置情報読み取り
-        try {
-            FileInputStream fis = openFileInput("test.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-            String tmp;
-//            tv.setText("");
-            while ((tmp = reader.readLine()) != null) {
-//                tv.append(tmp + "\n");
-                targetStr += tmp;
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        // 登録位置情報読み取り
+//        try {
+//            FileInputStream fis = openFileInput("test.txt");
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+//            String tmp;
+////            tv.setText("");
+//            while ((tmp = reader.readLine()) != null) {
+////                tv.append(tmp + "\n");
+//                targetStr += tmp;
+//            }
+//            reader.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
-        Pattern pattern = Pattern.compile(",");
-        String[] splitStr = pattern.split(targetStr);
-        for (int i = 0; i < splitStr.length; i++) {
-            System.out.println(splitStr[i]);
-        }
-        confLatitude = Double.parseDouble(splitStr[0]);
-        confLongitude =  Double.parseDouble(splitStr[1]);
+//        Pattern pattern = Pattern.compile(",");
+//        String[] splitStr = pattern.split(targetStr);
+//        for (int i = 0; i < splitStr.length; i++) {
+//            System.out.println(splitStr[i]);
+//        }
+//        confLatitude = Double.parseDouble(splitStr[0]);
+//        confLongitude =  Double.parseDouble(splitStr[1]);
 
-        Toast.makeText(this, "緯度" + confLatitude + "経度"+ confLongitude,
-                Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "登録" + confLatitude + ","+ confLongitude
+                        + "現在"+myLatitude+","+myLongitude,Toast.LENGTH_LONG).show();
 
     }
 

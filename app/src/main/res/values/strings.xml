@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BroadcastApp</string>
+
+    <string name="location_explain">位置情報の設定をします</string>
 </resources>

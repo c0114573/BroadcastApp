@@ -164,7 +164,6 @@ public class MainActivity extends Activity implements LocationListener {
 
                     bw.write(bf.toString());
 
-
                     bw.flush();
 
 //                    out.write(str.getBytes());
@@ -196,11 +195,17 @@ public class MainActivity extends Activity implements LocationListener {
                 for (int i = 0; i < splitStr.length; i++) {
                     System.out.println(splitStr[i]);
                 }
-                confLatitude = Double.parseDouble(splitStr[0]);
-                confLongitude =  Double.parseDouble(splitStr[1]);
 
-                Toast.makeText(this, "緯度" + confLatitude + "経度"+confLongitude,
-                        Toast.LENGTH_LONG).show();
+                // ファイルはあるけど読み込みが正しくできてないっぽい
+                try {
+                    confLatitude = Double.parseDouble(splitStr[0]);
+                    confLongitude = Double.parseDouble(splitStr[1]);
+
+                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
+                            Toast.LENGTH_LONG).show();
+                } catch (Exception e){
+                    Toast.makeText(this, "ファイル読み込み失敗",Toast.LENGTH_LONG).show();
+                }
 
                 break;
 
@@ -222,6 +227,13 @@ public class MainActivity extends Activity implements LocationListener {
         }
     }
 
+
+    // リスト表示
+    public void onListButtonClick(View v) {
+        Intent intent = new Intent(MainActivity.this, PermissionList.class);
+        startActivity(intent);
+
+    }
 
     // GPS関係
     @Override
