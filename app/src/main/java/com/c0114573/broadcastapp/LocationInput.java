@@ -11,10 +11,21 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,6 +36,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.regex.Pattern;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by member on 2017/06/07.
  */
@@ -33,6 +46,8 @@ public class LocationInput extends Activity implements LocationListener {
 //    implements View.OnClickListener
 
     LocationManager lm;
+    private MapView mv;
+    MapFragment mf;
 
     private final int REQUEST_PERMISSION = 1000;
 
@@ -51,11 +66,22 @@ public class LocationInput extends Activity implements LocationListener {
 
     String targetStr = new String("");    // 緯度経度を持ってくる
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_boot_receiver);
+        //setContentView(R.layout.activity_locationinput);
+
+        mf = MapFragment.newInstance();
+
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.add(android.R.id.content, mf);
+        ft.commit();
+
+
+//      /  mv = (MapView)findViewByID(R.id.mapView2);
 
     }
 
@@ -100,9 +126,7 @@ public class LocationInput extends Activity implements LocationListener {
     // GPS関係
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(),
-                Toast.LENGTH_LONG).show();
-
+        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(), Toast.LENGTH_LONG).show();
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
     }

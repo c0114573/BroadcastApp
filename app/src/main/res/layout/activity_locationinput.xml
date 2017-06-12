@@ -58,7 +58,11 @@
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:clickable="true"
+            android:apiKey="AIzaSyDnxFjGFFML4dE_MJBtXkk4R38YChTrrYE" />
+
     </FrameLayout>
 
 

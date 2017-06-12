@@ -235,6 +235,12 @@ public class MainActivity extends Activity implements LocationListener {
 
     }
 
+    public void onMapButtonClick(View v) {
+        Intent intent = new Intent(MainActivity.this, LocationInput.class);
+        startActivity(intent);
+
+    }
+
     // GPS関係
     @Override
     public void onLocationChanged(Location location) {
