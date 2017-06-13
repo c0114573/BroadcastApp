@@ -11,7 +11,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -37,14 +37,16 @@ import java.io.OutputStreamWriter;
 import java.util.regex.Pattern;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.c0114573.broadcastapp.R.layout.activity_locationinput;
 
 /**
  * Created by member on 2017/06/07.
  */
 
-public class LocationInput extends Activity implements LocationListener {
+public class LocationInput extends Activity implements LocationListener, OnMapReadyCallback {
 //    implements View.OnClickListener
 
+    private GoogleMap mMap;
     LocationManager lm;
     private MapView mv;
     MapFragment mf;
@@ -52,6 +54,7 @@ public class LocationInput extends Activity implements LocationListener {
     private final int REQUEST_PERMISSION = 1000;
 
     TextView tv;
+    TextView tv2;
     String str1 = "GPS読み取れてないよ";
     String str2 = "結合";
 
@@ -71,21 +74,34 @@ public class LocationInput extends Activity implements LocationListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        tv = new TextView(this);
+        tv.setText("");
+
+
+
+        setContentView(activity_locationinput);
+
         //setContentView(R.layout.activity_locationinput);
 
-        mf = MapFragment.newInstance();
-
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.add(android.R.id.content, mf);
-        ft.commit();
+//        mf = MapFragment.newInstance();
+//
+//        FragmentManager fm = getFragmentManager();
+//        FragmentTransaction ft = fm.beginTransaction();
+//        ft.add(android.R.id.content, mf);
+//        ft.commit();
 
 
 //      /  mv = (MapView)findViewByID(R.id.mapView2);
 
+        Fragment mapFragment = (Fragment)getFragmentManager().findFragmentById(R.id.fragment);
+//        mapFragment.getMapAsync(this);
+
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap){
 
+    }
 
     // ローカルに文字列を保存
     public void onFileClick(View v) {
@@ -113,9 +129,49 @@ public class LocationInput extends Activity implements LocationListener {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                // 読み込み
+                targetStr = "";
+                try {
+                    FileInputStream fis = openFileInput("test.txt");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    String tmp;
+                    tv.setText("");
+                    while ((tmp = reader.readLine()) != null) {
+                        tv.append(tmp + "\n");
+                        targetStr = tmp;
+                    }
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+//                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
+
+                Pattern pattern = Pattern.compile(",");
+                String[] splitStr = pattern.split(targetStr);
+                for (int i = 0; i < splitStr.length; i++) {
+                    System.out.println(splitStr[i]);
+                }
+
+                tv2 = (TextView) findViewById(R.id.latlng_text);
+                tv2.setText("");
+                // ファイルはあるけど読み込みが正しくできてないっぽい
+//                try {
+                    confLatitude = Double.parseDouble(splitStr[0]);
+                    confLongitude = Double.parseDouble(splitStr[1]);
+
+                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
+                            Toast.LENGTH_LONG).show();
+                    tv2.setText("緯度" + confLatitude + "経度" + confLongitude);
+//                } catch (Exception e) {
+//                    Toast.makeText(this, "ファイル読み込み失敗", Toast.LENGTH_LONG).show();
+//                }
+
                 break;
 
 
+            // 削除
             case R.id.location_delete_button:
 
                 deleteFile("test.txt");

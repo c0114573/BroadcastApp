@@ -173,6 +173,7 @@ public class MainActivity extends Activity implements LocationListener {
                 break;
 
             case R.id.file_read_button:
+                targetStr="";
                 try {
                     FileInputStream fis = openFileInput("test.txt");
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
