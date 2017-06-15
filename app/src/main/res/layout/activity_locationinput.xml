@@ -11,29 +11,44 @@
         android:text="@string/location_explain" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/latlng_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text="現在の設定:"
         android:layout_weight="0.07" />
 
-    <Button
-        android:id="@+id/location_input_button"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onFileClick"
-        android:text="地図中心を設置" />
+        android:layout_height="38dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/location_input_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onFileClick"
+            android:text="地図中心を設置" />
+
+        <Button
+            android:id="@+id/location_input_button2"
+            android:layout_width="188dp"
+            android:layout_height="wrap_content"
+            android:onClick="onFileClick"
+            android:text="現在位置を設定" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/location_delete_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="38dp"
         android:onClick="onFileClick"
-        android:text="ロック解除" />
+        android:text="設定解除" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="37dp"
         android:orientation="horizontal">
 
         <TextView
@@ -47,22 +62,19 @@
             android:id="@+id/button"
             android:layout_width="119dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.14"
+            android:layout_weight="0.17"
             android:text="Button" />
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="388dp">
+        android:layout_height="419dp">
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="true"
-            android:clickable="true"
-            android:apiKey="AIzaSyDnxFjGFFML4dE_MJBtXkk4R38YChTrrYE" />
-
+        <fragment
+            android:id="@+id/fragment"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="415dp" />
     </FrameLayout>
 
 

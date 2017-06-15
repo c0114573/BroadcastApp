@@ -37,6 +37,7 @@ public class ExampleService extends Service implements LocationListener {
 
 
     String targetStr = new String("");    // 緯度経度を持ってくる
+    String message = "";
 
     @Override
     public void onCreate() {
@@ -64,6 +65,7 @@ public class ExampleService extends Service implements LocationListener {
         for (int i = 0; i < splitStr.length; i++) {
             System.out.println(splitStr[i]);
         }
+        // ここでエラー NumberFormatException
         confLatitude = Double.parseDouble(splitStr[0]);
         confLongitude =  Double.parseDouble(splitStr[1]);
     }
@@ -161,8 +163,39 @@ public class ExampleService extends Service implements LocationListener {
 //        confLongitude =  Double.parseDouble(splitStr[1]);
 
         Toast.makeText(this, "登録" + confLatitude + ","+ confLongitude
-                        + "現在"+myLatitude+","+myLongitude,Toast.LENGTH_LONG).show();
+                        + "\n現在"+myLatitude+","+myLongitude,Toast.LENGTH_LONG).show();
 
+        float results2 = getDistanceBetween(confLatitude,confLongitude,myLatitude,myLongitude);
+
+        // 3km 以内
+        if(results2<3000){
+            message = "範囲内";
+        }else{
+            message = "範囲外";
+        }
+
+        Toast.makeText(this, "距離" + results2+"m" + message,Toast.LENGTH_LONG).show();
+    }
+
+
+    public float getDistanceBetween(
+            double latitude1, double longitude1,
+            double latitude2, double longitude2) {
+
+        float[] results = new float[3];
+        // 2点間の距離を取得（第5引数にセットされることに注意！）
+        Location.distanceBetween(latitude1, longitude1, latitude2, longitude2, results);
+
+        if (results.length < 1) {
+            // 取得に失敗した場合のコード
+        }
+
+        if (results.length < 3) {
+            // 方位角の値を取得した場合のコード
+        }
+
+        // ここでは距離（メートル）のみを返却
+        return results[0];
     }
 
     @Override

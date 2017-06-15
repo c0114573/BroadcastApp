@@ -173,6 +173,7 @@ public class MainActivity extends Activity implements LocationListener {
                 break;
 
             case R.id.file_read_button:
+                targetStr="";
                 try {
                     FileInputStream fis = openFileInput("test.txt");
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
@@ -244,8 +245,8 @@ public class MainActivity extends Activity implements LocationListener {
     // GPS関係
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(),
-                Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(),
+//                Toast.LENGTH_LONG).show();
 
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
