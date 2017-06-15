@@ -55,19 +55,22 @@ public class ExampleService extends Service implements LocationListener {
                 targetStr += tmp;
             }
             reader.close();
+
+
+            // 読み取りを行った位置情報をdouble型にそれぞれ格納
+            Pattern pattern = Pattern.compile(",");
+            String[] splitStr = pattern.split(targetStr);
+            for (int i = 0; i < splitStr.length; i++) {
+                System.out.println(splitStr[i]);
+            }
+            // ここでエラー NumberFormatException
+            confLatitude = Double.parseDouble(splitStr[0]);
+            confLongitude = Double.parseDouble(splitStr[1]);
+
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("登録されてない");
         }
-
-        // 読み取りを行った位置情報をdouble型にそれぞれ格納
-        Pattern pattern = Pattern.compile(",");
-        String[] splitStr = pattern.split(targetStr);
-        for (int i = 0; i < splitStr.length; i++) {
-            System.out.println(splitStr[i]);
-        }
-        // ここでエラー NumberFormatException
-        confLatitude = Double.parseDouble(splitStr[0]);
-        confLongitude =  Double.parseDouble(splitStr[1]);
     }
 
     @Override
@@ -162,19 +165,19 @@ public class ExampleService extends Service implements LocationListener {
 //        confLatitude = Double.parseDouble(splitStr[0]);
 //        confLongitude =  Double.parseDouble(splitStr[1]);
 
-        Toast.makeText(this, "登録" + confLatitude + ","+ confLongitude
-                        + "\n現在"+myLatitude+","+myLongitude,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
+                + "\n現在" + myLatitude + "," + myLongitude, Toast.LENGTH_LONG).show();
 
-        float results2 = getDistanceBetween(confLatitude,confLongitude,myLatitude,myLongitude);
+        float results2 = getDistanceBetween(confLatitude, confLongitude, myLatitude, myLongitude);
 
         // 3km 以内
-        if(results2<3000){
+        if (results2 < 3000) {
             message = "範囲内";
-        }else{
+        } else {
             message = "範囲外";
         }
 
-        Toast.makeText(this, "距離" + results2+"m" + message,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
     }
 
 
