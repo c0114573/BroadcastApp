@@ -168,7 +168,7 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     // ローカルに文字列を保存
     public void onFileClick(View v) {
         switch (v.getId()) {
-            case R.id.location_input_button2:
+            case R.id.location_input_button:
                 try {
                     FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
 
