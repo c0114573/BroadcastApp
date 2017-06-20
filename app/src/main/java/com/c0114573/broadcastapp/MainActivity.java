@@ -1,6 +1,7 @@
 package com.c0114573.broadcastapp;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -11,8 +12,10 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -37,10 +40,9 @@ import static android.content.ContentValues.TAG;
  * Created by C011457331 on 2017/04/19.
  */
 
-public class MainActivity extends Activity implements LocationListener {
+public class MainActivity extends Activity {
 //    implements View.OnClickListener
 
-    LocationManager lm;
 
     private final int REQUEST_PERMISSION = 1000;
 
@@ -59,91 +61,24 @@ public class MainActivity extends Activity implements LocationListener {
 
     String targetStr = new String("");    // 緯度経度を持ってくる
 
+
+    public static int OVERLAY_PERMISSION_REQ_CODE = 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_boot_receiver);
 
-        tv = (TextView)findViewById(R.id.textView3);
+        tv = (TextView) findViewById(R.id.textView3);
         tv.setText("テスト");
 
-        // Android 6, API 23以上でパーミッシンの確認
-        if (Build.VERSION.SDK_INT >= 23) {
+        // API 23 以上であればPermission chekを行う
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
-        } else {
         }
-        lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-        if (lm != null) {
-            Log.d("LocationActivity", "locationManager.requestLocationUpdates");
-            // バックグラウンドから戻ってしまうと例外が発生する場合がある
-
-            try {
-                // minTime = 1000msec, minDistance = 50m
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                Toast toast = Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT);
-                toast.show();
-
-//                //MainActivityに戻す
-//                finish();
-            }
-        }
     }
-
-
-
-
-    // 位置情報許可の確認
-    public void checkPermission() {
-        // 既に許可している
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-        }
-        // 位置情報権限がなかった場合
-        else {
-            requestLocationPermission();
-        }
-    }
-
-    // 位置情報許可を求める通知表示
-    private void requestLocationPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
-
-        } else {
-            Toast toast = Toast.makeText(this, "許可されないとアプリが実行できません", Toast.LENGTH_SHORT);
-            toast.show();
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, REQUEST_PERMISSION);
-        }
-    }
-
-    // 結果の受け取り
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSION) {
-            // 使用が許可された
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            } else {
-                // それでも拒否された時の対応
-                Toast toast = Toast.makeText(this, "これ以上なにもできません", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-        }
-    }
-
-
-
 
     // ローカルに文字列を保存
     public void onFileClick(View v) {
@@ -242,26 +177,25 @@ public class MainActivity extends Activity implements LocationListener {
 
     }
 
-    // GPS関係
-    @Override
-    public void onLocationChanged(Location location) {
-//        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(),
-//                Toast.LENGTH_LONG).show();
 
-        myLatitude = location.getLatitude();
-        myLongitude = location.getLongitude();
+    @TargetApi(Build.VERSION_CODES.M)
+    public void checkPermission() {
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+        }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onProviderDisabled(String provider) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
+            if (!Settings.canDrawOverlays(this)) {
+                // SYSTEM_ALERT_WINDOW permission not granted...
+                // nothing to do !
+            }
+        }
     }
 
 }

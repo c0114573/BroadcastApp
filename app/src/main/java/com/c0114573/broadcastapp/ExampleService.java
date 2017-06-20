@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -98,6 +99,8 @@ public class ExampleService extends Service implements LocationListener {
 //                //MainActivityに戻す
 //                finish();
             }
+
+            startService(new Intent(getBaseContext(), WindowService.class));
         }
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
@@ -173,6 +176,7 @@ public class ExampleService extends Service implements LocationListener {
         // 3km 以内
         if (results2 < 3000) {
             message = "範囲内";
+            startService(new Intent(getBaseContext(), WindowService.class));
         } else {
             message = "範囲外";
         }
