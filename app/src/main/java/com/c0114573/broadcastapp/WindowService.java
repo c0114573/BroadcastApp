@@ -84,7 +84,7 @@ public class WindowService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "バックグラウンドサービスを終了します。", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "ウィンドウ終了します。", Toast.LENGTH_SHORT).show();
 //        mLocationManager.removeUpdates(this);
         wm.removeView(player_view);
 

@@ -1,9 +1,7 @@
 package com.c0114573.broadcastapp;
 
 import android.Manifest;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,14 +12,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
 public class ExampleService extends Service implements LocationListener {
@@ -57,7 +53,6 @@ public class ExampleService extends Service implements LocationListener {
             }
             reader.close();
 
-
             // 読み取りを行った位置情報をdouble型にそれぞれ格納
             Pattern pattern = Pattern.compile(",");
             String[] splitStr = pattern.split(targetStr);
@@ -84,7 +79,10 @@ public class ExampleService extends Service implements LocationListener {
 
             try {
                 // minTime = 1000msec, minDistance = 50m
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
 //                    return;
                 }
 
@@ -93,40 +91,38 @@ public class ExampleService extends Service implements LocationListener {
             } catch (Exception e) {
                 e.printStackTrace();
 
-                Toast toast = Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT).show();
 
-//                //MainActivityに戻す
-//                finish();
             }
 
-            startService(new Intent(getBaseContext(), WindowService.class));
+//            startService(new Intent(getBaseContext(), WindowService.class));
         }
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
     }
 
-    private void showNotification() {
-        Log.d("Debug TEST", "showNotification");
-
-        Intent i = new Intent(this, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-
-        Notification nf = new Notification.Builder(this)
-                .setContentTitle("サンプル")
-                .setContentText("設定画面に移動")
-                .setContentIntent(pi)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setWhen(System.currentTimeMillis())
-                .build();
-        nm.notify(0, nf);
-    }
+//    private void showNotification() {
+//        Log.d("Debug TEST", "showNotification");
+//
+//        Intent i = new Intent(this, MainActivity.class);
+//        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+//
+//        Notification nf = new Notification.Builder(this)
+//                .setContentTitle("サンプル")
+//                .setContentText("設定画面に移動")
+//                .setContentIntent(pi)
+//                .setSmallIcon(R.drawable.ic_launcher)
+//                .setWhen(System.currentTimeMillis())
+//                .build();
+//        nm.notify(0, nf);
+//    }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "バックグラウンドサービスを終了します。", Toast.LENGTH_SHORT).show();
+        stopService(new Intent(getBaseContext(), WindowService.class));
         mLocationManager.removeUpdates(this);
         Log.i(TAG, "onDestroy");
     }
@@ -179,8 +175,8 @@ public class ExampleService extends Service implements LocationListener {
             startService(new Intent(getBaseContext(), WindowService.class));
         } else {
             message = "範囲外";
+            stopService(new Intent(getBaseContext(), WindowService.class));
         }
-
         Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
     }
 

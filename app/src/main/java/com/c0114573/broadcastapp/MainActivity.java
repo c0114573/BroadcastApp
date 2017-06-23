@@ -43,7 +43,6 @@ import static android.content.ContentValues.TAG;
 public class MainActivity extends Activity {
 //    implements View.OnClickListener
 
-
     private final int REQUEST_PERMISSION = 1000;
 
     TextView tv;
@@ -73,11 +72,10 @@ public class MainActivity extends Activity {
         tv = (TextView) findViewById(R.id.textView3);
         tv.setText("テスト");
 
-        // API 23 以上であればPermission chekを行う
+        // API 23 以上であればPermission checkを行う
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
         }
-
     }
 
     // ローカルに文字列を保存
@@ -163,7 +161,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
     // リスト表示
     public void onListButtonClick(View v) {
         Intent intent = new Intent(MainActivity.this, PermissionList.class);
@@ -176,7 +173,6 @@ public class MainActivity extends Activity {
         startActivity(intent);
 
     }
-
 
     @TargetApi(Build.VERSION_CODES.M)
     public void checkPermission() {
@@ -197,5 +193,4 @@ public class MainActivity extends Activity {
             }
         }
     }
-
 }
