@@ -6,16 +6,37 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="match_parent"
+        android:layout_width="60dp"
         android:layout_height="3dp"
-        android:text="                    "
+        android:text=""
         android:background="#ff0000" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/wm_button1"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.03"
         android:text="設定" />
+
+    <Button
+        android:id="@+id/wm_button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="設定"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/wm_button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GPS"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/wm_button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="閉じる"
+        android:visibility="gone" />
 
 </LinearLayout>

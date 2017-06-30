@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +46,8 @@ public class MainActivity extends Activity {
 
     private final int REQUEST_PERMISSION = 1000;
 
+    private static final int REQUEST_SETTINGS = 1;
+
     TextView tv;
     String str1 = "GPS読み取れてないよ";
     String str2 = "結合";
@@ -72,10 +75,6 @@ public class MainActivity extends Activity {
         tv = (TextView) findViewById(R.id.textView3);
         tv.setText("テスト");
 
-        // API 23 以上であればPermission checkを行う
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkPermission();
-        }
     }
 
     // ローカルに文字列を保存
@@ -144,15 +143,16 @@ public class MainActivity extends Activity {
                 break;
 
             case R.id.file_delete_button:
-
                 deleteFile("test.txt");
         }
     }
 
+
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.startButton:
-                startService(new Intent(getBaseContext(), ExampleService.class));
+//                startService(new Intent(getBaseContext(), ExampleService.class));
+                startService();
                 break;
 
             case R.id.stopButton:
@@ -174,23 +174,63 @@ public class MainActivity extends Activity {
 
     }
 
+//    @TargetApi(Build.VERSION_CODES.M)
+//    public void checkPermission() {
+//        if (!Settings.canDrawOverlays(this)) {
+//            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+//                    Uri.parse("package:" + getPackageName()));
+//            startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+//        }
+//    }
+//
+//    @TargetApi(Build.VERSION_CODES.M)
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
+//            if (!Settings.canDrawOverlays(this)) {
+//                // SYSTEM_ALERT_WINDOW permission not granted...
+//                // nothing to do !
+//            }
+//        }
+//    }
+
+
     @TargetApi(Build.VERSION_CODES.M)
-    public void checkPermission() {
-        if (!Settings.canDrawOverlays(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+    private void startService() {
+        Intent intent = null;
+        if (!canGetUsageStats()) {  // (1)
+            intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        } else if (!canDrawOverlays()) {  // (2)
+            Uri uri = Uri.parse("package:" + getPackageName());
+            intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri);
+        }
+        if (intent != null) {  // (3)
+            startActivityForResult(intent, REQUEST_SETTINGS);
+            Toast.makeText(getApplicationContext(), "Please turn ON", Toast.LENGTH_SHORT).show();
+        } else {
+            startService(new Intent(getBaseContext(), ExampleService.class));
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
-            if (!Settings.canDrawOverlays(this)) {
-                // SYSTEM_ALERT_WINDOW permission not granted...
-                // nothing to do !
-            }
+    // (1)「使用履歴へのアクセス」の権限があるか？
+    public boolean canGetUsageStats() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {  // 【1】
+            return true;
         }
+        AppOpsManager aom = (AppOpsManager) getSystemService(APP_OPS_SERVICE);
+        int uid = android.os.Process.myUid();
+        int mode = aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
+
+    // (2)「画面の上に表示」の権限があるか？
+    private boolean canDrawOverlays() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {  // 【1】
+            return true;
+        }
+        return Settings.canDrawOverlays(getApplicationContext());
+    }
+
+
+
 }
