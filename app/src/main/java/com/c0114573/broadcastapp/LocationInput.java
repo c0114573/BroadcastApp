@@ -26,6 +26,7 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -46,7 +47,7 @@ import static com.c0114573.broadcastapp.R.layout.activity_locationinput;
 public class LocationInput extends Activity implements LocationListener, OnMapReadyCallback {
 //    implements View.OnClickListener
 
-    private GoogleMap mMap;
+//    private GoogleMap mMap = null;
     LocationManager lm;
     private MapView mv;
     MapFragment mf;
@@ -158,6 +159,9 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 //                finish();
             }
         }
+
+//        mMap = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map) ).getMap();
+
     }
 
     @Override
@@ -177,13 +181,18 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 
                     str1 = Double.toString(myLatitude);
                     str2 = Double.toString(myLongitude);
-                    StringBuffer bf = new StringBuffer();
-                    bf.append(str1);
-                    bf.append(",");
-                    bf.append(str2);
 
-                    bw.write(bf.toString());
+//                    StringBuffer bf = new StringBuffer();
+//                    bf.append(str1);
+//                    bf.append(",");
+//                    bf.append(str2);
+//
+//                    bw.write(bf.toString());
 
+                    bw.write(str1);
+                    bw.write(",");
+                    bw.write(str2);
+                    bw.newLine();
 
                     bw.flush();
 
