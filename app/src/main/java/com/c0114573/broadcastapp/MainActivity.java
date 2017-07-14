@@ -9,7 +9,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -27,11 +34,14 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static android.app.Service.START_STICKY;
@@ -45,13 +55,14 @@ public class MainActivity extends Activity {
 //    implements View.OnClickListener
 
     private final int REQUEST_PERMISSION = 1000;
-
     private static final int REQUEST_SETTINGS = 1;
 
     TextView tv;
+    TextView tv3;
     String str1 = "GPS読み取れてないよ";
     String str2 = "結合";
 
+    List<AppData> dataList = new ArrayList<AppData>();
 
     //学校 35.625122, 139.342143
     double confLatitude = 35.625122;    // 設定緯度
@@ -72,78 +83,230 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_boot_receiver);
 
-        tv = (TextView) findViewById(R.id.textView3);
+        tv3 = (TextView) findViewById(R.id.textView3);
+        tv3.setText("テスト");
+
+        tv = (TextView) findViewById(R.id.textView5);
         tv.setText("テスト");
+
+
+        // リスト作成
+        ArrayList<String> appList = new ArrayList<String>();
+
+        // パッケージマネージャーの作成
+        PackageManager packageManager = getPackageManager();
+
+        // 起動不可能なアプリをリストに格納
+        List<PackageInfo> pckInfoList = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        for (PackageInfo pckInfo : pckInfoList) {
+            // インテントで起動できないものを格納
+            if (packageManager.getLaunchIntentForPackage(pckInfo.packageName) == null) {
+                appList.add(pckInfo.packageName);
+            }
+        }
+
+        // インストール済みアプリの情報を取得
+        List<ApplicationInfo> applicationInfo = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        int pSMS = -1;
+        int pLocation = -1;
+
+        // リストにアプリデータを格納
+        appInfo:
+        for (ApplicationInfo info : applicationInfo) {
+            pSMS = -1;
+            pLocation = -1;
+
+            // システム標準でインストールされているアプリであるか
+//            if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM) continue;
+
+            // 自分自身を除外
+            if (info.packageName.equals(this.getPackageName())) continue;
+
+            // 起動不可能なアプリを除外
+            for (String app : appList) {
+                if ((info.packageName.equals(app))) continue appInfo;
+            }
+
+            // パーミッションを持っているか
+            int pCamera = getPackageManager().checkPermission(Manifest.permission.CAMERA, info.packageName);
+            int pSMS1 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_SMS, info.packageName);
+            int pSMS2 = getPackageManager().checkPermission(Manifest.permission.SEND_SMS, info.packageName);
+            int pSMS3 = getPackageManager().checkPermission(Manifest.permission.READ_SMS, info.packageName);
+            int pSMS4 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_WAP_PUSH, info.packageName);
+            int pSMS5 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_MMS, info.packageName);
+            int pLocation1 = getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, info.packageName);
+            int pLocation2 = getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, info.packageName);
+
+            if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
+
+            if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
+
+            // カメラ,SNS,位置権限を持ったアプリであるか
+            if (pCamera == PackageManager.PERMISSION_GRANTED ||
+                    pLocation == PackageManager.PERMISSION_GRANTED ||
+                    pSMS == PackageManager.PERMISSION_GRANTED) {
+
+                // アプリ情報クラスにアプリ情報を追加
+                AppData data = new AppData();
+                data.packageLabel = info.loadLabel(packageManager).toString();
+                data.packageName = info.packageName;
+                data.icon = info.loadIcon(packageManager);
+                data.pCamera = pCamera;
+                data.pSMS = pSMS;
+                data.pLocation = pLocation;
+
+                // アプリ情報クラスをリストに追加
+                dataList.add(data);
+            }
+        }
+
 
     }
 
     // ローカルに文字列を保存
     public void onFileClick(View v) {
         switch (v.getId()) {
+
+
             case R.id.file_save_button:
+                String strl = "";
+                String strn = "";
+                String strp = "";
+                String strlo = "";
+                Drawable stri ;
+
+                StringBuilder sb = new StringBuilder();
+
                 try {
-                    FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
-
+                    FileOutputStream out = openFileOutput("appData.csv", MODE_PRIVATE);
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-//                    bw.write(tv.getText().toString());
 
-                    str1 =  Double.toString(myLatitude);
-                    str2 =  Double.toString(myLongitude);
-                    StringBuffer bf = new StringBuffer();
-                    bf.append(str1);
-                    bf.append(",");
-                    bf.append(str2);
+                    int num = 0;
+                    for (AppData info : dataList) {
+                        num++;
+                        strl = info.getpackageLabel();
+                        strp = info.getPermission();
+                        strn = info.getpackageName();
+                        strlo = info.getLock();
+                        stri = info.getIcon();
 
-                    bw.write(bf.toString());
+                        // ビットマップに変換
+                        Bitmap bitmap = ((BitmapDrawable) stri).getBitmap();
 
+                        // バイト配列出力を扱う
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                        // ビットマップを圧縮する
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+
+                        // 文字列型に直す
+                        String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+
+                        // SharedPreferenceのインスタンスを生成
+                        SharedPreferences pref = getSharedPreferences("DATA"+num, Context.MODE_PRIVATE);
+                        // データの書き込み
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("key", bitmapStr);
+                        editor.apply();
+
+                        bw.write(strl);
+                        bw.write(",");
+                        bw.write(strn);
+                        bw.write(",");
+                        bw.write(strp);
+                        bw.write(",");
+                        bw.write(strlo);
+                        bw.write(",");
+
+                        bw.newLine();
+
+
+////                    String strlat = "";
+////                    String strlng = "";
+//
+//                    out = openFileOutput("test.txt", MODE_PRIVATE);
+//                    bw = new BufferedWriter(new OutputStreamWriter(out));
+//
+////                        strlat =  Double.toString(myLatitude);
+////                        strlng =  Double.toString(myLongitude);
+//                    StringBuffer bf = new StringBuffer();
+//                    bf.append(confLatitude);
+//                    bf.append(",");
+//                    bf.append(confLongitude);
+//                    bw.write(bf.toString());
+//                    bw.flush();
+
+
+
+
+                        }
+                    num=0;
                     bw.flush();
-
-//                    out.write(str.getBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
 
+
             case R.id.file_read_button:
-                targetStr="";
+//                targetStr = "";
+//                try {
+//                    FileInputStream fis = openFileInput("test.txt");
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+//                    String tmp;
+//                    tv3.setText("");
+//                    while ((tmp = reader.readLine()) != null) {
+//                        tv3.append(tmp + "\n");
+//
+//                        targetStr = tmp;
+//                    }
+//                    reader.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+////                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
+//
+//                Pattern pattern = Pattern.compile(",");
+//                String[] splitStr = pattern.split(targetStr);
+//                for (int i = 0; i < splitStr.length; i++) {
+//                    System.out.println(splitStr[i]);
+//                }
+//
+//                // ファイルはあるけど読み込みが正しくできてないっぽい
+//                try {
+//                    confLatitude = Double.parseDouble(splitStr[0]);
+//                    confLongitude = Double.parseDouble(splitStr[1]);
+//
+//                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
+//                            Toast.LENGTH_LONG).show();
+//                } catch (Exception e){
+//                    Toast.makeText(this, "ファイル読み込み失敗",Toast.LENGTH_LONG).show();
+//                }
+//
+
+
+
                 try {
-                    FileInputStream fis = openFileInput("test.txt");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    FileInputStream in = openFileInput("appData.csv");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
                     String tmp;
+//                et.setText("");
                     tv.setText("");
                     while ((tmp = reader.readLine()) != null) {
+//                    et.append(tmp + "\n");
                         tv.append(tmp + "\n");
-
-                        targetStr = tmp;
                     }
                     reader.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-//                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
-
-                Pattern pattern = Pattern.compile(",");
-                String[] splitStr = pattern.split(targetStr);
-                for (int i = 0; i < splitStr.length; i++) {
-                    System.out.println(splitStr[i]);
-                }
-
-                // ファイルはあるけど読み込みが正しくできてないっぽい
-                try {
-                    confLatitude = Double.parseDouble(splitStr[0]);
-                    confLongitude = Double.parseDouble(splitStr[1]);
-
-                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
-                            Toast.LENGTH_LONG).show();
-                } catch (Exception e){
-                    Toast.makeText(this, "ファイル読み込み失敗",Toast.LENGTH_LONG).show();
-                }
-
                 break;
 
             case R.id.file_delete_button:
-                deleteFile("test.txt");
+                deleteFile("appData.csv");
         }
     }
 
@@ -174,27 +337,8 @@ public class MainActivity extends Activity {
 
     }
 
-//    @TargetApi(Build.VERSION_CODES.M)
-//    public void checkPermission() {
-//        if (!Settings.canDrawOverlays(this)) {
-//            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-//                    Uri.parse("package:" + getPackageName()));
-//            startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
-//        }
-//    }
-//
-//    @TargetApi(Build.VERSION_CODES.M)
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
-//            if (!Settings.canDrawOverlays(this)) {
-//                // SYSTEM_ALERT_WINDOW permission not granted...
-//                // nothing to do !
-//            }
-//        }
-//    }
 
-
+    // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)
     private void startService() {
         Intent intent = null;
@@ -230,7 +374,6 @@ public class MainActivity extends Activity {
         }
         return Settings.canDrawOverlays(getApplicationContext());
     }
-
 
 
 }

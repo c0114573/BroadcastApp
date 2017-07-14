@@ -14,7 +14,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="31dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -27,9 +27,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="28dp"
-            android:orientation="horizontal"
-            android:layout_weight="0.13">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/startButton"
@@ -48,9 +47,33 @@
                 android:text="Stop" />
         </LinearLayout>
 
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="32dp"
+            android:layout_height="67dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onListButtonClick"
+                android:text="リスト" />
+
+            <Button
+                android:id="@+id/button3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.70"
+                android:onClick="onMapButtonClick"
+                android:text="位置情報の設定" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -59,6 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="ファイル操作テスト" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -93,10 +117,9 @@
 
         </LinearLayout>
 
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="35dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -107,27 +130,16 @@
                 android:text="TextView" />
         </LinearLayout>
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="75dp"
-            android:orientation="horizontal">
+            android:layout_height="341dp">
 
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="onListButtonClick"
-                android:text="リスト" />
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.70"
-                android:onClick="onMapButtonClick"
-                android:text="位置情報の設定" />
-        </LinearLayout>
+                android:text="TextView" />
+        </ScrollView>
 
 
     </LinearLayout>

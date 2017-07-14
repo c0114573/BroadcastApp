@@ -3,17 +3,25 @@ package com.c0114573.broadcastapp;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,86 +29,89 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionList extends Activity {
 
-    AppData data = new AppData();
+    TextView tv;
+
+    ArrayList<String> readAppList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission_lsit);
 
-//        TextView tv = (TextView) findViewById(R.id.textView2);
+
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        setContentView(ll);
+        tv = new TextView(this);
+        tv.setText("こんにちは");
+        ll.addView(tv);
 
 
-        // リスト作成
-        ArrayList<String> appList = new ArrayList<String>();
-        // パッケージマネージャーの作成
-        PackageManager packageManager = getPackageManager();
-        // インストール済みのアプリの情報を取得
-        final List<ApplicationInfo> applicationInfo = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
-
+        // 読み込み
+        try {
+            FileInputStream in = openFileInput("appData.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            String tmp;
+            while ((tmp = reader.readLine()) != null) {
+                readAppList.add(tmp + "\n");
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // アイコンあり
-        final List<AppData> dataList = new ArrayList<AppData>();
+        final List<AppData> appList = new ArrayList<AppData>();
 
-        // リストに一覧データを格納する
-        for (ApplicationInfo info : applicationInfo) {
+        int num = 0;
+        // 読み込んだデータをAppData型のappListに格納
+        for (String str : readAppList) {
+            num++;
+            AppData data = new AppData();
 
-            int p = getPackageManager().checkPermission(Manifest.permission.CAMERA, info.packageName);
-            if(p == PackageManager.PERMISSION_GRANTED) {
-
-                if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM)
-                    continue;
-                if (info.packageName.equals(this.getPackageName())) continue;
-
-                // インストール済みアプリ情報からアプリ名を取得しリストに追加
-                appList.add((String) packageManager.getApplicationLabel(info));
-//            appList.add(info.loadLabel(packageManager).toString());
-
-
-                AppData data = new AppData();
-                data.label = info.loadLabel(packageManager).toString();
-                data.icon = info.loadIcon(packageManager);
-                data.pname = info.packageName;
-                dataList.add(data);
-
+            // SharedPreferenceのインスタンスを生成
+            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+            String s = pref.getString("key", "");
+            if (!s.equals("")) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                byte[] b = Base64.decode(s, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+                data.icon = new BitmapDrawable(bitmap);
             }
+
+
+            String[] appdata = str.split(",", 0);
+            data.packageLabel = appdata[0];
+            data.packageName = appdata[1];
+            data.pCamera = Integer.parseInt(appdata[2]);
+            data.pSMS = Integer.parseInt(appdata[3]);
+            data.pLocation = Integer.parseInt(appdata[4]);
+            data.lock = Integer.parseInt(appdata[5]);
+//            data.icon = bitmap;
+
+            appList.add(data);
+
         }
-
-        /*
-        // リストの表示
-        for (String app : appList) {
-            appname += app + "\n";
-        }
-        tv.setText(appname);
-        */
-
-
-
-
-        // リストビューで表示
-
-//        lv = (ListView)findViewById(R.id.listView);
-//
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
-//        // リストの表示
-//        for (String app : appList) {
-//            adapter.add(app);
-//        }
-//        lv.setAdapter(adapter);
-
+        num = 0;
 
 
         // リストビューにアプリケーションの一覧を表示する
         final ListView listView = new ListView(this);
-        listView.setAdapter(new AppListAdapter(this, dataList));
+        listView.setAdapter(new AppListAdapter(this, appList));
+
         //クリック処理
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -108,47 +119,16 @@ public class PermissionList extends Activity {
 //                ApplicationInfo item = applicationInfo.get(position);
 
                 // タップされたアプリ名取得
-                AppData item = dataList.get(position);
-                Log.d("onClick",item.getName());
+                AppData item = appList.get(position);
+//                Log.d("onClick",item.getpackageName());
 
-                // アプリを開く
-//                PackageManager pManager = getPackageManager();
-//                Intent intent = pManager.getLaunchIntentForPackage(item.getName());
-//                startActivity(intent);
-
-
-                // アプリをアンインストール
-                PackageManager pManager = getPackageManager();
-                Uri uri = Uri.fromParts("package", item.getName(), null);
-                Intent intent = new Intent(Intent.ACTION_DELETE, uri);
-                startActivity(intent);
-
-
-
-
-
-
+                // リスト表示用のアラートダイアログ
+                displayDialog(item.getpackageLabel(), item.getpackageName());
 
             }
         });
         setContentView(listView);
-
-
-
     }
-
-
-    // アプリケーションデータ格納クラス
-    private static class AppData {
-        String label;
-        Drawable icon;
-        String pname;
-
-        public String getName(){
-            return this.pname;
-        }
-    }
-
 
     // アプリケーションのラベルとアイコンを表示するためのアダプタークラス
     private static class AppListAdapter extends ArrayAdapter<AppData> {
@@ -179,9 +159,9 @@ public class PermissionList extends Activity {
             // 表示データを取得
             final AppData data = getItem(position);
             // ラベルとアイコンをリストビューに設定
-            holder.textLabel.setText(data.label);
+            holder.textLabel.setText(data.getpackageLabel());
             holder.imageIcon.setImageDrawable(data.icon);
-            holder.packageName.setText(data.pname);
+            holder.packageName.setText(data.getpackageName());
 
             return convertView;
         }
@@ -192,6 +172,54 @@ public class PermissionList extends Activity {
         TextView textLabel;
         ImageView imageIcon;
         TextView packageName;
+    }
+
+    private void displayDialog(final String name, final String text) {
+
+        AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+        dlg.setTitle(name);
+
+        String[] items = {"アプリを起動", "アプリ情報画面を開く", "GooglePlayストアを開く", "アンインストール"};
+        dlg.setItems(items, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = null;
+                Uri uri;
+                PackageManager pManager = getPackageManager();
+                switch (which) {
+
+                    case 0:
+                        intent = pManager.getLaunchIntentForPackage(text);
+                        startActivity(intent);
+                        break;
+
+                    case 1:
+                        intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        intent.setData(Uri.parse("package:" + text));
+                        startActivity(intent);
+                        break;
+
+                    case 2:
+                        uri = Uri.parse("market://details?id=" + text);
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                        break;
+
+                    case 3:
+                        uri = Uri.fromParts("package", text, null);
+                        intent = new Intent(Intent.ACTION_DELETE, uri);
+                        startActivity(intent);
+                        break;
+
+                    default:
+                        break;
+                }
+
+            }
+        });
+        dlg.show();
     }
 
 }
