@@ -28,14 +28,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onFileClick"
-            android:text="地図中心を設置" />
+            android:text="学校" />
 
         <Button
             android:id="@+id/location_input_button2"
             android:layout_width="188dp"
             android:layout_height="wrap_content"
             android:onClick="onFileClick"
-            android:text="現在位置を設定" />
+            android:text="八王子駅" />
 
     </LinearLayout>
 

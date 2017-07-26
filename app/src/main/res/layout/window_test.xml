@@ -7,8 +7,8 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="60dp"
-        android:layout_height="3dp"
-        android:text=""
+        android:layout_height="wrap_content"
+        android:text="制限中"
         android:background="#ff0000" />
 
     <Button

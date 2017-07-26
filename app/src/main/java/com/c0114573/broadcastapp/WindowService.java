@@ -180,6 +180,7 @@ public class WindowService extends Service {
                 if (locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     //GPSが利用可能
                     provider = "gps";
+
                 } else if (locationmanager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                     //ネットワークが利用可能
                     provider = "network";

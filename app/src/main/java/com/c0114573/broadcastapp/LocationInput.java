@@ -64,8 +64,9 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     double confLatitude = 35.625122;    // 設定緯度
     double confLongitude = 139.342143;   // 設定経度
 
-    double myLatitude = 0;    // 現在の緯度
-    double myLongitude = 0;   // 現在の経度
+    // 八王子
+    double myLatitude = 35.655601;    // 現在の緯度
+    double myLongitude = 139.338854;   // 現在の経度
 
 
     String targetStr = new String("");    // 緯度経度を持ってくる
@@ -320,8 +321,8 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     @Override
     public void onLocationChanged(Location location) {
 //        Toast.makeText(this, "緯度" + location.getLatitude() + "経度" + location.getLongitude(), Toast.LENGTH_LONG).show();
-        myLatitude = location.getLatitude();
-        myLongitude = location.getLongitude();
+//        myLatitude = location.getLatitude();
+//        myLongitude = location.getLongitude();
 //        Toast.makeText(this, "緯度" + myLatitude + "経度" + myLongitude, Toast.LENGTH_LONG).show();
     }
 

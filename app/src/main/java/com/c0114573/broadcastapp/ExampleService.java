@@ -1,14 +1,19 @@
 package com.c0114573.broadcastapp;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -16,8 +21,13 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class ExampleService extends Service implements LocationListener {
@@ -35,6 +45,186 @@ public class ExampleService extends Service implements LocationListener {
 
     String targetStr = new String("");    // 緯度経度を持ってくる
     String message = "";
+
+
+    public ArrayList<String> array = new ArrayList<String>();
+    String result = "";
+    String sendPackageLabel = "";
+    String sendPermission = "";
+
+    boolean isPackage = false;
+    boolean isLocationApp = false;
+
+    boolean locationInto = false;
+
+    int appUsedCount = 0;
+
+    private final static String TAG2 = "";
+
+    // Toastを何回表示されたか数えるためのカウント
+    private int mCount = 0;
+
+    // Toastを表示させるために使うハンドラ
+    private Handler mHandler = new Handler();
+
+    // スレッドを停止するために必要
+    private boolean mThreadActive = true;
+
+
+    // スレッド処理
+    private Runnable mTask = new Runnable() {
+
+        @Override
+        public void run() {
+
+            // アクティブな間だけ処理をする
+            while (mThreadActive) {
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    // TODO 自動生成された catch ブロック
+                    e.printStackTrace();
+                }
+
+                // ハンドラーをはさまないとToastでエラーでる
+                // UIスレッド内で処理をしないといけないらしい
+                mHandler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        mCount++;
+//                        showText("カウント:" + mCount);
+
+                        usagestatsmanager();
+
+//                        setToast();
+//                        showText(result);
+
+
+                        if (isPackage == true) {
+                            if(isLocationApp==true&&locationInto==true){
+                                warningDialog();
+
+                            }else {
+                                appPlayDialog();
+                            }
+                        }
+                        isPackage = false;
+                        isLocationApp = false;
+                        locationInto = false;
+
+                    }
+                });
+            }
+
+            mHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    showText("スレッド終了");
+                }
+            });
+        }
+    };
+    private Thread mThread;
+
+
+    public void onActivityResult(int req, int result, Intent it) {
+
+    }
+
+
+    @TargetApi(21)
+    private void usagestatsmanager() {
+        // UsageStats,UsageStatsManager : デバイスの使用履歴、統計情報を扱う
+        UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+        int intTime = UsageStatsManager.INTERVAL_BEST;
+        Long end = System.currentTimeMillis(); // 現在の時間を取得 (ミリ秒)
+//        Long start = end - (1 * 24 * 60 * 60 * 1000); // 現在時刻から1日前の時間(ミリ秒)を引く　1日 = 24*60*60*1000ミリ秒
+        Long start = end - (5 * 60 * 1000); // 5分
+        List<UsageStats> usl = usm.queryUsageStats(intTime, start, end); //
+
+        List<AppData> dataList = new ArrayList<AppData>();
+
+        // AppData読み込み
+        try {
+            //FileInputStream inFile = new FileInputStream(FILE_NAME);
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            dataList = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < usl.size(); i++) {
+            UsageStats us = usl.get(i);
+
+            // 使用時間が0でない
+            if (us.getTotalTimeInForeground() != 0) {
+
+                if (us.getLastTimeUsed() > end - 5000) {
+
+                    for (AppData info : dataList) {
+                        // インストール済みアプリであるか
+                        if (info.getpackageName().equals(us.getPackageName())) {
+
+                            // 位置情報アプリか
+                            if(info.getLocationPermission().equals("0")){
+                                isLocationApp=true;
+                            }
+
+                            // 制限されているか
+                            if (info.getLock() == true) {
+//                            array.add("パッケージ名:" + String.valueOf(info.getpackageLabel()));
+
+                                isPackage = true;
+//                            text = "パッケージ名:" + String.valueOf(info.getpackageLabel());
+                                sendPackageLabel = String.valueOf(info.getpackageLabel());
+                                sendPermission = info.getPermission();
+                                appUsedCount++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void appPlayDialog() {
+        Intent intent = new Intent(this, CallDialogActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
+
+        intent.putExtra("LABEL", sendPackageLabel);
+        intent.putExtra("PERMISSION", sendPermission);
+
+        startActivity(intent);
+    }
+    private void warningDialog() {
+        Intent intent = new Intent(this, WarningDialogActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
+            startActivity(intent);
+    }
+
+
+    private void showText(Context ctx, final String text) {
+        Toast.makeText(this, TAG2 + text, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showText(final String text) {
+        if (isPackage == true) {
+            showText(this, text);
+        }
+        isPackage = false;
+    }
 
     @Override
     public void onCreate() {
@@ -73,10 +263,10 @@ public class ExampleService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
 
+        // 位置情報サービスの利用
         if (mLocationManager != null) {
             Log.d("LocationActivity", "locationManager.requestLocationUpdates");
             // バックグラウンドから戻ってしまうと例外が発生する場合がある
-
             try {
                 // minTime = 1000msec, minDistance = 50m
                 if (ActivityCompat.checkSelfPermission(
@@ -85,21 +275,29 @@ public class ExampleService extends Service implements LocationListener {
                         != PackageManager.PERMISSION_GRANTED) {
 //                    return;
                 }
-
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
-
             } catch (Exception e) {
                 e.printStackTrace();
-
                 Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT).show();
-
             }
 
 //            startService(new Intent(getBaseContext(), WindowService.class));
         }
+
+
+
+
+
+        this.mThread = new Thread(null, mTask, "NortifyingService");
+        this.mThread.start();
+
+
+
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -108,6 +306,11 @@ public class ExampleService extends Service implements LocationListener {
         stopService(new Intent(getBaseContext(), WindowService.class));
         mLocationManager.removeUpdates(this);
         Log.i(TAG, "onDestroy");
+
+        // スレッド停止
+        this.mThread.interrupt();
+        this.mThreadActive = false;
+
     }
 
     @Override
@@ -131,7 +334,16 @@ public class ExampleService extends Service implements LocationListener {
         // 3km 以内
         if (results2 < 3000) {
             message = "範囲内";
+            locationInto=true;
+
             startService(new Intent(getBaseContext(), WindowService.class));
+
+
+
+//            Intent intent = new Intent(this, WarningDialogActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
+//            startActivity(intent);
+
         } else {
             message = "範囲外";
             stopService(new Intent(getBaseContext(), WindowService.class));

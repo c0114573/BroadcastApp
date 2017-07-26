@@ -65,9 +65,6 @@ public class MainActivity extends Activity {
     TextView tv;
     TextView tv3;
     String str = "";
-    String str1 = "GPS読み取れてないよ";
-    String str2 = "結合";
-
     List<AppData> dataList = new ArrayList<AppData>();
 
     //学校 35.625122, 139.342143
@@ -95,6 +92,7 @@ public class MainActivity extends Activity {
         tv = (TextView) findViewById(R.id.textView5);
         tv.setText("テスト");
 
+        // 初期起動時処理
         if(!(AppLaunchChecker.hasStartedFromLauncher(this))){
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
             InitialSetting();

@@ -45,6 +45,9 @@ public class AppData implements Serializable {
 
         return spCamera + "," + spSMS + "," + spLocation;
     }
+    public String getLocationPermission() {
+        return String.valueOf(this.pLocation);
+    }
 
     // 制限ありtrue 制限なしfalse
     public boolean getLock() {return  lock; }
