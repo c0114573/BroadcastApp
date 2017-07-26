@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onFileClick"
-                android:text="保存" />
+                android:text="初期化" />
 
             <Button
                 android:id="@+id/file_read_button"

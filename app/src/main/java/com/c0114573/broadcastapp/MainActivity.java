@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.AppLaunchChecker;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -36,10 +37,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -59,6 +64,7 @@ public class MainActivity extends Activity {
 
     TextView tv;
     TextView tv3;
+    String str = "";
     String str1 = "GPS読み取れてないよ";
     String str2 = "結合";
 
@@ -89,7 +95,116 @@ public class MainActivity extends Activity {
         tv = (TextView) findViewById(R.id.textView5);
         tv.setText("テスト");
 
+        if(!(AppLaunchChecker.hasStartedFromLauncher(this))){
+            Log.d("AppLaunchChecker","はじめてアプリを起動した");
+            InitialSetting();
+        }
+        AppLaunchChecker.onActivityCreate(this);
 
+    }
+
+    public void onFileClick(View v) {
+        switch (v.getId()) {
+
+            // クラスの更新テスト
+            case R.id.file_save_button:
+                try {
+                    // デシリアライズ
+                    FileInputStream inFile = openFileInput("appData.file");
+                    ObjectInputStream inObject = new ObjectInputStream(inFile);
+                    List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+                    inObject.close();
+                    inFile.close();
+
+                    for (AppData appData : dataList2) {
+//                        if(appData.getpackageName().equals("com.nianticlabs.pokemongo")){
+//                            appData.setLock(0);
+//                        }
+                        appData.setLock(true);
+                    }
+
+                    // シリアライズしてファイルに保存
+                    FileOutputStream outFile = openFileOutput("appData.file", 0);
+                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+                    outObject.writeObject(dataList2);
+                    outObject.close();
+                    outFile.close();
+
+                } catch (StreamCorruptedException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+
+            // デシリアライズ(読み込み)
+            case R.id.file_read_button:
+                str="";
+                try {
+                    //FileInputStream inFile = new FileInputStream(FILE_NAME);
+                    FileInputStream inFile = openFileInput("appData.file");
+                    ObjectInputStream inObject = new ObjectInputStream(inFile);
+                    List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+                    inObject.close();
+                    inFile.close();
+
+                    for (AppData appData : dataList2) {
+                        str += appData.getpackageLabel();
+                        str += appData.getPermission()+",";
+                        str += String.valueOf(appData.getLock())+"\n";
+                    }
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (StreamCorruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                tv.setText(str);
+
+                break;
+
+            case R.id.file_delete_button:
+                break;
+        }
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.startButton:
+//                startService(new Intent(getBaseContext(), ExampleService.class));
+                startService();
+                break;
+
+            case R.id.stopButton:
+                stopService(new Intent(getBaseContext(), ExampleService.class));
+                break;
+        }
+    }
+
+    // リスト表示
+    public void onListButtonClick(View v) {
+        Intent intent = new Intent(MainActivity.this, PermissionList.class);
+        startActivity(intent);
+
+    }
+
+    public void onMapButtonClick(View v) {
+        Intent intent = new Intent(MainActivity.this, LocationInput.class);
+        startActivity(intent);
+
+    }
+
+    // 初期起動時
+    public void InitialSetting() {
         // リスト作成
         ArrayList<String> appList = new ArrayList<String>();
 
@@ -116,9 +231,6 @@ public class MainActivity extends Activity {
         for (ApplicationInfo info : applicationInfo) {
             pSMS = -1;
             pLocation = -1;
-
-            // システム標準でインストールされているアプリであるか
-//            if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM) continue;
 
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
@@ -155,186 +267,49 @@ public class MainActivity extends Activity {
                 data.pCamera = pCamera;
                 data.pSMS = pSMS;
                 data.pLocation = pLocation;
+                data.setLock(true);
 
                 // アプリ情報クラスをリストに追加
                 dataList.add(data);
             }
         }
 
-
-    }
-
-    // ローカルに文字列を保存
-    public void onFileClick(View v) {
-        switch (v.getId()) {
-
-
-            case R.id.file_save_button:
-                String strl = "";
-                String strn = "";
-                String strp = "";
-                String strlo = "";
-                Drawable stri ;
-
-                StringBuilder sb = new StringBuilder();
-
-                try {
-                    FileOutputStream out = openFileOutput("appData.csv", MODE_PRIVATE);
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-
-                    int num = 0;
-                    for (AppData info : dataList) {
-                        num++;
-                        strl = info.getpackageLabel();
-                        strp = info.getPermission();
-                        strn = info.getpackageName();
-                        strlo = info.getLock();
-                        stri = info.getIcon();
-
-                        // ビットマップに変換
-                        Bitmap bitmap = ((BitmapDrawable) stri).getBitmap();
-
-                        // バイト配列出力を扱う
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-                        // ビットマップを圧縮する
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-
-                        // 文字列型に直す
-                        String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-
-                        // SharedPreferenceのインスタンスを生成
-                        SharedPreferences pref = getSharedPreferences("DATA"+num, Context.MODE_PRIVATE);
-                        // データの書き込み
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putString("key", bitmapStr);
-                        editor.apply();
-
-                        bw.write(strl);
-                        bw.write(",");
-                        bw.write(strn);
-                        bw.write(",");
-                        bw.write(strp);
-                        bw.write(",");
-                        bw.write(strlo);
-                        bw.write(",");
-
-                        bw.newLine();
-
-
-////                    String strlat = "";
-////                    String strlng = "";
-//
-//                    out = openFileOutput("test.txt", MODE_PRIVATE);
-//                    bw = new BufferedWriter(new OutputStreamWriter(out));
-//
-////                        strlat =  Double.toString(myLatitude);
-////                        strlng =  Double.toString(myLongitude);
-//                    StringBuffer bf = new StringBuffer();
-//                    bf.append(confLatitude);
-//                    bf.append(",");
-//                    bf.append(confLongitude);
-//                    bw.write(bf.toString());
-//                    bw.flush();
-
-
-
-
-                        }
-                    num=0;
-                    bw.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-
-
-            case R.id.file_read_button:
-//                targetStr = "";
-//                try {
-//                    FileInputStream fis = openFileInput("test.txt");
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-//                    String tmp;
-//                    tv3.setText("");
-//                    while ((tmp = reader.readLine()) != null) {
-//                        tv3.append(tmp + "\n");
-//
-//                        targetStr = tmp;
-//                    }
-//                    reader.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-////                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
-//
-//                Pattern pattern = Pattern.compile(",");
-//                String[] splitStr = pattern.split(targetStr);
-//                for (int i = 0; i < splitStr.length; i++) {
-//                    System.out.println(splitStr[i]);
-//                }
-//
-//                // ファイルはあるけど読み込みが正しくできてないっぽい
-//                try {
-//                    confLatitude = Double.parseDouble(splitStr[0]);
-//                    confLongitude = Double.parseDouble(splitStr[1]);
-//
-//                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
-//                            Toast.LENGTH_LONG).show();
-//                } catch (Exception e){
-//                    Toast.makeText(this, "ファイル読み込み失敗",Toast.LENGTH_LONG).show();
-//                }
-//
-
-
-
-                try {
-                    FileInputStream in = openFileInput("appData.csv");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                    String tmp;
-//                et.setText("");
-                    tv.setText("");
-                    while ((tmp = reader.readLine()) != null) {
-//                    et.append(tmp + "\n");
-                        tv.append(tmp + "\n");
-                    }
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                break;
-
-            case R.id.file_delete_button:
-                deleteFile("appData.csv");
+        // アイコン情報を保存
+        Drawable icon ;
+        int num = 0;
+        for (AppData info : dataList) {
+            num++;
+            icon = info.getIcon();
+            // ビットマップに変換
+            Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+            // バイト配列出力を扱う
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            // ビットマップを圧縮する
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            // 文字列型に直す
+            String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+            // SharedPreferenceのインスタンスを生成
+            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+            // データの書き込み
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("ICON", bitmapStr);
+            editor.apply();
         }
-    }
 
+        // シリアライズしてAppDataをファイルに保存
+        try {
+            //FileOutputStream outFile = new FileOutputStream(FILE_NAME);
+            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList);
+            outObject.close();
+            outFile.close();
 
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.startButton:
-//                startService(new Intent(getBaseContext(), ExampleService.class));
-                startService();
-                break;
-
-            case R.id.stopButton:
-                stopService(new Intent(getBaseContext(), ExampleService.class));
-                break;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    }
-
-    // リスト表示
-    public void onListButtonClick(View v) {
-        Intent intent = new Intent(MainActivity.this, PermissionList.class);
-        startActivity(intent);
-
-    }
-
-    public void onMapButtonClick(View v) {
-        Intent intent = new Intent(MainActivity.this, LocationInput.class);
-        startActivity(intent);
-
     }
 
 

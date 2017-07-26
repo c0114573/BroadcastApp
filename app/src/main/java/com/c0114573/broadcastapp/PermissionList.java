@@ -31,20 +31,25 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionList extends Activity {
 
     TextView tv;
-
-    ArrayList<String> readAppList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,73 +66,68 @@ public class PermissionList extends Activity {
 
 
         // 読み込み
+        int num = 0;
         try {
-            FileInputStream in = openFileInput("appData.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            String tmp;
-            while ((tmp = reader.readLine()) != null) {
-                readAppList.add(tmp + "\n");
+            // AppDataの読み込み(デシリアライズ)
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            final List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+
+            // アイコン情報を読み取り
+            for (AppData appData : dataList2) {
+                num++;
+                // SharedPreferenceのインスタンスを生成
+                SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+                String s = pref.getString("ICON", "");
+                if (!s.equals("")) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    byte[] b = Base64.decode(s, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+                    // AppDataにアイコン情報を格納
+                    appData.setIcon(new BitmapDrawable(bitmap));
+                }
             }
-            reader.close();
+            // AppDataをファイルに保存(シリアライズ)
+            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList2);
+            outObject.close();
+            outFile.close();
+            num = 0;
+
+
+            // リストビューにアプリケーションの一覧を表示する
+            final ListView listView = new ListView(this);
+            listView.setAdapter(new AppListAdapter(this, dataList2));
+
+            //クリック処理
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                ApplicationInfo item = applicationInfo.get(position);
+
+                    // タップされたアプリ名取得
+                    AppData item = dataList2.get(position);
+//                Log.d("onClick",item.getpackageName());
+
+                    // リスト表示用のアラートダイアログ
+                    displayDialog(item.getpackageLabel(), item.getpackageName());
+
+                }
+            });
+            setContentView(listView);
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // アイコンあり
-        final List<AppData> appList = new ArrayList<AppData>();
-
-        int num = 0;
-        // 読み込んだデータをAppData型のappListに格納
-        for (String str : readAppList) {
-            num++;
-            AppData data = new AppData();
-
-            // SharedPreferenceのインスタンスを生成
-            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-            String s = pref.getString("key", "");
-            if (!s.equals("")) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                byte[] b = Base64.decode(s, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
-                data.icon = new BitmapDrawable(bitmap);
-            }
-
-
-            String[] appdata = str.split(",", 0);
-            data.packageLabel = appdata[0];
-            data.packageName = appdata[1];
-            data.pCamera = Integer.parseInt(appdata[2]);
-            data.pSMS = Integer.parseInt(appdata[3]);
-            data.pLocation = Integer.parseInt(appdata[4]);
-            data.lock = Integer.parseInt(appdata[5]);
-//            data.icon = bitmap;
-
-            appList.add(data);
-
-        }
-        num = 0;
-
-
-        // リストビューにアプリケーションの一覧を表示する
-        final ListView listView = new ListView(this);
-        listView.setAdapter(new AppListAdapter(this, appList));
-
-        //クリック処理
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                ApplicationInfo item = applicationInfo.get(position);
-
-                // タップされたアプリ名取得
-                AppData item = appList.get(position);
-//                Log.d("onClick",item.getpackageName());
-
-                // リスト表示用のアラートダイアログ
-                displayDialog(item.getpackageLabel(), item.getpackageName());
-
-            }
-        });
-        setContentView(listView);
     }
 
     // アプリケーションのラベルとアイコンを表示するためのアダプタークラス
@@ -142,7 +142,7 @@ public class PermissionList extends Activity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
 
             ViewHolder holder = new ViewHolder();
 
@@ -151,6 +151,8 @@ public class PermissionList extends Activity {
                 holder.textLabel = (TextView) convertView.findViewById(R.id.label);
                 holder.imageIcon = (ImageView) convertView.findViewById(R.id.icon);
                 holder.packageName = (TextView) convertView.findViewById(R.id.pname);
+                holder.tSwitch = (Switch) convertView.findViewById(R.id.switch3);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -162,9 +164,66 @@ public class PermissionList extends Activity {
             holder.textLabel.setText(data.getpackageLabel());
             holder.imageIcon.setImageDrawable(data.icon);
             holder.packageName.setText(data.getpackageName());
+            holder.tSwitch.setChecked(data.getLock());
+
+
+            // Switchボタンの設定
+            Switch switchButton = (Switch)convertView.findViewById(R.id.switch3);
+            switchButton.setTag(position);
+            switchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    // TODO 自動生成されたメソッド・スタブ
+                    Log.d("buttonクリック", "ポジション：　" + position);
+
+
+//                    try {
+//                        // デシリアライズ
+//                        FileInputStream inFile = openFileInput("appData.file");
+//                        ObjectInputStream inObject = new ObjectInputStream(inFile);
+//                        List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+//                        inObject.close();
+//                        inFile.close();
+//
+//                        for (AppData appData : dataList2) {
+//                            appData.setLock(false);
+//                        }
+//
+//                        // シリアライズしてファイルに保存
+//                        FileOutputStream outFile = openFileOutput("appData.file", 0);
+//                        ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+//                        outObject.writeObject(dataList2);
+//                        outObject.close();
+//                        outFile.close();
+//
+//                    } catch (StreamCorruptedException e) {
+//                        e.printStackTrace();
+//                    } catch (ClassNotFoundException e) {
+//                        e.printStackTrace();
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+
+
+                }
+            });
+
 
             return convertView;
         }
+
+
+
+//        // Switchボタンのリスナー
+//        class SwitchListener implements View.OnClickListener {
+//            public void onClick(View v){
+//         // Switch処理
+//                AppData item = dataList2.get(position);
+//                Log.d("TEST", "押されたAAAAAAAAAAAAAAAAAAA"+);
+//            }
+//        }
     }
 
     // ビューホルダー
@@ -172,6 +231,7 @@ public class PermissionList extends Activity {
         TextView textLabel;
         ImageView imageIcon;
         TextView packageName;
+        Switch tSwitch;
     }
 
     private void displayDialog(final String name, final String text) {
