@@ -19,6 +19,8 @@ public class AppData implements Serializable {
     int pLocation;  // 位置情報権限
     boolean lock;       // 制限の有無 有:true 無:false
 
+    boolean appuse;       // 一時的な制限の有無 有:true 無:false
+
     public AppData(){
     }
 
@@ -45,6 +47,27 @@ public class AppData implements Serializable {
 
         return spCamera + "," + spSMS + "," + spLocation;
     }
+
+    public String getPermissionName() {
+        String spCamera = String.valueOf(pCamera);
+        String spSMS = String.valueOf(pSMS);
+        String spLocation = String.valueOf(pLocation);
+
+        String resultPermission = "";
+
+        if (spCamera.equals("0")) {
+            resultPermission += "    カメラ";
+        }
+        if (spSMS.equals("0")) {
+            resultPermission += "    SMS";
+        }
+        if (spLocation.equals("0")) {
+            resultPermission += "   位置情報";
+        }
+        return resultPermission;
+    }
+
+
     public String getLocationPermission() {
         return String.valueOf(this.pLocation);
     }

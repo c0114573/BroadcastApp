@@ -54,8 +54,10 @@ public class ExampleService extends Service implements LocationListener {
 
     boolean isPackage = false;
     boolean isLocationApp = false;
-
+    boolean isLocked = false;
     boolean locationInto = false;
+
+    boolean windowShowed = false;
 
     int appUsedCount = 0;
 
@@ -101,18 +103,25 @@ public class ExampleService extends Service implements LocationListener {
 //                        setToast();
 //                        showText(result);
 
+                        if(windowShowed==true) {
+                            providerCheck();
+                        }
 
-                        if (isPackage == true) {
-                            if(isLocationApp==true&&locationInto==true){
+
+
+                        if (isLocked==true) {
+
+                            if (isLocationApp == true && windowShowed==true) {
                                 warningDialog();
-
-                            }else {
+                            } else if (isPackage == true) {
                                 appPlayDialog();
                             }
                         }
+
                         isPackage = false;
                         isLocationApp = false;
-                        locationInto = false;
+//                        locationInto = false;
+                        isLocked = false;
 
                     }
                 });
@@ -171,7 +180,7 @@ public class ExampleService extends Service implements LocationListener {
             // 使用時間が0でない
             if (us.getTotalTimeInForeground() != 0) {
 
-                if (us.getLastTimeUsed() > end - 5000) {
+                if (us.getLastTimeUsed() > end - 4000) {
 
                     for (AppData info : dataList) {
                         // インストール済みアプリであるか
@@ -179,24 +188,48 @@ public class ExampleService extends Service implements LocationListener {
 
                             // 位置情報アプリか
                             if(info.getLocationPermission().equals("0")){
-                                isLocationApp=true;
+                                isLocationApp=true; //位置情報アプリだ
                             }
 
                             // 制限されているか
                             if (info.getLock() == true) {
-//                            array.add("パッケージ名:" + String.valueOf(info.getpackageLabel()));
+                                isLocked = true;   //制限されたアプリだ
+                            }
 
-                                isPackage = true;
+                            isPackage = true; //アプリが使用された
 //                            text = "パッケージ名:" + String.valueOf(info.getpackageLabel());
                                 sendPackageLabel = String.valueOf(info.getpackageLabel());
                                 sendPermission = info.getPermission();
                                 appUsedCount++;
-                            }
+
                         }
                     }
                 }
             }
         }
+    }
+
+
+    public void providerCheck(){
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//        String provider = "";
+        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            //GPSが利用可能
+//            provider = "gps";
+
+        } else if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            //ネットワークが利用可能
+//            provider = "network";
+        } else {
+            //位置情報の利用不可能
+//            provider = "使えません";
+
+            stopService(new Intent(getBaseContext(), WindowService.class));
+            windowShowed=false;
+
+
+        }
+//        Toast.makeText(this, ""+provider, Toast.LENGTH_SHORT).show();
     }
 
     private void appPlayDialog() {
@@ -228,7 +261,7 @@ public class ExampleService extends Service implements LocationListener {
 
     @Override
     public void onCreate() {
-        Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         // 登録位置情報読み取り
@@ -326,18 +359,19 @@ public class ExampleService extends Service implements LocationListener {
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
 
-        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
-                + "\n現在" + myLatitude + "," + myLongitude, Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
+//                + "\n現在" + myLatitude + "," + myLongitude, Toast.LENGTH_LONG).show();
 
         float results2 = getDistanceBetween(confLatitude, confLongitude, myLatitude, myLongitude);
 
         // 3km 以内
         if (results2 < 3000) {
             message = "範囲内";
-            locationInto=true;
-
-            startService(new Intent(getBaseContext(), WindowService.class));
-
+//            locationInto=true; // 範囲内だ
+            if(windowShowed==false) {
+                startService(new Intent(getBaseContext(), WindowService.class));
+            }
+            windowShowed=true;
 
 
 //            Intent intent = new Intent(this, WarningDialogActivity.class);
@@ -346,9 +380,12 @@ public class ExampleService extends Service implements LocationListener {
 
         } else {
             message = "範囲外";
+//            locationInto=false; // 範囲外だ
+
             stopService(new Intent(getBaseContext(), WindowService.class));
+            windowShowed=false;
         }
-        Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
     }
 
 

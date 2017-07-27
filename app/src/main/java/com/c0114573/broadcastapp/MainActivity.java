@@ -16,9 +16,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -67,18 +64,6 @@ public class MainActivity extends Activity {
     String str = "";
     List<AppData> dataList = new ArrayList<AppData>();
 
-    //学校 35.625122, 139.342143
-    double confLatitude = 35.625122;    // 設定緯度
-    double confLongitude = 139.342143;   // 設定経度
-
-    double myLatitude = 0;    // 現在の緯度
-    double myLongitude = 0;   // 現在の経度
-
-
-    String targetStr = new String("");    // 緯度経度を持ってくる
-
-
-    public static int OVERLAY_PERMISSION_REQ_CODE = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -233,6 +218,9 @@ public class MainActivity extends Activity {
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
 
+            // 安全なアプリを除外
+            if (info.packageName.equals("klb.android.lovelive")) continue;
+
             // 起動不可能なアプリを除外
             for (String app : appList) {
                 if ((info.packageName.equals(app))) continue appInfo;
@@ -309,7 +297,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 
     // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)

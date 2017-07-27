@@ -31,21 +31,22 @@ public class WarningDialogActivity extends Activity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("アプリ制限");
         alert.setMessage("設定範囲内にいるため位置情報アプリは制限されます\n");
-        alert.setPositiveButton("GPS設定", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
 
                 finish();
 
             }
         });
-        alert.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 //Noボタンが押された時の処理
 //                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+
                 finish();
 
             }
