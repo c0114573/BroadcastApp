@@ -3,9 +3,7 @@ package com.c0114573.broadcastapp;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AppOpsManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,9 +14,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,8 +23,6 @@ import android.support.v4.app.AppLaunchChecker;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,14 +59,6 @@ public class MainActivity extends Activity {
     TextView tv3;
     String str = "";
     List<AppData> dataList = new ArrayList<AppData>();
-
-    //学校 35.625122, 139.342143
-    double confLatitude = 35.625122;    // 設定緯度
-    double confLongitude = 139.342143;   // 設定経度
-
-    double myLatitude = 0;    // 現在の緯度
-    double myLongitude = 0;   // 現在の経度
-
 
     String targetStr = new String("");    // 緯度経度を持ってくる
 
