@@ -28,6 +28,7 @@ public class AppDataSetting extends Activity {
 
     public AppDataSetting(){
     }
+    private Context mAppContext;
 
     List<AppData> dataList = new ArrayList<AppData>();
 
@@ -35,8 +36,10 @@ public class AppDataSetting extends Activity {
         // リスト作成
         ArrayList<String> appList = new ArrayList<String>();
 
+        mAppContext = mAppContext.getApplicationContext();
+
         // パッケージマネージャーの作成
-        PackageManager packageManager = getPackageManager();
+        PackageManager packageManager = mAppContext.getPackageManager();
 
         // 起動不可能なアプリをリストに格納
         List<PackageInfo> pckInfoList = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
@@ -61,6 +64,9 @@ public class AppDataSetting extends Activity {
 
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
+
+            // 安全なアプリを除外
+            if (info.packageName.equals("klb.android.lovelive")) continue;
 
             // 起動不可能なアプリを除外
             for (String app : appList) {

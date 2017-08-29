@@ -45,6 +45,8 @@ import java.util.regex.Pattern;
 import static android.app.Service.START_STICKY;
 import static android.content.ContentValues.TAG;
 
+import com.c0114573.broadcastapp.AppDataSetting;
+
 /**
  * Created by C011457331 on 2017/04/19.
  */
@@ -80,7 +82,10 @@ public class MainActivity extends Activity {
         // 初期起動時処理
         if(!(AppLaunchChecker.hasStartedFromLauncher(this))){
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
-            InitialSetting();
+            //InitialSetting();
+            AppDataSetting setting = new AppDataSetting();
+            setting.InitialSetting();
+
         }
         AppLaunchChecker.onActivityCreate(this);
 
@@ -186,6 +191,7 @@ public class MainActivity extends Activity {
 
     }
 
+    /*
     // 初期起動時
     public void InitialSetting() {
         // リスト作成
@@ -297,6 +303,8 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+    */
 
     // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)
