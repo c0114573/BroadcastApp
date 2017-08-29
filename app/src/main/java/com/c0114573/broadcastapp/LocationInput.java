@@ -64,6 +64,10 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     double confLatitude = 35.625122;    // 設定緯度
     double confLongitude = 139.342143;   // 設定経度
 
+//    //学校 35.625122, 139.342143
+//    double confLatitude = 	35.867995;    // 設定緯度
+//    double confLongitude = 139.688812;   // 設定経度
+
     // 八王子
     double myLatitude = 35.655601;    // 現在の緯度
     double myLongitude = 139.338854;   // 現在の経度
@@ -252,6 +256,11 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 
                     str1 = Double.toString(35.625122);
                     str2 = Double.toString(139.342143);
+
+//                    str1 = Double.toString(35.867995);
+//                    str2 = Double.toString(139.688812);
+
+
                     StringBuffer bf = new StringBuffer();
                     bf.append(str1);
                     bf.append(",");

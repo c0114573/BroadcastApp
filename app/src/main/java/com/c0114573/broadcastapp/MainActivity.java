@@ -218,6 +218,9 @@ public class MainActivity extends Activity {
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
 
+            // 安全なアプリを除外
+            if (info.packageName.equals("klb.android.lovelive")) continue;
+
             // 起動不可能なアプリを除外
             for (String app : appList) {
                 if ((info.packageName.equals(app))) continue appInfo;
@@ -294,7 +297,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 
     // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)

@@ -51,8 +51,8 @@ public class CallDialogActivity extends Activity {
 
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(label);
-        alert.setMessage("以下の権限を持つアプリの使用を許可しますか\n" + resultPermission);
-        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        alert.setMessage("以下の権限を持つアプリを使用します\n位置情報の漏洩に注意してください\n" + resultPermission);
+        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
                 try {
@@ -90,14 +90,48 @@ public class CallDialogActivity extends Activity {
 
             }
         });
-        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("制限を許可", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 //Noボタンが押された時の処理
 //                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
+
+                try {
+                    //FileInputStream inFile = new FileInputStream(FILE_NAME);
+                    FileInputStream inFile = openFileInput("appData.file");
+                    ObjectInputStream inObject = new ObjectInputStream(inFile);
+                    List<AppData> dataList = (ArrayList<AppData>) inObject.readObject();
+                    inObject.close();
+                    inFile.close();
+
+                    for (AppData appData : dataList) {
+                        if (appData.getpackageLabel().equals(label)) {
+                            appData.setLock(false);
+                        }
+                    }
+
+                    // シリアライズしてファイルに保存
+                    FileOutputStream outFile = openFileOutput("appData.file", 0);
+                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+                    outObject.writeObject(dataList);
+                    outObject.close();
+                    outFile.close();
+
+                } catch (StreamCorruptedException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 finish();
 
             }
         });
+
+
         alert.show();
 
     }

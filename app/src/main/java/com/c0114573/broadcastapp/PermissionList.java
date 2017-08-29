@@ -163,7 +163,8 @@ public class PermissionList extends Activity {
             // ラベルとアイコンをリストビューに設定
             holder.textLabel.setText(data.getpackageLabel());
             holder.imageIcon.setImageDrawable(data.icon);
-            holder.packageName.setText(data.getpackageName());
+//            holder.packageName.setText(data.getpackageName());
+            holder.packageName.setText(data.getPermissionName());
             holder.tSwitch.setChecked(data.getLock());
 
 
