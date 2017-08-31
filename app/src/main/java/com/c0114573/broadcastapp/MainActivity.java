@@ -83,8 +83,13 @@ public class MainActivity extends Activity {
         if(!(AppLaunchChecker.hasStartedFromLauncher(this))){
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
             //InitialSetting();
-            AppDataSetting setting = new AppDataSetting();
-            setting.InitialSetting();
+//            AppDataSetting setting = new AppDataSetting();
+//            setting.InitialSetting();
+
+//            Intent intent = new Intent(this, AppDataSetting.class);
+//            intent.putExtra("foo", someData);
+//            startActivity(intent);
+           startService(new Intent(getBaseContext(), AppDataSetting.class));
 
         }
         AppLaunchChecker.onActivityCreate(this);

@@ -22,6 +22,12 @@ public class AppStateReceiver extends BroadcastReceiver {
             Toast.makeText(context, "インストール", Toast.LENGTH_LONG).show();
             //MainActivity app = new MainActivity();
             //app.InitialSetting();
+
+            int data1 = 10;
+
+            Intent startServiceIntent = new Intent(context,AppDataSetting.class);
+            startServiceIntent.putExtra("INSTALL",data1);
+            context.startService(startServiceIntent);
         }
 
         if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {

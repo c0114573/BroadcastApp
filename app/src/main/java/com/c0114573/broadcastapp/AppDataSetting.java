@@ -2,7 +2,9 @@ package com.c0114573.broadcastapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -10,13 +12,22 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.app.AppLaunchChecker;
 import android.util.Base64;
+import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,22 +35,93 @@ import java.util.List;
  * Created by member on 2017/08/02.
  */
 
-public class AppDataSetting extends Activity {
+public class AppDataSetting extends Service {
 
-    public AppDataSetting(){
+    // リスト作成
+    // 起動不可アプリ名リスト
+    ArrayList<String> appList = new ArrayList<String>();
+    // 端末内特定アプリ情報リスト
+    List<AppData> dataListNew = new ArrayList<AppData>();
+    // 読み込み特定アプリ情報リスト
+    List<AppData> dataListLoad = new ArrayList<AppData>();
+
+    // 新規追加特定アプリ
+    List<AppData> dataListAdd = new ArrayList<AppData>();
+
+    boolean appNew = true;
+
+//    @Override
+//    protected void onCreate( {
+//        super.onCreate(savedInstanceState);
+//
+//        NewAppList();
+//
+//        /*
+//        if(){
+//           LoadAppList();
+//        }
+//        */
+//
+//        SaveAppList();
+//
+////        finish();
+//    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        NewAppList();
+
+        if (intent != null && 10 == intent.getIntExtra("INSTALL",0)){
+            LoadAppList();
+
+            for (AppData info : dataListNew) {
+                    if(!(dataListLoad.contains(info))){
+                        appNew=false;
+
+                        AppData data = new AppData();
+                        data.packageLabel = info.getpackageLabel();
+                        data.packageName = info.getpackageName();
+                        data.icon = info.getIcon();
+                        String[] perm =info.getPermission().split(",", 0);
+                        data.pCamera = Integer.parseInt(perm[0]);
+                        data.pSMS = Integer.parseInt(perm[1]);
+                        data.pLocation = Integer.parseInt(perm[2]);
+                        data.setLock(true);
+
+                        dataListLoad.add(data);
+
+                    }
+            }
+
+
+        }
+        /*
+        if(){
+           LoadAppList();
+        }
+        */
+
+        SaveAppList();
+
+        stopSelf();
+
+        return START_STICKY;
     }
-    private Context mAppContext;
 
-    List<AppData> dataList = new ArrayList<AppData>();
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
-    public void InitialSetting() {
-        // リスト作成
-        ArrayList<String> appList = new ArrayList<String>();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this, "読み込み終わり", Toast.LENGTH_SHORT).show();
+    }
 
-        mAppContext = mAppContext.getApplicationContext();
-
+    // 特定アプリ一覧を作成
+    public void NewAppList() {
         // パッケージマネージャーの作成
-        PackageManager packageManager = mAppContext.getPackageManager();
+        PackageManager packageManager = getPackageManager();
 
         // 起動不可能なアプリをリストに格納
         List<PackageInfo> pckInfoList = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
@@ -103,14 +185,14 @@ public class AppDataSetting extends Activity {
                 data.setLock(true);
 
                 // アプリ情報クラスをリストに追加
-                dataList.add(data);
+                dataListNew.add(data);
             }
         }
 
         // アイコン情報を保存
         Drawable icon ;
         int num = 0;
-        for (AppData info : dataList) {
+        for (AppData info : dataListNew) {
             num++;
             icon = info.getIcon();
             // ビットマップに変換
@@ -129,12 +211,42 @@ public class AppDataSetting extends Activity {
             editor.apply();
         }
 
+    }
+
+    // 特定アプリを取得
+    public void LoadAppList() {
+        // AppData読み込み
+        try {
+            //FileInputStream inFile = new FileInputStream(FILE_NAME);
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            dataListLoad = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // 特定アプリを保存/更新
+    public void SaveAppList() {
         // シリアライズしてAppDataをファイルに保存
         try {
             //FileOutputStream outFile = new FileOutputStream(FILE_NAME);
             FileOutputStream outFile = openFileOutput("appData.file", 0);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            outObject.writeObject(dataList);
+            if(appNew==true) {
+                outObject.writeObject(dataListNew);
+            }else {
+                outObject.writeObject(dataListLoad);
+            }
             outObject.close();
             outFile.close();
 
@@ -144,4 +256,5 @@ public class AppDataSetting extends Activity {
             e.printStackTrace();
         }
     }
+
 }
