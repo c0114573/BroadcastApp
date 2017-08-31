@@ -89,6 +89,8 @@ public class AppDataSetting extends Service {
 
                         dataListLoad.add(data);
 
+
+
                     }
             }
 
@@ -97,6 +99,7 @@ public class AppDataSetting extends Service {
         /*
         if(){
            LoadAppList();
+           hgfrtttyud
         }
         */
 

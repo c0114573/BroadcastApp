@@ -36,6 +36,10 @@ public class AppStateReceiver extends BroadcastReceiver {
             if (intent.getExtras().getBoolean(Intent.EXTRA_DATA_REMOVED)
                     && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
                 Toast.makeText(context, "プリインアプリのアンインストール", Toast.LENGTH_LONG).show();
+
+                Intent startServiceIntent = new Intent(context,AppDataSetting.class);
+//                startServiceIntent.putExtra("INSTALL",data1);
+                context.startService(startServiceIntent);
             }
 
             // アプリの更新
