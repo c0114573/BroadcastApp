@@ -12,6 +12,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -60,6 +61,7 @@ public class MainActivity extends Activity {
     TextView tv;
     TextView tv3;
     String str = "";
+    String deleteApp = "";
     List<AppData> dataList = new ArrayList<AppData>();
 
     String targetStr = new String("");    // 緯度経度を持ってくる
@@ -109,12 +111,24 @@ public class MainActivity extends Activity {
                     inObject.close();
                     inFile.close();
 
+                    int appcnt = 0;
+                    int appnum = 0;
+                    deleteApp = "com.nianticlabs.pokemongo";
+
                     for (AppData appData : dataList2) {
+//                        deleteApp = appData.getpackageName();
+
 //                        if(appData.getpackageName().equals("com.nianticlabs.pokemongo")){
+                        if(appData.getpackageName().equals(deleteApp)){
 //                            appData.setLock(0);
-//                        }
-                        appData.setLock(true);
+//                            dataList2.remove(appcnt);
+                            appnum=appcnt;
+                        }
+//                        appData.setLock(true);
+                        appcnt++;
                     }
+
+                    dataList2.remove(appnum);
 
                     // シリアライズしてファイルに保存
                     FileOutputStream outFile = openFileOutput("appData.file", 0);
@@ -122,6 +136,49 @@ public class MainActivity extends Activity {
                     outObject.writeObject(dataList2);
                     outObject.close();
                     outFile.close();
+
+                    int num1 = 0;
+                    // アイコン情報を読み取り
+                    for (AppData appData : dataList2) {
+                        num1++;
+                        if(num1==appnum) continue;
+
+                        // SharedPreferenceのインスタンスを生成
+                        SharedPreferences pref = getSharedPreferences("DATA" + num1, Context.MODE_PRIVATE);
+                        String s = pref.getString("ICON", "");
+                        if (!s.equals("")) {
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            byte[] b = Base64.decode(s, Base64.DEFAULT);
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+                            // AppDataにアイコン情報を格納
+                            appData.setIcon(new BitmapDrawable(bitmap));
+                        }
+                    }
+
+
+                    // アイコン情報を保存
+                    Drawable icon ;
+                    int num = 0;
+                    for (AppData info : dataList2) {
+                        num++;
+                        if(num==appnum) continue;
+
+                        icon = info.getIcon();
+                        // ビットマップに変換
+                        Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+                        // バイト配列出力を扱う
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        // ビットマップを圧縮する
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                        // 文字列型に直す
+                        String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                        // SharedPreferenceのインスタンスを生成
+                        SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+                        // データの書き込み
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("ICON", bitmapStr);
+                        editor.apply();
+                    }
 
                 } catch (StreamCorruptedException e) {
                     e.printStackTrace();
@@ -132,6 +189,9 @@ public class MainActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
+
                 break;
 
 
