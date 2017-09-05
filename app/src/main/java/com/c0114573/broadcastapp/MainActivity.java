@@ -82,8 +82,8 @@ public class MainActivity extends Activity {
         tv.setText("テスト");
 
         // 初期起動時処理
-        if(!(AppLaunchChecker.hasStartedFromLauncher(this))){
-            Log.d("AppLaunchChecker","はじめてアプリを起動した");
+        if (!(AppLaunchChecker.hasStartedFromLauncher(this))) {
+            Log.d("AppLaunchChecker", "はじめてアプリを起動した");
             //InitialSetting();
 //            AppDataSetting setting = new AppDataSetting();
 //            setting.InitialSetting();
@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
 //            Intent intent = new Intent(this, AppDataSetting.class);
 //            intent.putExtra("foo", someData);
 //            startActivity(intent);
-           startService(new Intent(getBaseContext(), AppDataSetting.class));
+            startService(new Intent(getBaseContext(), AppDataSetting.class));
 
         }
         AppLaunchChecker.onActivityCreate(this);
@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
             // クラスの更新テスト
             case R.id.file_save_button:
                 try {
-                    // デシリアライズ
+                    // デシリアライズ(読み込み)
                     FileInputStream inFile = openFileInput("appData.file");
                     ObjectInputStream inObject = new ObjectInputStream(inFile);
                     List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
@@ -113,22 +113,19 @@ public class MainActivity extends Activity {
 
                     int appcnt = 0;
                     int appnum = 0;
+                    int appnum2 = 0;
                     deleteApp = "com.nianticlabs.pokemongo";
 
                     for (AppData appData : dataList2) {
-//                        deleteApp = appData.getpackageName();
-
-//                        if(appData.getpackageName().equals("com.nianticlabs.pokemongo")){
-                        if(appData.getpackageName().equals(deleteApp)){
-//                            appData.setLock(0);
-//                            dataList2.remove(appcnt);
-                            appnum=appcnt;
-                        }
-//                        appData.setLock(true);
                         appcnt++;
+                        // 削除したいアプリのリスト番号を取得
+                        if (appData.getpackageName().equals(deleteApp)) {
+                            appnum = appcnt;
+                            appnum2 = appcnt;
+                        }
                     }
-
-                    dataList2.remove(appnum);
+                    // 削除したいアプリをリストから削除
+//                    dataList2.remove(appnum2-1);
 
                     // シリアライズしてファイルに保存
                     FileOutputStream outFile = openFileOutput("appData.file", 0);
@@ -141,8 +138,6 @@ public class MainActivity extends Activity {
                     // アイコン情報を読み取り
                     for (AppData appData : dataList2) {
                         num1++;
-                        if(num1==appnum) continue;
-
                         // SharedPreferenceのインスタンスを生成
                         SharedPreferences pref = getSharedPreferences("DATA" + num1, Context.MODE_PRIVATE);
                         String s = pref.getString("ICON", "");
@@ -155,30 +150,38 @@ public class MainActivity extends Activity {
                         }
                     }
 
-
-                    // アイコン情報を保存
-                    Drawable icon ;
+                    // アイコン情報を上書き保存
+                    Drawable icon;
                     int num = 0;
                     for (AppData info : dataList2) {
                         num++;
-                        if(num==appnum) continue;
-
-                        icon = info.getIcon();
-                        // ビットマップに変換
-                        Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
-                        // バイト配列出力を扱う
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        // ビットマップを圧縮する
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                        // 文字列型に直す
-                        String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-                        // SharedPreferenceのインスタンスを生成
-                        SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-                        // データの書き込み
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putString("ICON", bitmapStr);
-                        editor.apply();
+                        // 削除したいアプリのリスト番号は読み取らない
+                        if (num == appnum) {
+                            num -= 1;
+                            appnum = -1;
+                        } else {
+                            icon = info.getIcon();
+                            Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                            String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putString("ICON", bitmapStr);
+                            editor.apply();
+                        }
                     }
+                    appcnt=0;
+                    for (AppData appData : dataList2) {
+                        appcnt++;
+                        // 削除したいアプリのリスト番号を取得
+                        if (appData.getpackageName().equals(deleteApp)) {
+                            appnum = appcnt;
+                            appnum2 = appcnt;
+                        }
+                    }
+                    dataList2.remove(appnum-1);
+
 
                 } catch (StreamCorruptedException e) {
                     e.printStackTrace();
@@ -191,13 +194,12 @@ public class MainActivity extends Activity {
                 }
 
 
-
                 break;
 
 
             // デシリアライズ(読み込み)
             case R.id.file_read_button:
-                str="";
+                str = "";
                 try {
                     //FileInputStream inFile = new FileInputStream(FILE_NAME);
                     FileInputStream inFile = openFileInput("appData.file");
@@ -208,8 +210,8 @@ public class MainActivity extends Activity {
 
                     for (AppData appData : dataList2) {
                         str += appData.getpackageLabel();
-                        str += appData.getPermission()+",";
-                        str += String.valueOf(appData.getLock())+"\n";
+                        str += appData.getPermission() + ",";
+                        str += String.valueOf(appData.getLock()) + "\n";
                     }
 
                 } catch (FileNotFoundException e) {

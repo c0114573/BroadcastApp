@@ -78,6 +78,9 @@ public class PermissionList extends Activity {
             // アイコン情報を読み取り
             for (AppData appData : dataList2) {
                 num++;
+//
+//                if(num==9) continue;
+
                 // SharedPreferenceのインスタンスを生成
                 SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
                 String s = pref.getString("ICON", "");
