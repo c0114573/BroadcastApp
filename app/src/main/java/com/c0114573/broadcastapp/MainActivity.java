@@ -91,8 +91,12 @@ public class MainActivity extends Activity {
 //            Intent intent = new Intent(this, AppDataSetting.class);
 //            intent.putExtra("foo", someData);
 //            startActivity(intent);
-            startService(new Intent(getBaseContext(), AppDataSetting.class));
 
+            Intent startServiceIntent = new Intent(getBaseContext(),AppDataSetting.class);
+            startServiceIntent.putExtra("AppFirstStart",10);
+            startService(startServiceIntent);
+
+//            startService(new Intent(getBaseContext(), AppDataSetting.class));
         }
         AppLaunchChecker.onActivityCreate(this);
 
@@ -102,6 +106,9 @@ public class MainActivity extends Activity {
         switch (v.getId()) {
 
             // クラスの更新テスト
+
+            // リストの要素番号は0から始まる
+            // アイコン読込,保存のSharedPreferenceは0が使えない
             case R.id.file_save_button:
                 try {
                     // デシリアライズ(読み込み)

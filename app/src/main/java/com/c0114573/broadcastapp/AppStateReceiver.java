@@ -19,15 +19,15 @@ public class AppStateReceiver extends BroadcastReceiver {
         // アプリのインストール
         if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
                 && !intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-            Toast.makeText(context, "インストール", Toast.LENGTH_LONG).show();
+            Toast.makeText(context,intent.getData()+"インストール", Toast.LENGTH_LONG).show();
             //MainActivity app = new MainActivity();
             //app.InitialSetting();
 
-            int data1 = 10;
-
-            Intent startServiceIntent = new Intent(context,AppDataSetting.class);
-            startServiceIntent.putExtra("INSTALL",data1);
-            context.startService(startServiceIntent);
+//            int data1 = 20;
+//
+//            Intent startServiceIntent = new Intent(context,AppDataSetting.class);
+//            startServiceIntent.putExtra("INSTALL",data1);
+//            context.startService(startServiceIntent);
         }
 
         if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
@@ -35,10 +35,13 @@ public class AppStateReceiver extends BroadcastReceiver {
             // プリインアプリのアンインストール
             if (intent.getExtras().getBoolean(Intent.EXTRA_DATA_REMOVED)
                     && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-                Toast.makeText(context, "プリインアプリのアンインストール", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, intent.getData()+"プリインアンイン", Toast.LENGTH_LONG).show();
 
+                String str ="";
+                str = intent.getData().toString();
                 Intent startServiceIntent = new Intent(context,AppDataSetting.class);
-//                startServiceIntent.putExtra("INSTALL",data1);
+                startServiceIntent.putExtra("UNINSTALL",30);
+                startServiceIntent.putExtra("APPNAME",str);
                 context.startService(startServiceIntent);
             }
 
@@ -51,7 +54,14 @@ public class AppStateReceiver extends BroadcastReceiver {
 
         // アプリのアンインストール
         if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(intent.getAction())) {
-            Toast.makeText(context, "アンインストール", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, intent.getData()+"アンインスト", Toast.LENGTH_LONG).show();
+
+            String str ="";
+            str = intent.getData().toString();
+            Intent startServiceIntent = new Intent(context,AppDataSetting.class);
+            startServiceIntent.putExtra("UNINSTALL",30);
+            startServiceIntent.putExtra("APPNAME",str);
+            context.startService(startServiceIntent);
         }
 
     }
