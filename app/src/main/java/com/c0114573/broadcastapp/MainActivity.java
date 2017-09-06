@@ -124,22 +124,13 @@ public class MainActivity extends Activity {
                             appnum2 = appcnt;
                         }
                     }
-                    // 削除したいアプリをリストから削除
-//                    dataList2.remove(appnum2-1);
 
-                    // シリアライズしてファイルに保存
-                    FileOutputStream outFile = openFileOutput("appData.file", 0);
-                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                    outObject.writeObject(dataList2);
-                    outObject.close();
-                    outFile.close();
-
-                    int num1 = 0;
+                    int num = 0;
                     // アイコン情報を読み取り
                     for (AppData appData : dataList2) {
-                        num1++;
+                        num++;
                         // SharedPreferenceのインスタンスを生成
-                        SharedPreferences pref = getSharedPreferences("DATA" + num1, Context.MODE_PRIVATE);
+                        SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
                         String s = pref.getString("ICON", "");
                         if (!s.equals("")) {
                             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -151,11 +142,11 @@ public class MainActivity extends Activity {
                     }
 
                     // アイコン情報を上書き保存
+                    num = 0;
                     Drawable icon;
-                    int num = 0;
                     for (AppData info : dataList2) {
                         num++;
-                        // 削除したいアプリのリスト番号は読み取らない
+                        // 削除したいアプリのリスト番号は保存しない
                         if (num == appnum) {
                             num -= 1;
                             appnum = -1;
@@ -171,17 +162,15 @@ public class MainActivity extends Activity {
                             editor.apply();
                         }
                     }
-                    appcnt=0;
-                    for (AppData appData : dataList2) {
-                        appcnt++;
-                        // 削除したいアプリのリスト番号を取得
-                        if (appData.getpackageName().equals(deleteApp)) {
-                            appnum = appcnt;
-                            appnum2 = appcnt;
-                        }
-                    }
-                    dataList2.remove(appnum-1);
+                    // 削除したいアプリをリストから削除
+                    dataList2.remove(appnum2-1);
 
+                    // シリアライズしてファイルに保存
+                    FileOutputStream outFile = openFileOutput("appData.file", 0);
+                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+                    outObject.writeObject(dataList2);
+                    outObject.close();
+                    outFile.close();
 
                 } catch (StreamCorruptedException e) {
                     e.printStackTrace();
@@ -192,8 +181,6 @@ public class MainActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
                 break;
 
 
