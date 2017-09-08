@@ -49,6 +49,7 @@ public class ExampleService extends Service implements LocationListener {
 
     public ArrayList<String> array = new ArrayList<String>();
     String result = "";
+    String sendPackageName = "";
     String sendPackageLabel = "";
     String sendPermission = "";
 
@@ -56,6 +57,7 @@ public class ExampleService extends Service implements LocationListener {
     boolean isLocationApp = false;
     boolean isLocked = false;
     boolean locationInto = false;
+    boolean isNotPermission = false;
 
     boolean windowShowed = false;
 
@@ -103,20 +105,26 @@ public class ExampleService extends Service implements LocationListener {
 //                        setToast();
 //                        showText(result);
 
-                        if(windowShowed==true) {
+                        // windowServiceを終了するかどうか
+                        if (windowShowed == true) {
                             providerCheck();
                         }
 
+                        if (isPackage && isNotPermission) {
+                            Intent startServiceIntent = new Intent(ExampleService.this,AppDataSetting.class);
+                            startServiceIntent.putExtra("UNINSTALL",30);
+                            startServiceIntent.putExtra("APPNAME",sendPackageName);
+                            startService(startServiceIntent);
 
+                        } else if (isLocked == true) {
 
-                        if (isLocked==true) {
-
-                            if (isLocationApp == true && windowShowed==true) {
+                            if (isLocationApp == true && windowShowed == true) {
                                 warningDialog();
                             } else if (isPackage == true) {
                                 appPlayDialog();
                             }
                         }
+
 
                         isPackage = false;
                         isLocationApp = false;
@@ -186,9 +194,14 @@ public class ExampleService extends Service implements LocationListener {
                         // インストール済みアプリであるか
                         if (info.getpackageName().equals(us.getPackageName())) {
 
+                            // 権限を持ってない場合
+                            if (info.getIsNotPermission()) {
+                                isNotPermission = true; //権限を持っていないアプリ
+                            }
+
                             // 位置情報アプリか
-                            if(info.getLocationPermission().equals("0")){
-                                isLocationApp=true; //位置情報アプリだ
+                            if (info.getLocationPermission().equals("0")) {
+                                isLocationApp = true; //位置情報アプリだ
                             }
 
                             // 制限されているか
@@ -198,9 +211,10 @@ public class ExampleService extends Service implements LocationListener {
 
                             isPackage = true; //アプリが使用された
 //                            text = "パッケージ名:" + String.valueOf(info.getpackageLabel());
-                                sendPackageLabel = String.valueOf(info.getpackageLabel());
-                                sendPermission = info.getPermission();
-                                appUsedCount++;
+                            sendPackageLabel = String.valueOf(info.getpackageLabel());
+                            sendPackageName = String.valueOf(info.getpackageName());
+                            sendPermission = info.getPermission();
+                            appUsedCount++;
 
                         }
                     }
@@ -210,7 +224,7 @@ public class ExampleService extends Service implements LocationListener {
     }
 
 
-    public void providerCheck(){
+    public void providerCheck() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 //        String provider = "";
         if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -225,7 +239,7 @@ public class ExampleService extends Service implements LocationListener {
 //            provider = "使えません";
 
             stopService(new Intent(getBaseContext(), WindowService.class));
-            windowShowed=false;
+            windowShowed = false;
 
 
         }
@@ -241,10 +255,11 @@ public class ExampleService extends Service implements LocationListener {
 
         startActivity(intent);
     }
+
     private void warningDialog() {
         Intent intent = new Intent(this, WarningDialogActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
-            startActivity(intent);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
+        startActivity(intent);
     }
 
 
@@ -318,18 +333,13 @@ public class ExampleService extends Service implements LocationListener {
         }
 
 
-
-
-
         this.mThread = new Thread(null, mTask, "NortifyingService");
         this.mThread.start();
-
 
 
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
     }
-
 
 
     @Override
@@ -368,10 +378,10 @@ public class ExampleService extends Service implements LocationListener {
         if (results2 < 3000) {
             message = "範囲内";
 //            locationInto=true; // 範囲内だ
-            if(windowShowed==false) {
+            if (windowShowed == false) {
                 startService(new Intent(getBaseContext(), WindowService.class));
             }
-            windowShowed=true;
+            windowShowed = true;
 
 
 //            Intent intent = new Intent(this, WarningDialogActivity.class);
@@ -383,7 +393,7 @@ public class ExampleService extends Service implements LocationListener {
 //            locationInto=false; // 範囲外だ
 
             stopService(new Intent(getBaseContext(), WindowService.class));
-            windowShowed=false;
+            windowShowed = false;
         }
 //        Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
     }

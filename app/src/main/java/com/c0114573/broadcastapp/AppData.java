@@ -67,6 +67,10 @@ public class AppData implements Serializable {
         return resultPermission;
     }
 
+    public boolean getIsNotPermission() {
+        if (pSMS==-1 && pLocation==-1 && pCamera==-1) return true;
+        else return false;
+    }
 
     public String getLocationPermission() {
         return String.valueOf(this.pLocation);

@@ -46,32 +46,13 @@ public class AppDataSetting extends Service {
     // 読み込み特定アプリ情報リスト
     List<AppData> dataListLoad = new ArrayList<AppData>();
 
-    // 新規追加特定アプリ
-    List<AppData> dataListAdd = new ArrayList<AppData>();
-
     boolean appNew = true;
 
-    //    @Override
-//    protected void onCreate( {
-//        super.onCreate(savedInstanceState);
-//
-//        NewAppList();
-//
-//        /*
-//        if(){
-//           LoadAppList();
-//        }
-//        */
-//
-//        SaveAppList();
-//
-////        finish();
-//    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         // 現在の端末内アプリから特定アプリをリストに追加,更新
-        // get〇〇Extra  キーがないとき第二引数の値となる
+        // get~Extra  キーがないとき第二引数の値となる
         if (intent != null && intent.getIntExtra("AppFirstStart", 0) == 10) {
 //            LoadAppList();
             NewAppList(); // 特定アプリ一覧を作成
@@ -81,13 +62,13 @@ public class AppDataSetting extends Service {
         // インストール時
         else if (intent != null && intent.getIntExtra("INSTALL", 0) == 20) {
             String appname = intent.getStringExtra("APPNAME");
-            LoadAppList(appname);
+            InstallAppList(appname);
         }
 
         // アンインストール時
         else if (intent != null && intent.getIntExtra("UNINSTALL", 0) == 30) {
             String appname = intent.getStringExtra("APPNAME");
-            DeleteAppList(appname);
+            UnInstallAppList(appname);
         }
 
         // サービスの終了
@@ -135,9 +116,9 @@ public class AppDataSetting extends Service {
 
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
-
-            // 安全なアプリを除外
-            if (info.packageName.equals("klb.android.lovelive")) continue;
+//
+//            // 安全なアプリを除外
+//            if (info.packageName.equals("klb.android.lovelive")) continue;
 
             // 起動不可能なアプリを除外
             for (String app : appList) {
@@ -243,7 +224,7 @@ public class AppDataSetting extends Service {
     }
 
     // インストール時
-    public void LoadAppList(String installApp) {
+    public void InstallAppList(String installApp) {
 
         // パッケージマネージャーの作成
         PackageManager packageManager = getPackageManager();
@@ -251,12 +232,10 @@ public class AppDataSetting extends Service {
         // 起動不可能なアプリをリストに格納
         List<PackageInfo> pckInfoList = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
         for (PackageInfo pckInfo : pckInfoList) {
-            // インテントで起動できないものを格納
             if (packageManager.getLaunchIntentForPackage(pckInfo.packageName) == null) {
                 appList.add(pckInfo.packageName);
             }
         }
-
         // インストール済みアプリの情報を取得
         List<ApplicationInfo> applicationInfo = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
@@ -307,8 +286,14 @@ public class AppDataSetting extends Service {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     byte[] b = Base64.decode(s, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+
                     // AppDataにアイコン情報を格納
-                    appData.setIcon(new BitmapDrawable(bitmap));
+                    // 新しくインストールしたアプリをリストの最後に追加
+                    if(dataList2.size()==num){
+                        appData.setIcon(appData.getIcon());
+                    }else {
+                        appData.setIcon(new BitmapDrawable(bitmap));
+                    }
                 }
             }
 
@@ -348,7 +333,7 @@ public class AppDataSetting extends Service {
     }
 
     // アンインストール時
-    public void DeleteAppList(String deleteApp) {
+    public void UnInstallAppList(String deleteApp) {
         try {
             // デシリアライズ(読み込み)
             FileInputStream inFile = openFileInput("appData.file");
@@ -360,7 +345,7 @@ public class AppDataSetting extends Service {
             int appcnt = 0;
             int appnum = 0;
             int appnum2 = 0;
-            boolean found = false;
+            boolean isfound = false;
 //            deleteApp = "com.nianticlabs.pokemongo";
 
             for (AppData appData : dataList2) {
@@ -369,11 +354,11 @@ public class AppDataSetting extends Service {
                 if (appData.getpackageName().equals(deleteApp)) {
                     appnum = appcnt;
                     appnum2 = appcnt;
-                    found = true; //見つかった
+                    isfound = true; //見つかった
                 }
             }
 
-            if (found == true) {
+            if (isfound == true) {
 
                 int num = 0;
                 // アイコン情報を読み取り
