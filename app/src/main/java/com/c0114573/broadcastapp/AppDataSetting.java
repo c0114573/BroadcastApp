@@ -1,7 +1,6 @@
 package com.c0114573.broadcastapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -13,12 +12,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.AppLaunchChecker;
 import android.util.Base64;
-import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -118,7 +114,8 @@ public class AppDataSetting extends Service {
             if (info.packageName.equals(this.getPackageName())) continue;
 //
 //            // 安全なアプリを除外
-//            if (info.packageName.equals("klb.android.lovelive")) continue;
+            if (info.packageName.equals("klb.android.lovelive")) continue;
+            if (info.packageName.equals("com.android.settings")) continue;
 
             // 起動不可能なアプリを除外
             for (String app : appList) {
@@ -152,6 +149,7 @@ public class AppDataSetting extends Service {
                 data.pCamera = pCamera;
                 data.pSMS = pSMS;
                 data.pLocation = pLocation;
+                data.useCount = 0;
                 data.setLock(true);
 
                 // アプリ情報クラスをリストに追加
@@ -268,6 +266,7 @@ public class AppDataSetting extends Service {
                 data.pCamera = -1;
                 data.pSMS = -1;
                 data.pLocation = -1;
+                data.useCount = 0;
                 data.setLock(true);
 
                 // アプリ情報クラスをリストに追加

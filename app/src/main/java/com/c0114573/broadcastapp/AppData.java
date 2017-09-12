@@ -19,6 +19,8 @@ public class AppData implements Serializable {
     int pLocation;  // 位置情報権限
     boolean lock;       // 制限の有無 有:true 無:false
 
+    int useCount;
+
     boolean appuse;       // 一時的な制限の有無 有:true 無:false
 
     public AppData(){
@@ -30,6 +32,8 @@ public class AppData implements Serializable {
         this.lock = b;
     }
 
+    public  void setUseCountPlus() { this.useCount += 1; }
+
     public String getpackageName() {
         return this.packageName;
     }
@@ -39,6 +43,8 @@ public class AppData implements Serializable {
     }
 
     public Drawable getIcon() { return this.icon;}
+
+    public int getUseCount() { return this.useCount; }
 
     public String getPermission() {
         String spCamera = String.valueOf(pCamera);

@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.c0114573.broadcastapp.MainActivity;
-
 /**
  * Created by member on 2017/08/02.
  */

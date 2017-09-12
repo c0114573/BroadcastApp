@@ -4,49 +4,26 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AppOpsManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.AppLaunchChecker;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
-
-import static android.app.Service.START_STICKY;
-import static android.content.ContentValues.TAG;
-
-import com.c0114573.broadcastapp.AppDataSetting;
 
 /**
  * Created by C011457331 on 2017/04/19.
@@ -85,8 +62,8 @@ public class MainActivity extends Activity {
         if (!(AppLaunchChecker.hasStartedFromLauncher(this))) {
             Log.d("AppLaunchChecker", "はじめてアプリを起動した");
 
-            Intent startServiceIntent = new Intent(getBaseContext(),AppDataSetting.class);
-            startServiceIntent.putExtra("AppFirstStart",10);
+            Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
+            startServiceIntent.putExtra("AppFirstStart", 10);
             startService(startServiceIntent);
 
         }
@@ -99,8 +76,8 @@ public class MainActivity extends Activity {
 
             // クラスの更新テスト
             case R.id.file_save_button:
-                Intent startServiceIntent = new Intent(getBaseContext(),AppDataSetting.class);
-                startServiceIntent.putExtra("AppFirstStart",10);
+                Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
+                startServiceIntent.putExtra("AppFirstStart", 10);
                 startService(startServiceIntent);
 
                 break;
@@ -119,8 +96,10 @@ public class MainActivity extends Activity {
 
                     for (AppData appData : dataList2) {
                         str += appData.getpackageLabel();
+//                        str += appData.getpackageName();
                         str += appData.getPermission() + ",";
-                        str += String.valueOf(appData.getLock()) + "\n";
+                        str += String.valueOf(appData.getLock())+",";
+                        str += appData.getUseCount() + "\n";
                     }
 
                 } catch (FileNotFoundException e) {
@@ -170,7 +149,25 @@ public class MainActivity extends Activity {
     // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)
     private void startService() {
+
         Intent intent = null;
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // permissionが許可されていません
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // 許可ダイアログで今後表示しないにチェックされていない場合
+            }
+
+            // permissionを許可してほしい理由の表示など
+
+            // 許可ダイアログの表示
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTSはアプリ内で独自定義したrequestCodeの値
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+
+        }else
+
+
         if (!canGetUsageStats()) {  // (1)
             intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
         } else if (!canDrawOverlays()) {  // (2)
@@ -205,4 +202,24 @@ public class MainActivity extends Activity {
     }
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            // 先ほどの独自定義したrequestCodeの結果確認
+            case 0: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // ユーザーが許可したとき
+                    // 許可が必要な機能を改めて実行する
+                    Toast.makeText(getApplicationContext(), "OK", Toast.LENGTH_SHORT).show();
+                } else {
+                    // ユーザーが許可しなかったとき
+                    // 許可されなかったため機能が実行できないことを表示する
+                    Toast.makeText(getApplicationContext(), "許可されていません", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+
+        }
+    }
 }

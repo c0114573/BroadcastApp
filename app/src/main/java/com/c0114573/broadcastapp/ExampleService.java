@@ -8,7 +8,12 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,15 +21,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +67,7 @@ public class ExampleService extends Service implements LocationListener {
     boolean isLocked = false;
     boolean locationInto = false;
     boolean isNotPermission = false;
+    boolean isUseCount = false;
 
     boolean windowShowed = false;
 
@@ -97,7 +107,7 @@ public class ExampleService extends Service implements LocationListener {
 
                     @Override
                     public void run() {
-                        mCount++;
+//                        mCount++;
 //                        showText("カウント:" + mCount);
 
                         usagestatsmanager();
@@ -110,11 +120,17 @@ public class ExampleService extends Service implements LocationListener {
                             providerCheck();
                         }
 
+                        // 権限を持っていない場合
                         if (isPackage && isNotPermission) {
-                            Intent startServiceIntent = new Intent(ExampleService.this,AppDataSetting.class);
-                            startServiceIntent.putExtra("UNINSTALL",30);
-                            startServiceIntent.putExtra("APPNAME",sendPackageName);
-                            startService(startServiceIntent);
+                            // 権限チェックを行う
+                            permissionCheck(sendPackageName);
+                            // 5回以上使われていた
+                            if (isUseCount) {
+                                Intent startServiceIntent = new Intent(ExampleService.this, AppDataSetting.class);
+                                startServiceIntent.putExtra("UNINSTALL", 30);
+                                startServiceIntent.putExtra("APPNAME", sendPackageName);
+                                startService(startServiceIntent);
+                            }
 
                         } else if (isLocked == true) {
 
@@ -125,11 +141,12 @@ public class ExampleService extends Service implements LocationListener {
                             }
                         }
 
-
                         isPackage = false;
                         isLocationApp = false;
 //                        locationInto = false;
                         isLocked = false;
+                        isUseCount = false;
+                        isNotPermission = false;
 
                     }
                 });
@@ -164,7 +181,7 @@ public class ExampleService extends Service implements LocationListener {
 
         List<AppData> dataList = new ArrayList<AppData>();
 
-        // AppData読み込み
+        // AppData読み込み (デシリアライズ)
         try {
             //FileInputStream inFile = new FileInputStream(FILE_NAME);
             FileInputStream inFile = openFileInput("appData.file");
@@ -197,6 +214,11 @@ public class ExampleService extends Service implements LocationListener {
                             // 権限を持ってない場合
                             if (info.getIsNotPermission()) {
                                 isNotPermission = true; //権限を持っていないアプリ
+
+                                // 5回以上か
+                                if (info.useCount > 4) {
+                                    isUseCount = true;
+                                }
                             }
 
                             // 位置情報アプリか
@@ -240,10 +262,63 @@ public class ExampleService extends Service implements LocationListener {
 
             stopService(new Intent(getBaseContext(), WindowService.class));
             windowShowed = false;
-
-
         }
 //        Toast.makeText(this, ""+provider, Toast.LENGTH_SHORT).show();
+    }
+
+    public void permissionCheck(String sendPackageName) {
+        // 権限があるか
+        // パーミッションを持っているか
+        int pSMS = -1;
+        int pLocation = -1;
+
+        int pCamera = getPackageManager().checkPermission(Manifest.permission.CAMERA, sendPackageName);
+        int pSMS1 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_SMS, sendPackageName);
+        int pSMS2 = getPackageManager().checkPermission(Manifest.permission.SEND_SMS, sendPackageName);
+        int pSMS3 = getPackageManager().checkPermission(Manifest.permission.READ_SMS, sendPackageName);
+        int pSMS4 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_WAP_PUSH, sendPackageName);
+        int pSMS5 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_MMS, sendPackageName);
+        int pLocation1 = getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, sendPackageName);
+        int pLocation2 = getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, sendPackageName);
+
+        if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
+
+        if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
+
+        // あればリスト更新
+        try {
+            // デシリアライズ(読み込み)
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+
+            for (AppData appData : dataList2) {
+                if (appData.getpackageName().equals(sendPackageName)) {
+                    appData.pCamera = pCamera;
+                    appData.pSMS = pSMS;
+                    appData.pLocation = pLocation;
+                    appData.setUseCountPlus();
+                }
+            }
+            // シリアライズしてファイルに保存
+            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList2);
+            outObject.close();
+            outFile.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void appPlayDialog() {
@@ -336,11 +411,9 @@ public class ExampleService extends Service implements LocationListener {
         this.mThread = new Thread(null, mTask, "NortifyingService");
         this.mThread.start();
 
-
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
     }
-
 
     @Override
     public void onDestroy() {
