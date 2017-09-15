@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -55,15 +56,6 @@ public class PermissionList extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission_lsit);
-
-
-        LinearLayout ll = new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        setContentView(ll);
-        tv = new TextView(this);
-        tv.setText("こんにちは");
-        ll.addView(tv);
-
 
         // 読み込み
         int num = 0;
@@ -103,6 +95,16 @@ public class PermissionList extends Activity {
 
             // リストビューにアプリケーションの一覧を表示する
             final ListView listView = new ListView(this);
+            int padding = (int) (getResources().getDisplayMetrics().density * 8);
+
+            listView.setPadding(padding, 0, padding, 0);
+            listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
+            listView.setDivider(null);
+
+            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            View header = inflater.inflate(R.layout.list_header_footer, listView, false);
+            listView.addHeaderView(header, null, false);
+
             listView.setAdapter(new AppListAdapter(this, dataList2));
 
             //クリック処理
@@ -112,11 +114,12 @@ public class PermissionList extends Activity {
 //                ApplicationInfo item = applicationInfo.get(position);
 
                     // タップされたアプリ名取得
-                    AppData item = dataList2.get(position);
-//                Log.d("onClick",item.getpackageName());
+                    AppData item = dataList2.get(position - 1);
+//                Log.d("onClick","VIEW_ID"+view.getId());
+                    Log.d("onClick", "a" + dataList2.get(position - 1).getpackageName());
 
                     // リスト表示用のアラートダイアログ
-                    displayDialog(item.getpackageLabel(), item.getpackageName());
+                    displayDialog(item.getpackageLabel(), item.getpackageName(), position);
 
                 }
             });
@@ -133,9 +136,9 @@ public class PermissionList extends Activity {
         }
     }
 
+
     // アプリケーションのラベルとアイコンを表示するためのアダプタークラス
     private static class AppListAdapter extends ArrayAdapter<AppData> {
-
         private final LayoutInflater mInflater;
 
         public AppListAdapter(Context context, List<AppData> dataList) {
@@ -172,14 +175,26 @@ public class PermissionList extends Activity {
 
 
             // Switchボタンの設定
-            Switch switchButton = (Switch)convertView.findViewById(R.id.switch3);
+            Switch switchButton = (Switch) convertView.findViewById(R.id.switch3);
             switchButton.setTag(position);
+            switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked == true) {
+                        Log.d("TEST", "ｔるえ" + position);
+                    } else {
+                        Log.d("TEST", "ふぁｌせ" + position);
+                    }
+                    AppLockSwitch(position);
+                }
+            });
+
+            /*
             switchButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View arg0) {
                     // TODO 自動生成されたメソッド・スタブ
                     Log.d("buttonクリック", "ポジション：　" + position);
-
 
 //                    try {
 //                        // デシリアライズ
@@ -190,7 +205,13 @@ public class PermissionList extends Activity {
 //                        inFile.close();
 //
 //                        for (AppData appData : dataList2) {
-//                            appData.setLock(false);
+//                            if(appData.getpackageName().equals(dataList2.get(position-1).getpackageName())) {
+//                                if(appData.getLock()){
+//                                    appData.setLock(false);
+//                                }else {
+//                                    appData.setLock(true);
+//                                }
+//                            }
 //                        }
 //
 //                        // シリアライズしてファイルに保存
@@ -213,11 +234,10 @@ public class PermissionList extends Activity {
 
                 }
             });
-
+*/
 
             return convertView;
         }
-
 
 
 //        // Switchボタンのリスナー
@@ -230,6 +250,13 @@ public class PermissionList extends Activity {
 //        }
     }
 
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+//        Toast.makeText(this,"あ"+position+view.getId(),Toast.LENGTH_SHORT).show();
+//
+//
+//    }
+
     // ビューホルダー
     private static class ViewHolder {
         TextView textLabel;
@@ -238,12 +265,44 @@ public class PermissionList extends Activity {
         Switch tSwitch;
     }
 
-    private void displayDialog(final String name, final String text) {
+    private void displayDialog(final String name, final String text, final int position) {
+        String lockText = "";
+        try {
+            // デシリアライズ
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+
+            if (dataList2.get(position - 1).getLock()) {
+                lockText = "制限解除";
+            } else {
+                lockText = "制限登録";
+            }
+
+            // シリアライズしてファイルに保存
+            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList2);
+            outObject.close();
+            outFile.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         AlertDialog.Builder dlg = new AlertDialog.Builder(this);
         dlg.setTitle(name);
 
-        String[] items = {"アプリを起動", "アプリ情報画面を開く", "GooglePlayストアを開く", "アンインストール"};
+        String[] items = {"アプリを起動", "アプリ情報画面を開く", "GooglePlayストアを開く", "アンインストール", lockText};
         dlg.setItems(items, new DialogInterface.OnClickListener() {
 
             @Override
@@ -277,6 +336,10 @@ public class PermissionList extends Activity {
                         startActivity(intent);
                         break;
 
+                    case 4:
+                        AppLockSwitch(position);
+                        break;
+
                     default:
                         break;
                 }
@@ -286,4 +349,37 @@ public class PermissionList extends Activity {
         dlg.show();
     }
 
+
+    public static void AppLockSwitch(int position) {
+        try {
+            // デシリアライズ
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+
+            if (dataList2.get(position - 1).getLock()) {
+                dataList2.get(position - 1).setLock(false);
+            } else {
+                dataList2.get(position - 1).setLock(true);
+            }
+
+            // シリアライズしてファイルに保存
+            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList2);
+            outObject.close();
+            outFile.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
