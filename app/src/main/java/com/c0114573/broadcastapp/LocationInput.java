@@ -59,7 +59,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     String str1 = "GPS読み取れてないよ";
     String str2 = "結合";
 
-
     //学校 35.625122, 139.342143
     double confLatitude = 35.625122;    // 設定緯度
     double confLongitude = 139.342143;   // 設定経度
@@ -72,9 +71,7 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     double myLatitude = 35.655601;    // 現在の緯度
     double myLongitude = 139.338854;   // 現在の経度
 
-
     String targetStr = new String("");    // 緯度経度を持ってくる
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +79,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 
         tv = new TextView(this);
         tv.setText("");
-
-
 
         setContentView(activity_locationinput);
 
@@ -95,7 +90,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 //        FragmentTransaction ft = fm.beginTransaction();
 //        ft.add(android.R.id.content, mf);
 //        ft.commit();
-
 
 //      /  mv = (MapView)findViewByID(R.id.mapView2);
 
@@ -137,7 +131,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
         } catch (Exception e) {
             tv2.setText("現在の設定:");
         }
-
 
         // GPS
         lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -243,9 +236,7 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
                 } catch (Exception e) {
                     Toast.makeText(this, "ファイル読み込み失敗", Toast.LENGTH_LONG).show();
                 }
-
                 break;
-
 
             case R.id.location_input_button:
                 try {
@@ -260,14 +251,12 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
 //                    str1 = Double.toString(35.867995);
 //                    str2 = Double.toString(139.688812);
 
-
                     StringBuffer bf = new StringBuffer();
                     bf.append(str1);
                     bf.append(",");
                     bf.append(str2);
 
                     bw.write(bf.toString());
-
 
                     bw.flush();
 
@@ -315,7 +304,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
                 }
 
                 break;
-
 
             // 削除
             case R.id.location_delete_button:

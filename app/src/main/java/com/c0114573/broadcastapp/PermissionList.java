@@ -181,11 +181,11 @@ public class PermissionList extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked == true) {
-                        Log.d("TEST", "ｔるえ" + position);
+                        Log.d("TEST", "true" + position);
                     } else {
-                        Log.d("TEST", "ふぁｌせ" + position);
+                        Log.d("TEST", "false" + position);
                     }
-                    AppLockSwitch(position);
+//                    AppLockSwitch(PermissionList.this,position);
                 }
             });
 
@@ -337,7 +337,7 @@ public class PermissionList extends Activity {
                         break;
 
                     case 4:
-                        AppLockSwitch(position);
+                        AppLockSwitch(PermissionList.this,position);
                         break;
 
                     default:
@@ -350,7 +350,7 @@ public class PermissionList extends Activity {
     }
 
 
-    public static void AppLockSwitch(int position) {
+    public void AppLockSwitch(Context context, int position) {
         try {
             // デシリアライズ
             FileInputStream inFile = openFileInput("appData.file");
