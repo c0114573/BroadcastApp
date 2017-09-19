@@ -27,6 +27,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -44,13 +45,15 @@ import static com.c0114573.broadcastapp.R.layout.activity_locationinput;
  * Created by member on 2017/06/07.
  */
 
-public class LocationInput extends Activity implements LocationListener, OnMapReadyCallback {
-//    implements View.OnClickListener
+public class LocationInput extends Activity implements LocationListener,
+        GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener,
+        OnMapReadyCallback {
 
-//    private GoogleMap mMap = null;
+    private GoogleMap mMap;
+    private TextView mTapTextView;
+    private TextView mCameraTextView;
+
     LocationManager lm;
-    private MapView mv;
-    MapFragment mf;
 
     private final int REQUEST_PERMISSION = 1000;
 
@@ -76,61 +79,62 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(activity_locationinput);
 
         tv = new TextView(this);
         tv.setText("");
 
-        setContentView(activity_locationinput);
-
-        //setContentView(R.layout.activity_locationinput);
-
-//        mf = MapFragment.newInstance();
-//
-//        FragmentManager fm = getFragmentManager();
-//        FragmentTransaction ft = fm.beginTransaction();
-//        ft.add(android.R.id.content, mf);
-//        ft.commit();
-
-//      /  mv = (MapView)findViewByID(R.id.mapView2);
-
-        Fragment mapFragment = (Fragment)getFragmentManager().findFragmentById(R.id.fragment);
-//        mapFragment.getMapAsync(this);
-
-        // 読み込み
-        targetStr = "";
-        try {
-            FileInputStream fis = openFileInput("test.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-            String tmp;
-            tv.setText("");
-            while ((tmp = reader.readLine()) != null) {
-                tv.append(tmp + "\n");
-                targetStr = tmp;
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
-
-        Pattern pattern = Pattern.compile(",");
-        String[] splitStr = pattern.split(targetStr);
-        for (int i = 0; i < splitStr.length; i++) {
-            System.out.println(splitStr[i]);
-        }
-
         tv2 = (TextView) findViewById(R.id.latlng_text);
         tv2.setText("");
-        // ファイルはあるけど読み込みが正しくできてないっぽい
-        try {
-            confLatitude = Double.parseDouble(splitStr[0]);
-            confLongitude = Double.parseDouble(splitStr[1]);
 
-            tv2.setText("現在の設定:" + confLatitude + "," + confLongitude);
-        } catch (Exception e) {
-            tv2.setText("現在の設定:");
-        }
+        mMap = null;
+
+//        Fragment mapFragment =
+//                (Fragment)getFragmentManager().findFragmentById(R.id.map);
+//        mapFragment.getMapAsync(this);
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
+//        SupportMapFragment mapFragment =
+//                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+//        mapFragment.getMapAsync(this);
+
+//        // 読み込み
+//        targetStr = "";
+//        try {
+//            FileInputStream fis = openFileInput("test.txt");
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+//            String tmp;
+//            tv.setText("");
+//            while ((tmp = reader.readLine()) != null) {
+//                tv.append(tmp + "\n");
+//                targetStr = tmp;
+//            }
+//            reader.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+//
+//        Pattern pattern = Pattern.compile(",");
+//        String[] splitStr = pattern.split(targetStr);
+//        for (int i = 0; i < splitStr.length; i++) {
+//            System.out.println(splitStr[i]);
+//        }
+//
+//        tv2 = (TextView) findViewById(R.id.latlng_text);
+//        tv2.setText("");
+//        // ファイルはあるけど読み込みが正しくできてないっぽい
+//        try {
+//            confLatitude = Double.parseDouble(splitStr[0]);
+//            confLongitude = Double.parseDouble(splitStr[1]);
+//
+//            tv2.setText("現在の設定:" + confLatitude + "," + confLongitude);
+//        } catch (Exception e) {
+//            tv2.setText("現在の設定:");
+//        }
 
         // GPS
         lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -138,59 +142,61 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
         if (lm != null) {
             Log.d("LocationActivity", "locationManager.requestLocationUpdates");
             // バックグラウンドから戻ってしまうと例外が発生する場合がある
-
             try {
                 // minTime = 1000msec, minDistance = 50m
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
-
                 lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
-
             } catch (Exception e) {
                 e.printStackTrace();
-
                 Toast toast = Toast.makeText(this, "例外が発生、位置情報のPermissionを許可していますか？", Toast.LENGTH_SHORT);
                 toast.show();
-
 //                //MainActivityに戻す
 //                finish();
             }
         }
+    }
 
-//        mMap = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map) ).getMap();
 
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        mMap.setOnMapClickListener(this);
+        mMap.setOnMapLongClickListener(this);
+        mMap.setOnCameraIdleListener(this);
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap){
+    public void onMapClick(LatLng point) {
+        mTapTextView.setText("tapped, point=" + point);
+        str1 = point.toString();
 
+        Toast.makeText(this,point.toString().substring(8),Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMapLongClick(LatLng point) {
+        mTapTextView.setText("long pressed, point=" + point);
+    }
+
+    @Override
+    public void onCameraIdle() {
+        mCameraTextView.setText(mMap.getCameraPosition().toString());
     }
 
     // ローカルに文字列を保存
     public void onFileClick(View v) {
         switch (v.getId()) {
-            case R.id.location_input_button2:
+            case R.id.location_input_button:
                 try {
                     FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
-
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 //                    bw.write(tv.getText().toString());
 
-                    str1 = Double.toString(myLatitude);
-                    str2 = Double.toString(myLongitude);
-
-//                    StringBuffer bf = new StringBuffer();
-//                    bf.append(str1);
-//                    bf.append(",");
-//                    bf.append(str2);
-//
-//                    bw.write(bf.toString());
+//                    str1 = Double.toString(onMapClick);
 
                     bw.write(str1);
-                    bw.write(",");
-                    bw.write(str2);
-                    bw.newLine();
 
                     bw.flush();
 
@@ -223,8 +229,7 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
                     System.out.println(splitStr[i]);
                 }
 
-                tv2 = (TextView) findViewById(R.id.latlng_text);
-                tv2.setText("");
+
                 // ファイルはあるけど読み込みが正しくできてないっぽい
                 try {
                 confLatitude = Double.parseDouble(splitStr[0]);
@@ -238,72 +243,6 @@ public class LocationInput extends Activity implements LocationListener, OnMapRe
                 }
                 break;
 
-            case R.id.location_input_button:
-                try {
-                    FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
-
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-//                    bw.write(tv.getText().toString());
-
-                    str1 = Double.toString(35.625122);
-                    str2 = Double.toString(139.342143);
-
-//                    str1 = Double.toString(35.867995);
-//                    str2 = Double.toString(139.688812);
-
-                    StringBuffer bf = new StringBuffer();
-                    bf.append(str1);
-                    bf.append(",");
-                    bf.append(str2);
-
-                    bw.write(bf.toString());
-
-                    bw.flush();
-
-//                    out.write(str.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                // 読み込み
-                targetStr = "";
-                try {
-                    FileInputStream fis = openFileInput("test.txt");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-                    String tmp;
-                    tv.setText("");
-                    while ((tmp = reader.readLine()) != null) {
-                        tv.append(tmp + "\n");
-                        targetStr = tmp;
-                    }
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-//                Toast.makeText(this, targetStr,Toast.LENGTH_LONG).show();
-
-                Pattern pattern2 = Pattern.compile(",");
-                splitStr = pattern2.split(targetStr);
-                for (int i = 0; i < splitStr.length; i++) {
-                    System.out.println(splitStr[i]);
-                }
-
-                tv2 = (TextView) findViewById(R.id.latlng_text);
-                tv2.setText("");
-                // ファイルはあるけど読み込みが正しくできてないっぽい
-                try {
-                    confLatitude = Double.parseDouble(splitStr[0]);
-                    confLongitude = Double.parseDouble(splitStr[1]);
-
-                    Toast.makeText(this, "緯度" + confLatitude + "経度" + confLongitude,
-                            Toast.LENGTH_LONG).show();
-                    tv2.setText("現在の設定:" + confLatitude + "," + confLongitude);
-                } catch (Exception e) {
-                    Toast.makeText(this, "ファイル読み込み失敗", Toast.LENGTH_LONG).show();
-                }
-
-                break;
 
             // 削除
             case R.id.location_delete_button:

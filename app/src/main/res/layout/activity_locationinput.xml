@@ -28,14 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onFileClick"
-            android:text="学校" />
-
-        <Button
-            android:id="@+id/location_input_button2"
-            android:layout_width="188dp"
-            android:layout_height="wrap_content"
-            android:onClick="onFileClick"
-            android:text="八王子駅" />
+            android:text="選択したエリアを設定" />
 
     </LinearLayout>
 
@@ -63,18 +56,18 @@
             android:layout_width="119dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.17"
-            android:text="Button" />
+            android:text="距離" />
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="419dp">
 
-        <fragment
-            android:id="@+id/fragment"
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             android:name="com.google.android.gms.maps.MapFragment"
+            android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="415dp" />
+            android:layout_height="match_parent"/>
     </FrameLayout>
 
 
