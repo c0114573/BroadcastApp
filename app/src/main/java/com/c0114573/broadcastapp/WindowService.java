@@ -189,13 +189,11 @@ public class WindowService extends Service {
                     provider = "使えません";
 
 
-
                     //この画面を終了
                     onDestroy();
                 }
                 Log.d("TEST", provider);
 //                Toast.makeText(this, provider, Toast.LENGTH_SHORT).show();
-
 
             }
         });

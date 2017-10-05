@@ -288,14 +288,13 @@ public class AppDataSetting extends Service {
 
                     // AppDataにアイコン情報を格納
                     // 新しくインストールしたアプリをリストの最後に追加
-                    if(dataList2.size()==num){
+                    if(dataList2.size() == num){
                         appData.setIcon(appData.getIcon());
                     }else {
                         appData.setIcon(new BitmapDrawable(bitmap));
                     }
                 }
             }
-
 
             // アイコン情報を上書き保存
              num = 0;

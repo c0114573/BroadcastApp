@@ -456,7 +456,6 @@ public class ExampleService extends Service implements LocationListener {
             }
             windowShowed = true;
 
-
 //            Intent intent = new Intent(this, WarningDialogActivity.class);
 //            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
 //            startActivity(intent);
