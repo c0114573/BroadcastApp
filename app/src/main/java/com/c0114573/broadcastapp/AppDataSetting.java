@@ -50,21 +50,19 @@ public class AppDataSetting extends Service {
         // 現在の端末内アプリから特定アプリをリストに追加,更新
         // get~Extra  キーがないとき第二引数の値となる
         if (intent != null && intent.getIntExtra("AppFirstStart", 0) == 10) {
-//            LoadAppList();
             NewAppList(); // 特定アプリ一覧を作成
-//            SaveAppList(); // 特定アプリを保存/更新
         }
 
         // インストール時
         else if (intent != null && intent.getIntExtra("INSTALL", 0) == 20) {
-            String appname = intent.getStringExtra("APPNAME");
-            InstallAppList(appname);
+            String appName = intent.getStringExtra("APPNAME");
+            InstallAppList(appName);
         }
 
         // アンインストール時
         else if (intent != null && intent.getIntExtra("UNINSTALL", 0) == 30) {
-            String appname = intent.getStringExtra("APPNAME");
-            UnInstallAppList(appname);
+            String appName = intent.getStringExtra("APPNAME");
+            UnInstallAppList(appName);
         }
 
         // サービスの終了
@@ -123,6 +121,7 @@ public class AppDataSetting extends Service {
             }
 
             // パーミッションを持っているか
+            int pNetwork = getPackageManager().checkPermission(Manifest.permission.INTERNET, info.packageName);
             int pCamera = getPackageManager().checkPermission(Manifest.permission.CAMERA, info.packageName);
             int pSMS1 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_SMS, info.packageName);
             int pSMS2 = getPackageManager().checkPermission(Manifest.permission.SEND_SMS, info.packageName);
@@ -146,11 +145,13 @@ public class AppDataSetting extends Service {
                 data.packageLabel = info.loadLabel(packageManager).toString();
                 data.packageName = info.packageName;
                 data.icon = info.loadIcon(packageManager);
+                data.pNetwork = pNetwork;
                 data.pCamera = pCamera;
                 data.pSMS = pSMS;
                 data.pLocation = pLocation;
+                data.isUsed = false;
                 data.useCount = 0;
-                data.setLock(true);
+                data.lock = true;
 
                 // アプリ情報クラスをリストに追加
                 dataListNew.add(data);
@@ -199,27 +200,6 @@ public class AppDataSetting extends Service {
         }
     }
 
-    // 特定アプリを保存/更新
-    public void SaveAppList() {
-        // シリアライズしてAppDataをファイルに保存
-        try {
-            //FileOutputStream outFile = new FileOutputStream(FILE_NAME);
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            if (appNew == true) {
-                outObject.writeObject(dataListNew);
-            } else {
-                outObject.writeObject(dataListLoad);
-            }
-            outObject.close();
-            outFile.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     // インストール時
     public void InstallAppList(String installApp) {
@@ -263,11 +243,13 @@ public class AppDataSetting extends Service {
                 data.packageLabel = info.loadLabel(packageManager).toString();
                 data.packageName = info.packageName;
                 data.icon = info.loadIcon(packageManager);
+                data.pNetwork = -1;
                 data.pCamera = -1;
                 data.pSMS = -1;
                 data.pLocation = -1;
+                data.isUsed = false;
                 data.useCount = 0;
-                data.setLock(true);
+                data.lock = true;
 
                 // アプリ情報クラスをリストに追加
                 dataList2.add(data);

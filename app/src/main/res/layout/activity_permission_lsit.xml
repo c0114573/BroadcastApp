@@ -49,7 +49,7 @@
         </LinearLayout>
 
         <Switch
-            android:id="@+id/switch3"
+            android:id="@+id/switch1"
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"

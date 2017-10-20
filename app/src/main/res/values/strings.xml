@@ -2,4 +2,13 @@
     <string name="app_name">BroadcastApp</string>
 
     <string name="location_explain">位置情報の設定をします</string>
+
+    <string-array name="list">
+        <item>1m</item>
+        <item>2m</item>
+        <item>3m</item>
+        <item>4m</item>
+        <item>5m</item>
+    </string-array>
+
 </resources>

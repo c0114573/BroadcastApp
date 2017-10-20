@@ -52,6 +52,10 @@ public class PermissionList extends Activity {
 
     TextView tv;
 
+
+    // Switchボタンの設定
+    Switch switchButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,9 +74,6 @@ public class PermissionList extends Activity {
             // アイコン情報を読み取り
             for (AppData appData : dataList2) {
                 num++;
-//
-//                if(num==9) continue;
-
                 // SharedPreferenceのインスタンスを生成
                 SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
                 String s = pref.getString("ICON", "");
@@ -123,6 +124,7 @@ public class PermissionList extends Activity {
 
                 }
             });
+
             setContentView(listView);
 
         } catch (StreamCorruptedException e) {
@@ -137,8 +139,8 @@ public class PermissionList extends Activity {
     }
 
 
-    // アプリケーションのラベルとアイコンを表示するためのアダプタークラス
-    private static class AppListAdapter extends ArrayAdapter<AppData> {
+    // AppDataクラスのアプリラベルとアイコンを表示する独自アダプタークラス
+    private  class AppListAdapter extends ArrayAdapter<AppData> {
         private final LayoutInflater mInflater;
 
         public AppListAdapter(Context context, List<AppData> dataList) {
@@ -149,7 +151,6 @@ public class PermissionList extends Activity {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-
             ViewHolder holder = new ViewHolder();
 
             if (convertView == null) {
@@ -157,7 +158,7 @@ public class PermissionList extends Activity {
                 holder.textLabel = (TextView) convertView.findViewById(R.id.label);
                 holder.imageIcon = (ImageView) convertView.findViewById(R.id.icon);
                 holder.packageName = (TextView) convertView.findViewById(R.id.pname);
-                holder.tSwitch = (Switch) convertView.findViewById(R.id.switch3);
+                holder.tSwitch = (Switch) convertView.findViewById(R.id.switch1);
 
                 convertView.setTag(holder);
             } else {
@@ -171,91 +172,36 @@ public class PermissionList extends Activity {
             holder.imageIcon.setImageDrawable(data.icon);
 //            holder.packageName.setText(data.getpackageName());
             holder.packageName.setText(data.getPermissionName());
-            holder.tSwitch.setChecked(data.getLock());
 
 
-            // Switchボタンの設定
-            Switch switchButton = (Switch) convertView.findViewById(R.id.switch3);
+            switchButton = (Switch) convertView.findViewById(R.id.switch1);
             switchButton.setTag(position);
             switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked == true) {
+                    if (isChecked) {
                         Log.d("TEST", "true" + position);
+                        data.setLock(isChecked);
+
+                        // positionは0から呼ばれた値が呼ばれる
+//                        AppLockSwitch(position);
+
                     } else {
                         Log.d("TEST", "false" + position);
+//                        AppLockSwitch(position);
+                        data.setLock(isChecked);
+
                     }
 //                    AppLockSwitch(PermissionList.this,position);
                 }
             });
 
-            /*
-            switchButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View arg0) {
-                    // TODO 自動生成されたメソッド・スタブ
-                    Log.d("buttonクリック", "ポジション：　" + position);
-
-//                    try {
-//                        // デシリアライズ
-//                        FileInputStream inFile = openFileInput("appData.file");
-//                        ObjectInputStream inObject = new ObjectInputStream(inFile);
-//                        List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
-//                        inObject.close();
-//                        inFile.close();
-//
-//                        for (AppData appData : dataList2) {
-//                            if(appData.getpackageName().equals(dataList2.get(position-1).getpackageName())) {
-//                                if(appData.getLock()){
-//                                    appData.setLock(false);
-//                                }else {
-//                                    appData.setLock(true);
-//                                }
-//                            }
-//                        }
-//
-//                        // シリアライズしてファイルに保存
-//                        FileOutputStream outFile = openFileOutput("appData.file", 0);
-//                        ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-//                        outObject.writeObject(dataList2);
-//                        outObject.close();
-//                        outFile.close();
-//
-//                    } catch (StreamCorruptedException e) {
-//                        e.printStackTrace();
-//                    } catch (ClassNotFoundException e) {
-//                        e.printStackTrace();
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-
-
-                }
-            });
-*/
+            holder.tSwitch.setChecked(data.getLock());
 
             return convertView;
         }
-
-
-//        // Switchボタンのリスナー
-//        class SwitchListener implements View.OnClickListener {
-//            public void onClick(View v){
-//         // Switch処理
-//                AppData item = dataList2.get(position);
-//                Log.d("TEST", "押されたAAAAAAAAAAAAAAAAAAA"+);
-//            }
-//        }
     }
 
-//    @Override
-//    public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-//        Toast.makeText(this,"あ"+position+view.getId(),Toast.LENGTH_SHORT).show();
-//
-//
-//    }
 
     // ビューホルダー
     private static class ViewHolder {
@@ -267,6 +213,7 @@ public class PermissionList extends Activity {
 
     private void displayDialog(final String name, final String text, final int position) {
         String lockText = "";
+        boolean checked=true;
         try {
             // デシリアライズ
             FileInputStream inFile = openFileInput("appData.file");
@@ -275,18 +222,14 @@ public class PermissionList extends Activity {
             inObject.close();
             inFile.close();
 
-            if (dataList2.get(position - 1).getLock()) {
+            if (dataList2.get(position).getLock()) {
                 lockText = "制限解除";
+                checked=false;
+
             } else {
                 lockText = "制限登録";
+                checked=true;
             }
-
-            // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            outObject.writeObject(dataList2);
-            outObject.close();
-            outFile.close();
 
         } catch (StreamCorruptedException e) {
             e.printStackTrace();
@@ -297,7 +240,6 @@ public class PermissionList extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         AlertDialog.Builder dlg = new AlertDialog.Builder(this);
         dlg.setTitle(name);
@@ -337,20 +279,22 @@ public class PermissionList extends Activity {
                         break;
 
                     case 4:
-                        AppLockSwitch(PermissionList.this,position);
+                        AppLockSwitch(position);
+                        Log.d("TEST", "dialog" + position);
+//                        switchButton.setChecked(checked);
                         break;
 
                     default:
                         break;
                 }
-
             }
         });
         dlg.show();
     }
 
 
-    public void AppLockSwitch(Context context, int position) {
+    // appDataクラスのアプリ制限のon/offを切り替える
+    public void AppLockSwitch(int position) {
         try {
             // デシリアライズ
             FileInputStream inFile = openFileInput("appData.file");
@@ -361,8 +305,13 @@ public class PermissionList extends Activity {
 
             if (dataList2.get(position - 1).getLock()) {
                 dataList2.get(position - 1).setLock(false);
+//                switchButton.setTag(position-1);
+                switchButton.setChecked(false);
+
             } else {
                 dataList2.get(position - 1).setLock(true);
+//                switchButton.setTag(position-1);
+                switchButton.setChecked(true);
             }
 
             // シリアライズしてファイルに保存

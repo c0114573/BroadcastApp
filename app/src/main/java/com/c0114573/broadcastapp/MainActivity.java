@@ -30,21 +30,13 @@ import java.util.List;
  */
 
 public class MainActivity extends Activity {
-//    implements View.OnClickListener
 
-    private final int REQUEST_PERMISSION = 1000;
     private static final int REQUEST_SETTINGS = 1;
 
-    TextView tv;
-    TextView tv3;
+    // テスト用テキスト
+    TextView tv1;
+    TextView tv2;
     String str = "";
-    String deleteApp = "";
-    List<AppData> dataList = new ArrayList<AppData>();
-
-    String targetStr = new String("");    // 緯度経度を持ってくる
-
-
-    public static int OVERLAY_PERMISSION_REQ_CODE = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +44,11 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_boot_receiver);
 
-        tv3 = (TextView) findViewById(R.id.textView3);
-        tv3.setText("テスト");
+        tv1 = (TextView) findViewById(R.id.textView3);
+        tv1.setText("テスト");
 
-        tv = (TextView) findViewById(R.id.textView5);
-        tv.setText("テスト");
+        tv2 = (TextView) findViewById(R.id.textView5);
+        tv2.setText("テスト");
 
         // 初期起動時処理
         if (!(AppLaunchChecker.hasStartedFromLauncher(this))) {
@@ -68,26 +60,24 @@ public class MainActivity extends Activity {
 
         }
         AppLaunchChecker.onActivityCreate(this);
-
     }
 
+    // ファイルテスト
     public void onFileClick(View v) {
         switch (v.getId()) {
 
-            // クラスの更新テスト
+            // リストの初期化,再読み込み
             case R.id.file_save_button:
                 Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
                 startServiceIntent.putExtra("AppFirstStart", 10);
                 startService(startServiceIntent);
-
                 break;
 
 
-            // デシリアライズ(読み込み)
+            // リストを読み込みテキストに表示
             case R.id.file_read_button:
                 str = "";
                 try {
-                    //FileInputStream inFile = new FileInputStream(FILE_NAME);
                     FileInputStream inFile = openFileInput("appData.file");
                     ObjectInputStream inObject = new ObjectInputStream(inFile);
                     List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
@@ -101,6 +91,7 @@ public class MainActivity extends Activity {
                         str += String.valueOf(appData.getLock())+",";
                         str += appData.getUseCount() + "\n";
                     }
+                    tv2.setText(str);
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -111,8 +102,6 @@ public class MainActivity extends Activity {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                tv.setText(str);
-
                 break;
 
             case R.id.file_delete_button:
@@ -120,6 +109,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    // サービス起動
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.startButton:
@@ -133,23 +123,23 @@ public class MainActivity extends Activity {
         }
     }
 
-    // リスト表示
+    // リスト表示画面へ遷移
     public void onListButtonClick(View v) {
         Intent intent = new Intent(MainActivity.this, PermissionList.class);
         startActivity(intent);
 
     }
 
+    // 位置情報設定画面へ遷移
     public void onMapButtonClick(View v) {
-        Intent intent = new Intent(MainActivity.this, LocationInput.class);
+//        Intent intent = new Intent(MainActivity.this, LocationInput.class);
+        Intent intent = new Intent(MainActivity.this, LocationList.class);
         startActivity(intent);
-
     }
 
     // バージョンが6.0以上であるか
     @TargetApi(Build.VERSION_CODES.M)
     private void startService() {
-
         Intent intent = null;
 
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -165,10 +155,7 @@ public class MainActivity extends Activity {
             // MY_PERMISSIONS_REQUEST_READ_CONTACTSはアプリ内で独自定義したrequestCodeの値
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
 
-        }else
-
-
-        if (!canGetUsageStats()) {  // (1)
+        }else if (!canGetUsageStats()) {  // (1)
             intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
         } else if (!canDrawOverlays()) {  // (2)
             Uri uri = Uri.parse("package:" + getPackageName());
@@ -201,7 +188,6 @@ public class MainActivity extends Activity {
         return Settings.canDrawOverlays(getApplicationContext());
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -218,8 +204,6 @@ public class MainActivity extends Activity {
                 }
                 return;
             }
-
-
         }
     }
 }

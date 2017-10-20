@@ -14,14 +14,13 @@ public class AppData implements Serializable {
     String packageName;     // パッケージ名
     transient Drawable icon;          // アイコン
 
+    int pNetwork;
     int pCamera;    // カメラ権限 有:0,無:-1
     int pSMS;       // SMS権限
     int pLocation;  // 位置情報権限
-    boolean lock;       // 制限の有無 有:true 無:false
-
-    int useCount;
-
-    boolean appuse;       // 一時的な制限の有無 有:true 無:false
+    boolean lock;   // 制限の有無 有:true 無:false
+    boolean isUsed; // 現在起動しているか
+    int useCount;   // 使われた回数
 
     public AppData(){
     }
@@ -33,6 +32,11 @@ public class AppData implements Serializable {
     }
 
     public  void setUseCountPlus() { this.useCount += 1; }
+
+    public  void setIsUsed(boolean b) {
+        this.isUsed = b;
+    }
+
 
     public String getpackageName() {
         return this.packageName;
@@ -47,11 +51,12 @@ public class AppData implements Serializable {
     public int getUseCount() { return this.useCount; }
 
     public String getPermission() {
+        String spNetwork = String.valueOf(pNetwork);
         String spCamera = String.valueOf(pCamera);
         String spSMS = String.valueOf(pSMS);
         String spLocation = String.valueOf(pLocation);
 
-        return spCamera + "," + spSMS + "," + spLocation;
+        return spNetwork + "," + spCamera + "," + spSMS + "," + spLocation;
     }
 
     public String getPermissionName() {

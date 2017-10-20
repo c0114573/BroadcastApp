@@ -39,6 +39,11 @@
             android:label="@string/app_name" >
         </activity>
 
+        <activity
+            android:name=".LocationList"
+            android:label="@string/app_name" >
+        </activity>
+
 
         <activity
             android:name=".CallDialogActivity"

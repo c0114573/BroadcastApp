@@ -87,22 +87,19 @@ public class ExampleService extends Service implements LocationListener {
 
     // スレッド処理
     private Runnable mTask = new Runnable() {
-
         @Override
         public void run() {
-
             // アクティブな間だけ処理をする
             while (mThreadActive) {
-
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(3000); //3秒待つ
                 } catch (InterruptedException e) {
                     // TODO 自動生成された catch ブロック
                     e.printStackTrace();
                 }
 
                 // ハンドラーをはさまないとToastでエラーでる
-                // UIスレッド内で処理をしないといけないらしい
+                // UIスレッド内で処理をしないといけない
                 mHandler.post(new Runnable() {
 
                     @Override
@@ -110,10 +107,11 @@ public class ExampleService extends Service implements LocationListener {
 //                        mCount++;
 //                        showText("カウント:" + mCount);
 
-                        usagestatsmanager();
+                        // 登録位置情報取得
+                        reqestGPS();
 
-//                        setToast();
-//                        showText(result);
+                        // 起動検知
+                        usageStatsInfo();
 
                         // windowServiceを終了するかどうか
                         if (windowShowed == true) {
@@ -132,11 +130,11 @@ public class ExampleService extends Service implements LocationListener {
                                 startService(startServiceIntent);
                             }
 
-                        } else if (isLocked == true) {
+                        } else if (isLocked) {
 
-                            if (isLocationApp == true && windowShowed == true) {
+                            if (isLocationApp && windowShowed) {
                                 warningDialog();
-                            } else if (isPackage == true) {
+                            } else if (isPackage) {
                                 appPlayDialog();
                             }
                         }
@@ -151,7 +149,6 @@ public class ExampleService extends Service implements LocationListener {
                     }
                 });
             }
-
             mHandler.post(new Runnable() {
 
                 @Override
@@ -163,24 +160,21 @@ public class ExampleService extends Service implements LocationListener {
     };
     private Thread mThread;
 
-
-    public void onActivityResult(int req, int result, Intent it) {
-
-    }
-
-
     @TargetApi(21)
-    private void usagestatsmanager() {
+    private void usageStatsInfo() {
         // UsageStats,UsageStatsManager : デバイスの使用履歴、統計情報を扱う
         UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+
         int intTime = UsageStatsManager.INTERVAL_BEST;
+
         Long end = System.currentTimeMillis(); // 現在の時間を取得 (ミリ秒)
 //        Long start = end - (1 * 24 * 60 * 60 * 1000); // 現在時刻から1日前の時間(ミリ秒)を引く　1日 = 24*60*60*1000ミリ秒
         Long start = end - (5 * 60 * 1000); // 5分
-        List<UsageStats> usl = usm.queryUsageStats(intTime, start, end); //
+
+        // 5分前から現在までの使用履歴をリストで取得
+        List<UsageStats> usl = usm.queryUsageStats(intTime, start, end);
 
         List<AppData> dataList = new ArrayList<AppData>();
-
         // AppData読み込み (デシリアライズ)
         try {
             //FileInputStream inFile = new FileInputStream(FILE_NAME);
@@ -208,7 +202,7 @@ public class ExampleService extends Service implements LocationListener {
                 if (us.getLastTimeUsed() > end - 4000) {
 
                     for (AppData info : dataList) {
-                        // インストール済みアプリであるか
+                        // 使用されたアプリがAppDataリストに存在しているか
                         if (info.getpackageName().equals(us.getPackageName())) {
 
                             // 権限を持ってない場合
@@ -237,14 +231,12 @@ public class ExampleService extends Service implements LocationListener {
                             sendPackageName = String.valueOf(info.getpackageName());
                             sendPermission = info.getPermission();
                             appUsedCount++;
-
                         }
                     }
                 }
             }
         }
     }
-
 
     public void providerCheck() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -272,6 +264,7 @@ public class ExampleService extends Service implements LocationListener {
         int pSMS = -1;
         int pLocation = -1;
 
+        int pNetwork = getPackageManager().checkPermission(Manifest.permission.INTERNET, sendPackageName);
         int pCamera = getPackageManager().checkPermission(Manifest.permission.CAMERA, sendPackageName);
         int pSMS1 = getPackageManager().checkPermission(Manifest.permission.RECEIVE_SMS, sendPackageName);
         int pSMS2 = getPackageManager().checkPermission(Manifest.permission.SEND_SMS, sendPackageName);
@@ -285,7 +278,6 @@ public class ExampleService extends Service implements LocationListener {
 
         if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
 
-        // あればリスト更新
         try {
             // デシリアライズ(読み込み)
             FileInputStream inFile = openFileInput("appData.file");
@@ -296,6 +288,7 @@ public class ExampleService extends Service implements LocationListener {
 
             for (AppData appData : dataList2) {
                 if (appData.getpackageName().equals(sendPackageName)) {
+                    appData.pNetwork = pNetwork;
                     appData.pCamera = pCamera;
                     appData.pSMS = pSMS;
                     appData.pLocation = pLocation;
@@ -318,7 +311,6 @@ public class ExampleService extends Service implements LocationListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void appPlayDialog() {
@@ -337,7 +329,6 @@ public class ExampleService extends Service implements LocationListener {
         startActivity(intent);
     }
 
-
     private void showText(Context ctx, final String text) {
         Toast.makeText(this, TAG2 + text, Toast.LENGTH_SHORT).show();
     }
@@ -354,32 +345,32 @@ public class ExampleService extends Service implements LocationListener {
 //        Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        // 登録位置情報読み取り
-        try {
-            FileInputStream fis = openFileInput("test.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-            String tmp;
-//            tv.setText("");
-            while ((tmp = reader.readLine()) != null) {
-//                tv.append(tmp + "\n");
-                targetStr += tmp;
-            }
-            reader.close();
-
-            // 読み取りを行った位置情報をdouble型にそれぞれ格納
-            Pattern pattern = Pattern.compile(",");
-            String[] splitStr = pattern.split(targetStr);
-            for (int i = 0; i < splitStr.length; i++) {
-                System.out.println(splitStr[i]);
-            }
-            // ここでエラー NumberFormatException
-            confLatitude = Double.parseDouble(splitStr[0]);
-            confLongitude = Double.parseDouble(splitStr[1]);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("登録されてない");
-        }
+//        // 登録位置情報読み取り
+//        try {
+//            FileInputStream fis = openFileInput("test.txt");
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+//            String tmp;
+////            tv.setText("");
+//            while ((tmp = reader.readLine()) != null) {
+////                tv.append(tmp + "\n");
+//                targetStr += tmp;
+//            }
+//            reader.close();
+//
+//            // 読み取りを行った位置情報をdouble型にそれぞれ格納
+//            Pattern pattern = Pattern.compile(",");
+//            String[] splitStr = pattern.split(targetStr);
+//            for (int i = 0; i < splitStr.length; i++) {
+//                System.out.println(splitStr[i]);
+//            }
+//            // ここでエラー NumberFormatException
+//            confLatitude = Double.parseDouble(splitStr[0]);
+//            confLongitude = Double.parseDouble(splitStr[1]);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.out.println("登録されてない");
+//        }
     }
 
     @Override
@@ -406,10 +397,7 @@ public class ExampleService extends Service implements LocationListener {
 
 //            startService(new Intent(getBaseContext(), WindowService.class));
         }
-
-
         this.mThread = new Thread(null, mTask, "NortifyingService");
-        this.mThread.start();
 
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
@@ -426,7 +414,6 @@ public class ExampleService extends Service implements LocationListener {
         // スレッド停止
         this.mThread.interrupt();
         this.mThreadActive = false;
-
     }
 
     @Override
@@ -434,10 +421,42 @@ public class ExampleService extends Service implements LocationListener {
         return null;
     }
 
+
+    public void reqestGPS(){
+        // 登録位置情報読み取り
+        try {
+            FileInputStream fis = openFileInput("test.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+            String tmp;
+//            tv.setText("");
+            targetStr="";
+            while ((tmp = reader.readLine()) != null) {
+//                tv.append(tmp + "\n");
+                targetStr += tmp;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("登録されてない");
+        }
+
+            // 読み取りを行った位置情報をdouble型にそれぞれ格納
+            Pattern pattern = Pattern.compile(",");
+            String[] splitStr = pattern.split(targetStr);
+//            for (int i = 0; i < splitStr.length; i++) {
+//                System.out.println(i+"-----"+splitStr[i]+"-----");
+//            }
+            try {
+                // ここでエラー NumberFormatException
+                confLatitude = Double.parseDouble(splitStr[0]);
+                confLongitude = Double.parseDouble(splitStr[1]);
+            }catch (NumberFormatException e){
+                System.out.println("エラー"+targetStr);
+            }
+    }
+
     @Override
     public void onLocationChanged(Location location) {
-//        Toast.makeText(this, "緯度" + location.getLatitude() + "経度"+location.getLongitude(),
-//                Toast.LENGTH_LONG).show();
 
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
@@ -469,7 +488,6 @@ public class ExampleService extends Service implements LocationListener {
         }
 //        Toast.makeText(this, "距離" + results2 + "m" + message, Toast.LENGTH_LONG).show();
     }
-
 
     public float getDistanceBetween(
             double latitude1, double longitude1,

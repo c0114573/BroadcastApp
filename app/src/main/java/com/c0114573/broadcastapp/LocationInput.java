@@ -116,7 +116,6 @@ public class LocationInput extends Activity implements LocationListener,
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-
 //
 //        Pattern pattern = Pattern.compile(",");
 //        String[] splitStr = pattern.split(targetStr);
@@ -182,7 +181,7 @@ public class LocationInput extends Activity implements LocationListener,
 
     @Override
     public void onCameraIdle() {
-        mCameraTextView.setText(mMap.getCameraPosition().toString());
+//        mCameraTextView.setText(mMap.getCameraPosition().toString());
     }
 
     // ローカルに文字列を保存
@@ -196,7 +195,8 @@ public class LocationInput extends Activity implements LocationListener,
 
 //                    str1 = Double.toString(onMapClick);
 
-                    bw.write(str1);
+//                    bw.write(str1);
+                    bw.write(confLatitude+","+confLongitude);
 
                     bw.flush();
 
