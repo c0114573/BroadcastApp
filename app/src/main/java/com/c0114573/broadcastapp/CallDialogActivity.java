@@ -2,6 +2,7 @@ package com.c0114573.broadcastapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -70,7 +71,7 @@ public class CallDialogActivity extends Activity {
                     }
 
                     // シリアライズしてファイルに保存
-                    FileOutputStream outFile = openFileOutput("appData.file", 0);
+                    FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
                     ObjectOutputStream outObject = new ObjectOutputStream(outFile);
                     outObject.writeObject(dataList);
                     outObject.close();
@@ -94,12 +95,9 @@ public class CallDialogActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 //Noボタンが押された時の処理
 //                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-
-                finish();
-
                 Intent intent = new Intent(CallDialogActivity.this, PermissionList.class);
                 startActivity(intent);
-
+                finish();
 
             }
         });

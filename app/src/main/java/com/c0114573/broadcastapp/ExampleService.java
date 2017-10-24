@@ -104,9 +104,9 @@ public class ExampleService extends Service implements LocationListener {
 
                     @Override
                     public void run() {
-//                        mCount++;
+                        mCount++;
 //                        showText("カウント:" + mCount);
-
+//                        Log.i(TAG, "aaaaaaaaaaaaa"+mCount );
                         // 登録位置情報取得
                         reqestGPS();
 
@@ -296,7 +296,7 @@ public class ExampleService extends Service implements LocationListener {
                 }
             }
             // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             outObject.writeObject(dataList2);
             outObject.close();
@@ -334,9 +334,9 @@ public class ExampleService extends Service implements LocationListener {
     }
 
     private void showText(final String text) {
-        if (isPackage == true) {
+//        if (isPackage == true) {
             showText(this, text);
-        }
+//        }
         isPackage = false;
     }
 
@@ -375,6 +375,7 @@ public class ExampleService extends Service implements LocationListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
 
         // 位置情報サービスの利用
@@ -398,6 +399,7 @@ public class ExampleService extends Service implements LocationListener {
 //            startService(new Intent(getBaseContext(), WindowService.class));
         }
         this.mThread = new Thread(null, mTask, "NortifyingService");
+        this.mThread.start();
 
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;

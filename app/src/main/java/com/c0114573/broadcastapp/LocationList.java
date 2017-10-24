@@ -2,6 +2,7 @@ package com.c0114573.broadcastapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.AppLaunchChecker;
@@ -115,7 +116,7 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
 
         try {
             // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("locationData.file", 0);
+            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             outObject.writeObject(locationDatas);
             outObject.close();
@@ -264,7 +265,7 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
 
                 try {
                     // シリアライズしてファイルに保存
-                    FileOutputStream outFile = openFileOutput("locationData.file", 0);
+                    FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
                     ObjectOutputStream outObject = new ObjectOutputStream(outFile);
                     outObject.writeObject(locationDatas);
                     outObject.close();

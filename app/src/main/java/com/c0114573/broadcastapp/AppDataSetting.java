@@ -169,7 +169,7 @@ public class AppDataSetting extends Service {
             // バイト配列出力を扱う
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             // ビットマップを圧縮する
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 50, baos); // 100でいい
             // 文字列型に直す
             String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             // SharedPreferenceのインスタンスを生成
@@ -183,7 +183,7 @@ public class AppDataSetting extends Service {
         // シリアライズしてAppDataをファイルに保存
         try {
             //FileOutputStream outFile = new FileOutputStream(FILE_NAME);
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             if (appNew == true) {
                 outObject.writeObject(dataListNew);
@@ -295,7 +295,7 @@ public class AppDataSetting extends Service {
             }
 
             // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             outObject.writeObject(dataList2);
             outObject.close();
@@ -381,7 +381,7 @@ public class AppDataSetting extends Service {
                 dataList2.remove(appnum2 - 1);
 
                 // シリアライズしてファイルに保存
-                FileOutputStream outFile = openFileOutput("appData.file", 0);
+                FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
                 ObjectOutputStream outObject = new ObjectOutputStream(outFile);
                 outObject.writeObject(dataList2);
                 outObject.close();

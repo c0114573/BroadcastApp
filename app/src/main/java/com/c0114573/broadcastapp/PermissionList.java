@@ -86,7 +86,7 @@ public class PermissionList extends Activity {
                 }
             }
             // AppDataをファイルに保存(シリアライズ)
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             outObject.writeObject(dataList2);
             outObject.close();
@@ -315,7 +315,7 @@ public class PermissionList extends Activity {
             }
 
             // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("appData.file", 0);
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             outObject.writeObject(dataList2);
             outObject.close();
