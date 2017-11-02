@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.AppLaunchChecker;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,58 +82,83 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 //        Toast.makeText(this, "こんにちは" + position, Toast.LENGTH_SHORT).show();
 
-        try {
-            // デシリアライズ(読み込み)
-            FileInputStream inFile = openFileInput("locationData.file");
-            ObjectInputStream inObject = new ObjectInputStream(inFile);
-            locationDatas = (ArrayList<LocationData>) inObject.readObject();
-            inObject.close();
-            inFile.close();
+        AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+        String[] items = {"編集", "削除"};
+        dlg.setItems(items, new DialogInterface.OnClickListener() {
 
-            // 選択されたアイテムをリストから削除
-            locationDatas.remove(position);
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = null;
+                Uri uri;
+                PackageManager pManager = getPackageManager();
+                switch (which) {
 
-            // ListViewにアダプタを設定
-            LocationListAdapter adapter = new LocationListAdapter(getApplicationContext());
-            for (LocationData ld : locationDatas) {
-                adapter.add(ld);
+                    case 0:
+//                        displayDialog();
+                        break;
+
+                    case 1:
+                        try {
+                            // デシリアライズ(読み込み)
+                            FileInputStream inFile = openFileInput("locationData.file");
+                            ObjectInputStream inObject = new ObjectInputStream(inFile);
+                            locationDatas = (ArrayList<LocationData>) inObject.readObject();
+                            inObject.close();
+                            inFile.close();
+
+                            // 選択されたアイテムをリストから削除
+                            locationDatas.remove(position);
+
+                            // ListViewにアダプタを設定
+                            LocationListAdapter adapter = new LocationListAdapter(getApplicationContext());
+                            for (LocationData ld : locationDatas) {
+                                adapter.add(ld);
+                            }
+
+                            final ListView listView = (ListView) findViewById(R.id.card_list);
+                            listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
+                            listView.setDivider(null);
+                            listView.setAdapter(adapter);
+                            listView.setOnItemClickListener(LocationList.this);
+
+                        } catch (StreamCorruptedException e) {
+                            e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            // シリアライズしてファイルに保存
+                            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
+                            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+                            outObject.writeObject(locationDatas);
+                            outObject.close();
+                            outFile.close();
+
+                        } catch (StreamCorruptedException e) {
+                            e.printStackTrace();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
-
-            final ListView listView = (ListView) findViewById(R.id.card_list);
-            listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
-            listView.setDivider(null);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(this);
-
-        } catch (StreamCorruptedException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            outObject.writeObject(locationDatas);
-            outObject.close();
-            outFile.close();
-
-        } catch (StreamCorruptedException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+        dlg.show();
     }
+
 
     // 新規作成
     public void onClick(View v) {

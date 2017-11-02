@@ -10,14 +10,18 @@ import java.io.Serializable;
 
 // アプリケーションデータ格納クラス
 public class AppData implements Serializable {
+    int packageID;
+
     String packageLabel;    // パッケージラベル
     String packageName;     // パッケージ名
     transient Drawable icon;          // アイコン
 
-    int pNetwork;
-    int pCamera;    // カメラ権限 有:0,無:-1
+    // 権限 有:0,無:-1
+    int pNetwork;   // ネットワーク権限
+    int pCamera;    // カメラ権限
     int pSMS;       // SMS権限
     int pLocation;  // 位置情報権限
+
     boolean lock;   // 制限の有無 有:true 無:false
     boolean isUsed; // 現在起動しているか
     int useCount;   // 使われた回数
@@ -48,7 +52,17 @@ public class AppData implements Serializable {
 
     public Drawable getIcon() { return this.icon;}
 
+
+
+
+    // 制限ありtrue 制限なしfalse
+    public boolean getLock() {return  lock; }
+
+    public boolean getIsUsed() {return  isUsed; }
+
     public int getUseCount() { return this.useCount; }
+
+    public int getpackageID() { return this.packageID; }
 
     public String getPermission() {
         String spNetwork = String.valueOf(pNetwork);
@@ -87,8 +101,6 @@ public class AppData implements Serializable {
         return String.valueOf(this.pLocation);
     }
 
-    // 制限ありtrue 制限なしfalse
-    public boolean getLock() {return  lock; }
 
 }
 

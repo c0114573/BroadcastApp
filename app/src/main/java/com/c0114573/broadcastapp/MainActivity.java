@@ -85,10 +85,11 @@ public class MainActivity extends Activity {
                     inFile.close();
 
                     for (AppData appData : dataList2) {
+                        str += appData.getpackageID() + ":";
                         str += appData.getpackageLabel();
 //                        str += appData.getpackageName();
-                        str += appData.getPermission() + ",";
-                        str += String.valueOf(appData.getLock())+",";
+                        str += appData.getPermission() + ",isUsed:";
+                        str += String.valueOf(appData.isUsed)+",";
                         str += appData.getUseCount() + "\n";
                     }
                     tv2.setText(str);

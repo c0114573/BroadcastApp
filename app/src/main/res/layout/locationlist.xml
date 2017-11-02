@@ -14,7 +14,8 @@
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hello World!" />
+            android:text="位置情報登録"
+            android:textAlignment="center" />
 
         <Button
             android:id="@+id/button"

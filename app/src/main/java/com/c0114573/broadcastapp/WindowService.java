@@ -84,7 +84,6 @@ public class WindowService extends Service {
 
         // ボタンをつくる
         final Button button1 = (Button) player_view.findViewById(R.id.wm_button1);
-
         final Button button2 = (Button) player_view.findViewById(R.id.wm_button2);
         final Button button3 = (Button) player_view.findViewById(R.id.wm_button3);
         final Button button4 = (Button) player_view.findViewById(R.id.wm_button4);

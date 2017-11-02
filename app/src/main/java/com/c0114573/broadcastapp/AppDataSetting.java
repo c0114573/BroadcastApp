@@ -65,6 +65,14 @@ public class AppDataSetting extends Service {
             UnInstallAppList(appName);
         }
 
+        // 更新時
+        else if (intent != null && intent.getIntExtra("UPDATE", 0) == 40) {
+            String appName = intent.getStringExtra("APPNAME");
+            UpdateAppList(appName);
+        }
+
+
+
         // サービスの終了
         stopSelf();
 
@@ -103,6 +111,7 @@ public class AppDataSetting extends Service {
         int pLocation = -1;
 
         // リストにアプリデータを格納
+        int i=0;
         appInfo:
         for (ApplicationInfo info : applicationInfo) {
             pSMS = -1;
@@ -112,7 +121,6 @@ public class AppDataSetting extends Service {
             if (info.packageName.equals(this.getPackageName())) continue;
 //
 //            // 安全なアプリを除外
-            if (info.packageName.equals("klb.android.lovelive")) continue;
             if (info.packageName.equals("com.android.settings")) continue;
 
             // 起動不可能なアプリを除外
@@ -142,6 +150,8 @@ public class AppDataSetting extends Service {
 
                 // アプリ情報クラスにアプリ情報を追加
                 AppData data = new AppData();
+                data.packageID = i;
+                i++;
                 data.packageLabel = info.loadLabel(packageManager).toString();
                 data.packageName = info.packageName;
                 data.icon = info.loadIcon(packageManager);
@@ -225,36 +235,36 @@ public class AppDataSetting extends Service {
             inObject.close();
             inFile.close();
 
-        // リストにアプリデータを格納
-        appInfo:
-        for (ApplicationInfo info : applicationInfo) {
-            // 自分自身を除外
-            if (info.packageName.equals(this.getPackageName())) continue;
+            // リストにアプリデータを格納
+            appInfo:
+            for (ApplicationInfo info : applicationInfo) {
+                // 自分自身を除外
+                if (info.packageName.equals(this.getPackageName())) continue;
 
-            // 起動不可能なアプリを除外
-            for (String app : appList) {
-                if ((info.packageName.equals(app))) continue appInfo;
+                // 起動不可能なアプリを除外
+                for (String app : appList) {
+                    if ((info.packageName.equals(app))) continue appInfo;
+                }
+
+                // 新しくインストールしたアプリをリストに追加
+                if (info.packageName.equals(installApp)) {
+                    // アプリ情報クラスにアプリ情報を追加
+                    AppData data = new AppData();
+                    data.packageLabel = info.loadLabel(packageManager).toString();
+                    data.packageName = info.packageName;
+                    data.icon = info.loadIcon(packageManager);
+                    data.pNetwork = -1;
+                    data.pCamera = -1;
+                    data.pSMS = -1;
+                    data.pLocation = -1;
+                    data.isUsed = false;
+                    data.useCount = 0;
+                    data.lock = true;
+
+                    // アプリ情報クラスをリストに追加
+                    dataList2.add(data);
+                }
             }
-
-            // 新しくインストールしたアプリをリストに追加
-            if(info.packageName.equals(installApp)) {
-                // アプリ情報クラスにアプリ情報を追加
-                AppData data = new AppData();
-                data.packageLabel = info.loadLabel(packageManager).toString();
-                data.packageName = info.packageName;
-                data.icon = info.loadIcon(packageManager);
-                data.pNetwork = -1;
-                data.pCamera = -1;
-                data.pSMS = -1;
-                data.pLocation = -1;
-                data.isUsed = false;
-                data.useCount = 0;
-                data.lock = true;
-
-                // アプリ情報クラスをリストに追加
-                dataList2.add(data);
-            }
-        }
 
             int num = 0;
             // アイコン情報を読み取り
@@ -270,16 +280,16 @@ public class AppDataSetting extends Service {
 
                     // AppDataにアイコン情報を格納
                     // 新しくインストールしたアプリをリストの最後に追加
-                    if(dataList2.size() == num){
+                    if (dataList2.size() == num) {
                         appData.setIcon(appData.getIcon());
-                    }else {
+                    } else {
                         appData.setIcon(new BitmapDrawable(bitmap));
                     }
                 }
             }
 
             // アイコン情報を上書き保存
-             num = 0;
+            num = 0;
             Drawable icon;
             for (AppData info : dataList2) {
                 num++;
@@ -398,5 +408,47 @@ public class AppDataSetting extends Service {
             e.printStackTrace();
         }
     }
+
+
+    // アプリ使用更新
+    public void UpdateAppList(String updateApp) {
+        try {
+            // 読み込み
+            FileInputStream inFile = openFileInput("appData.file");
+            ObjectInputStream inObject = new ObjectInputStream(inFile);
+            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            inObject.close();
+            inFile.close();
+
+//            deleteApp = "com.nianticlabs.pokemongo";
+
+            for (AppData appData : dataList2) {
+                if (appData.getpackageName().equals(updateApp)) {
+                    if(appData.getIsUsed()){
+                     appData.setIsUsed(false);
+                    } else {
+                        appData.setIsUsed(true);
+                    }
+                }
+            }
+
+            // 保存
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList2);
+            outObject.close();
+            outFile.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

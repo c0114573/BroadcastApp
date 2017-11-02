@@ -23,6 +23,10 @@ public class LocationData implements Serializable {
         lng=ln;
     }
 
+    public void setDistance(int d) {
+        distance=d;
+    }
+
     public String getLocationName(){
         return locationName;
     }
@@ -30,4 +34,6 @@ public class LocationData implements Serializable {
     public String getLatlng(){
         return lat+","+ lng;
     }
+
+
 }

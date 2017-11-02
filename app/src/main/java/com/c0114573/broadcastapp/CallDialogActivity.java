@@ -1,6 +1,7 @@
 package com.c0114573.broadcastapp;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -86,6 +87,9 @@ public class CallDialogActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
+                activityManager.killBackgroundProcesses(label);
 
                 finish();
 
