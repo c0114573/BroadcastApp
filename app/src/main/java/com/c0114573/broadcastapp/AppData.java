@@ -10,11 +10,10 @@ import java.io.Serializable;
 
 // アプリケーションデータ格納クラス
 public class AppData implements Serializable {
-    int packageID;
-
-    String packageLabel;    // パッケージラベル
-    String packageName;     // パッケージ名
-    transient Drawable icon;          // アイコン
+    int packageID;              // ID
+    String packageLabel;        // パッケージラベル
+    String packageName;         // パッケージ名
+    transient Drawable icon;    // アイコン
 
     // 権限 有:0,無:-1
     int pNetwork;   // ネットワーク権限

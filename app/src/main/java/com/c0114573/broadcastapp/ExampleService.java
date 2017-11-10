@@ -2,6 +2,7 @@ package com.c0114573.broadcastapp;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -101,7 +102,6 @@ public class ExampleService extends Service implements LocationListener {
                     public void run() {
                         mCount++;
 //                        showText("カウント:" + mCount);
-//                        Log.i(TAG, "aaaaaaaaaaaaa"+mCount );
                         // 登録位置情報取得
 //                        reqestGPS();
 
@@ -167,7 +167,8 @@ public class ExampleService extends Service implements LocationListener {
 
             // 使用時間が0でない
             if (us.getTotalTimeInForeground() != 0) {
-                if (us.getLastTimeUsed() > end - 4000) {
+                // 3秒前に使用されたアプリ
+                if (us.getLastTimeUsed() > end - 3000) {
 
                     for (AppData info : dataList) {
                         // 使用されたアプリがAppDataリストに存在しているか
@@ -229,6 +230,14 @@ public class ExampleService extends Service implements LocationListener {
 
             if (isLocationApp && windowShowed) {
                 warningDialog();
+
+                // バックグラウンドプロセスの終了
+                ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
+                for (int j = 0; j < dataList.size(); j++){
+                    if(!dataList.get(j).getLock())
+                    activityManager.killBackgroundProcesses(dataList.get(j).packageName);
+                }
+
             } else if (isPackage && (!isUsed)) {
 
                 // アプリ使用状況の変更
@@ -342,13 +351,13 @@ public class ExampleService extends Service implements LocationListener {
         intent.putExtra("LABEL", PackageLabel);
         intent.putExtra("PERMISSION", Permission);
 
+
         startActivity(intent);
     }
 
     private void warningDialog() {
         Intent intent = new Intent(this, WarningDialogActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
-
         intent.putExtra("LABEL", PackageLabel);
 
         startActivity(intent);
@@ -471,6 +480,8 @@ public class ExampleService extends Service implements LocationListener {
                 message = "範囲内";
                 if (windowShowed == false) {
                     startService(new Intent(getBaseContext(), WindowService.class));
+                    warningDialog();
+
                 }
                 windowShowed = true;
                 return;

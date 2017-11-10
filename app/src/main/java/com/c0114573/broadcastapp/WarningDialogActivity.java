@@ -3,6 +3,9 @@ package com.c0114573.broadcastapp;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -52,7 +55,6 @@ public class WarningDialogActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 //Noボタンが押された時の処理
 //                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
