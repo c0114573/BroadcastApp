@@ -108,7 +108,7 @@ public class LocationDialogActivity extends Activity {
         label = intent.getStringExtra("LABEL");
         it = getIntent();
 
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this).setCancelable(false);
         alert.setTitle("アプリ制限");
         alert.setMessage("設定範囲内に入ったよ\n");
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {

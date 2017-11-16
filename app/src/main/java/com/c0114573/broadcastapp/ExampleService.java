@@ -212,6 +212,8 @@ public class ExampleService extends Service implements LocationListener {
         // windowServiceを終了するかどうか
         if (windowShowed == true) {
             providerCheck();
+        }else {
+            stopService(new Intent(getBaseContext(), WindowService.class));
         }
 
         // 権限を持っていない場合
@@ -240,11 +242,14 @@ public class ExampleService extends Service implements LocationListener {
 
             } else if (isPackage && (!isUsed)) {
 
+                Log.i(TAG, "windowShowed:"+windowShowed+",isLocationApp:"+isLocationApp);
+
                 // アプリ使用状況の変更
                 Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
                 startServiceIntent.putExtra("UPDATE", 40);
                 startServiceIntent.putExtra("APPNAME", PackageName);
                 startService(startServiceIntent);
+
 
                 appPlayDialog();
 
@@ -257,7 +262,7 @@ public class ExampleService extends Service implements LocationListener {
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis()); // 現在時刻を取得
-                calendar.add(Calendar.SECOND, 15); // 現時刻より15秒後を設定
+                calendar.add(Calendar.SECOND, 30); // 現時刻より15秒後を設定
 
                 // AlramManager取得
                 AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
@@ -271,7 +276,7 @@ public class ExampleService extends Service implements LocationListener {
 
     public void providerCheck() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-//        String provider = "";
+        String provider = "";
         if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             //GPSが利用可能
 //            provider = "gps";
@@ -281,12 +286,13 @@ public class ExampleService extends Service implements LocationListener {
 //            provider = "network";
         } else {
             //位置情報の利用不可能
-//            provider = "使えません";
+            provider = "使えません";
 
             stopService(new Intent(getBaseContext(), WindowService.class));
             windowShowed = false;
         }
 //        Toast.makeText(this, ""+provider, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, provider);
     }
 
     public void permissionCheck(String pName) {
@@ -351,7 +357,6 @@ public class ExampleService extends Service implements LocationListener {
         intent.putExtra("LABEL", PackageLabel);
         intent.putExtra("PERMISSION", Permission);
 
-
         startActivity(intent);
     }
 
@@ -359,6 +364,13 @@ public class ExampleService extends Service implements LocationListener {
         Intent intent = new Intent(this, WarningDialogActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
         intent.putExtra("LABEL", PackageLabel);
+
+        startActivity(intent);
+    }
+
+    private void locationDialog(){
+        Intent intent = new Intent(this, LocationDialogActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
 
         startActivity(intent);
     }
@@ -374,15 +386,11 @@ public class ExampleService extends Service implements LocationListener {
         isPackage = false;
     }
 
-//    @Override
-//    public void onCreate() {
-////        Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
-//    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
+        Log.i(TAG, "onStartCommand Received start windowShowed:" + windowShowed);
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -398,6 +406,7 @@ public class ExampleService extends Service implements LocationListener {
                         != PackageManager.PERMISSION_GRANTED) {
 //                    return;
                 }
+                // 通知のための最小時間間隔(ミリ秒),通知のための最小距離間隔(メートル)
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -432,11 +441,6 @@ public class ExampleService extends Service implements LocationListener {
     }
 
 
-    public void reqestGPS(){
-
-
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Called_onLocationChanged");
@@ -444,8 +448,6 @@ public class ExampleService extends Service implements LocationListener {
         myLongitude = location.getLongitude();
 //        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
 //                + "\n現在" + myLatitude + "," + myLongitude, Toast.LENGTH_LONG).show();
-
-
 
         try {
             FileInputStream inFile = openFileInput("locationData.file");
@@ -480,10 +482,11 @@ public class ExampleService extends Service implements LocationListener {
                 message = "範囲内";
                 if (windowShowed == false) {
                     startService(new Intent(getBaseContext(), WindowService.class));
-                    warningDialog();
+                    locationDialog();
 
                 }
                 windowShowed = true;
+                Log.i(TAG, "Location_Info"+windowShowed);
                 return;
 
             } else {
@@ -492,9 +495,11 @@ public class ExampleService extends Service implements LocationListener {
 
                 stopService(new Intent(getBaseContext(), WindowService.class));
                 windowShowed = false;
+
+                Log.i(TAG, "Location_Info"+windowShowed);
+
             }
         }
-
     }
 
     // 距離判定

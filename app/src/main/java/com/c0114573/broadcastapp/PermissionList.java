@@ -117,10 +117,10 @@ public class PermissionList extends Activity {
                     // タップされたアプリ名取得
                     AppData item = dataList2.get(position - 1);
 //                Log.d("onClick","VIEW_ID"+view.getId());
-                    Log.d("onClick", "a" + dataList2.get(position - 1).getpackageName());
+                    Log.i("PermissionList", "onClick" + dataList2.get(position - 1).getpackageName()+",s:"+dataList2.size()+",p:"+position);
 
                     // リスト表示用のアラートダイアログ
-                    displayDialog(item.getpackageLabel(), item.getpackageName(), position);
+                    displayDialog(item.getpackageLabel(), item.getpackageName(), position-1);
 
                 }
             });

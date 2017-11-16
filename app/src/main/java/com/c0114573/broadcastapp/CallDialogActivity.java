@@ -41,6 +41,9 @@ public class CallDialogActivity extends Activity {
         String[] permissions = permission.split(",", 0);
         String resultPermission = "";
 
+//        if (permissions[0].equals("0")) {
+//            resultPermission += "    インターネット";
+//        }
         if (permissions[0].equals("0")) {
             resultPermission += "    カメラ";
         }
@@ -51,7 +54,7 @@ public class CallDialogActivity extends Activity {
             resultPermission += "   位置情報";
         }
 
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this).setCancelable(false);
         alert.setTitle(label);
         alert.setMessage("以下の権限を持つアプリを使用します\n位置情報の漏洩に注意してください\n" + resultPermission);
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {

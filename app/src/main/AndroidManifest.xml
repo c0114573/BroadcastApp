@@ -56,6 +56,13 @@
             android:launchMode="singleInstance">
         </activity>
 
+        <activity
+            android:name=".LocationDialogActivity"
+            android:label="activity_call_dialog"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:launchMode="singleInstance">
+        </activity>
+
         <service android:name=".ExampleService"></service>
 
         <service android:name=".WindowService"></service>

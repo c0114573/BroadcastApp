@@ -4,11 +4,11 @@
     <string name="location_explain">位置情報の設定をします</string>
 
     <string-array name="list">
-        <item>1m</item>
-        <item>2m</item>
-        <item>3m</item>
-        <item>4m</item>
-        <item>5m</item>
+        <item>1km</item>
+        <item>2km</item>
+        <item>3km</item>
+        <item>4km</item>
+        <item>5km</item>
     </string-array>
 
 </resources>

@@ -192,7 +192,7 @@ public class AppDataSetting extends Service {
 
         // シリアライズしてAppDataをファイルに保存
         try {
-            //FileOutputStream outFile = new FileOutputStream(FILE_NAME);
+            // FileOutputStream outFile = new FileOutputStream(FILE_NAME);
             FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
             ObjectOutputStream outObject = new ObjectOutputStream(outFile);
             if (appNew == true) {

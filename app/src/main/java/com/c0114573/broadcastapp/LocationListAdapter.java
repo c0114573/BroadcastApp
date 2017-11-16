@@ -28,7 +28,7 @@ public class LocationListAdapter extends ArrayAdapter<LocationData> {
         tv.setText(locationData.getLocationName());
 
         tv = (TextView) convertView.findViewById(R.id.sub);
-        tv.setText("登録位置 : ("+locationData.getLatlng()+")\n設定範囲 : "+locationData.distance+"m");
+        tv.setText("登録位置 : ("+locationData.getLatlng()+")\n設定範囲 : "+locationData.distance+"km");
 
         return convertView;
     }

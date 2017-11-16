@@ -64,12 +64,11 @@ public class AppData implements Serializable {
     public int getpackageID() { return this.packageID; }
 
     public String getPermission() {
-        String spNetwork = String.valueOf(pNetwork);
         String spCamera = String.valueOf(pCamera);
         String spSMS = String.valueOf(pSMS);
         String spLocation = String.valueOf(pLocation);
 
-        return spNetwork + "," + spCamera + "," + spSMS + "," + spLocation;
+        return spCamera + "," + spSMS + "," + spLocation;
     }
 
     public String getPermissionName() {

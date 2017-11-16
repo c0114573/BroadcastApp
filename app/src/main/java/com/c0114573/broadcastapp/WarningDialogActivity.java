@@ -38,31 +38,37 @@ public class WarningDialogActivity extends Activity {
         label = intent.getStringExtra("LABEL");
         it = getIntent();
 
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this).setCancelable(false);
         alert.setTitle("アプリ制限");
-        alert.setMessage("設定範囲内にいるため位置情報アプリは制限されます\n");
+        alert.setMessage("設定範囲内にいるためこのアプリは制限されます\n" +
+                "GPSをOFFにするか制限の設定を行ってください\n");
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
                 ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
                 activityManager.killBackgroundProcesses(label);
 
-                finish();
-
-            }
-        });
-        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                //Noボタンが押された時の処理
-//                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(homeIntent);
 
                 finish();
 
             }
         });
+//        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int which) {
+//                //Noボタンが押された時の処理
+////                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent();
+//                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                startActivity(intent);
+//
+//                finish();
+//
+//            }
+//        });
         alert.show();
 
     }
