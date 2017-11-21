@@ -431,10 +431,10 @@ public class ExampleService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy");
         Toast.makeText(this, "バックグラウンドサービスを終了します。", Toast.LENGTH_SHORT).show();
         stopService(new Intent(getBaseContext(), WindowService.class));
         mLocationManager.removeUpdates(this);
-        Log.i(TAG, "onDestroy");
 
         // スレッド停止
         this.mThread.interrupt();
