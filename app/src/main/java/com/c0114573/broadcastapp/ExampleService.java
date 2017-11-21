@@ -11,6 +11,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -208,7 +209,6 @@ public class ExampleService extends Service implements LocationListener {
             }
         }
 
-
         // windowServiceを終了するかどうか
         if (windowShowed == true) {
             providerCheck();
@@ -250,7 +250,6 @@ public class ExampleService extends Service implements LocationListener {
                 startServiceIntent.putExtra("APPNAME", PackageName);
                 startService(startServiceIntent);
 
-
                 appPlayDialog();
 
                 // ReceivedActivityを呼び出すインテントを作成
@@ -287,9 +286,8 @@ public class ExampleService extends Service implements LocationListener {
         } else {
             //位置情報の利用不可能
             provider = "使えません";
-
-            stopService(new Intent(getBaseContext(), WindowService.class));
             windowShowed = false;
+            stopService(new Intent(getBaseContext(), WindowService.class));
         }
 //        Toast.makeText(this, ""+provider, Toast.LENGTH_SHORT).show();
         Log.i(TAG, provider);
@@ -418,6 +416,14 @@ public class ExampleService extends Service implements LocationListener {
         this.mThread = new Thread(null, mTask, "NortifyingService");
         this.mThread.start();
 
+        // TODO 位置情報と現在範囲内にいるかのデータを取得
+        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+        myLatitude = Double.longBitsToDouble(data.getLong("myLatitude",0l));
+        myLongitude = Double.longBitsToDouble(data.getLong("myLongitude",0l));
+        windowShowed = data.getBoolean("windowShowed",false);
+
+        Log.i(TAG, "取得後,myLatitude:"+myLatitude +",myLongitude:"+ myLongitude+",windowShowed:"+windowShowed);
+
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
     }
@@ -439,7 +445,6 @@ public class ExampleService extends Service implements LocationListener {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -477,29 +482,40 @@ public class ExampleService extends Service implements LocationListener {
 
         for (int i = 0; i < confLatitude.length ; i++) {
             float results2 = getDistanceBetween(confLatitude[i], confLongitude[i], myLatitude, myLongitude);
-            // 3km 以内
+            // 指定範囲内
             if (results2 < confDistance[i]) {
-                message = "範囲内";
-                if (windowShowed == false) {
-                    startService(new Intent(getBaseContext(), WindowService.class));
-                    locationDialog();
-
-                }
+//                message = "範囲内";
                 windowShowed = true;
-                Log.i(TAG, "Location_Info"+windowShowed);
                 return;
-
             } else {
                 Log.i(TAG,"範囲外"+ myLatitude);
-                message = "範囲外";
-
-                stopService(new Intent(getBaseContext(), WindowService.class));
+//                message = "範囲外";
                 windowShowed = false;
-
-                Log.i(TAG, "Location_Info"+windowShowed);
-
             }
         }
+
+
+        // TODO 位置情報とwindowShowedの保存処理
+        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = data.edit();
+        editor.putLong("myLatitude", Double.doubleToRawLongBits(myLatitude));
+        editor.putLong("myLongitude", Double.doubleToRawLongBits(myLongitude));
+        editor.putBoolean("windowShowed",windowShowed);
+        editor.apply();
+
+        Log.i(TAG, "保存後,myLatitude:"+myLatitude +",myLongitude:"+ myLongitude+",windowShowed:"+windowShowed);
+
+
+        if (windowShowed) {
+            startService(new Intent(getBaseContext(), WindowService.class));
+            locationDialog();
+
+        }else {
+            stopService(new Intent(getBaseContext(), WindowService.class));
+        }
+
+        Log.i(TAG, "Location_Info"+windowShowed);
+
     }
 
     // 距離判定

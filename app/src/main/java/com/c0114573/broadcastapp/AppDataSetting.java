@@ -139,6 +139,9 @@ public class AppDataSetting extends Service {
             int pLocation1 = getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, info.packageName);
             int pLocation2 = getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, info.packageName);
 
+            int pBuck = getPackageManager().checkPermission(Manifest.permission.WAKE_LOCK, info.packageName);
+
+
             if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
 
             if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
