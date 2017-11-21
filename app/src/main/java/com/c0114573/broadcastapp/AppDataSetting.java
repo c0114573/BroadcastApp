@@ -253,6 +253,7 @@ public class AppDataSetting extends Service {
                 if (info.packageName.equals(installApp)) {
                     // アプリ情報クラスにアプリ情報を追加
                     AppData data = new AppData();
+                    data.packageID = dataList2.size();
                     data.packageLabel = info.loadLabel(packageManager).toString();
                     data.packageName = info.packageName;
                     data.icon = info.loadIcon(packageManager);
