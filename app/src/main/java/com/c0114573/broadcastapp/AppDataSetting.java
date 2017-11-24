@@ -72,7 +72,6 @@ public class AppDataSetting extends Service {
         }
 
 
-
         // サービスの終了
         stopSelf();
 
@@ -111,7 +110,7 @@ public class AppDataSetting extends Service {
         int pLocation = -1;
 
         // リストにアプリデータを格納
-        int i=0;
+        int i = 0;
         appInfo:
         for (ApplicationInfo info : applicationInfo) {
             pSMS = -1;
@@ -139,35 +138,43 @@ public class AppDataSetting extends Service {
             int pLocation1 = getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, info.packageName);
             int pLocation2 = getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, info.packageName);
 
-            int pBuck = getPackageManager().checkPermission(Manifest.permission.WAKE_LOCK, info.packageName);
-
+            int pWakeLock = getPackageManager().checkPermission(Manifest.permission.WAKE_LOCK, info.packageName);
+            int pReceive = getPackageManager().checkPermission(Manifest.permission.RECEIVE_BOOT_COMPLETED, info.packageName);
 
             if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
 
             if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
 
-            // カメラ,SNS,位置権限を持ったアプリであるか
-            if (pCamera == PackageManager.PERMISSION_GRANTED ||
-                    pLocation == PackageManager.PERMISSION_GRANTED ||
-                    pSMS == PackageManager.PERMISSION_GRANTED) {
+            // ネットワーク権限を持っているか
+            if (pNetwork == PackageManager.PERMISSION_GRANTED) {
+                // カメラ,SNS,位置権限を持ったアプリであるか
+                if (pCamera == PackageManager.PERMISSION_GRANTED ||
+                        pLocation == PackageManager.PERMISSION_GRANTED ||
+                        pSMS == PackageManager.PERMISSION_GRANTED) {
 
-                // アプリ情報クラスにアプリ情報を追加
-                AppData data = new AppData();
-                data.packageID = i;
-                i++;
-                data.packageLabel = info.loadLabel(packageManager).toString();
-                data.packageName = info.packageName;
-                data.icon = info.loadIcon(packageManager);
-                data.pNetwork = pNetwork;
-                data.pCamera = pCamera;
-                data.pSMS = pSMS;
-                data.pLocation = pLocation;
-                data.isUsed = false;
-                data.useCount = 0;
-                data.lock = true;
+                    // アプリ情報クラスにアプリ情報を追加
+                    AppData data = new AppData();
+                    data.packageID = i;
+                    i++;
 
-                // アプリ情報クラスをリストに追加
-                dataListNew.add(data);
+                    data.packageLabel = info.loadLabel(packageManager).toString();
+                    data.packageName = info.packageName;
+                    data.icon = info.loadIcon(packageManager);
+
+                    data.pNetwork = pNetwork;
+                    data.pCamera = pCamera;
+                    data.pSMS = pSMS;
+                    data.pLocation = pLocation;
+                    data.pWakeLock = pWakeLock;
+                    data.pReceive = pReceive;
+
+                    data.isUsed = false;
+                    data.useCount = 0;
+                    data.lock = true;
+
+                    // アプリ情報クラスをリストに追加
+                    dataListNew.add(data);
+                }
             }
         }
 
@@ -428,8 +435,8 @@ public class AppDataSetting extends Service {
 
             for (AppData appData : dataList2) {
                 if (appData.getpackageName().equals(updateApp)) {
-                    if(appData.getIsUsed()){
-                     appData.setIsUsed(false);
+                    if (appData.getIsUsed()) {
+                        appData.setIsUsed(false);
                     } else {
                         appData.setIsUsed(true);
                     }

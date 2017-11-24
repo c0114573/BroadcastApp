@@ -21,6 +21,10 @@ public class AppData implements Serializable {
     int pSMS;       // SMS権限
     int pLocation;  // 位置情報権限
 
+    int pWakeLock; // 端末のスリープの無効化
+    int pReceive; // ブロードキャストレシーバを使用しているか
+
+
     boolean lock;   // 制限の有無 有:true 無:false
     boolean isUsed; // 現在起動しているか
     int useCount;   // 使われた回数
@@ -71,10 +75,14 @@ public class AppData implements Serializable {
         return spCamera + "," + spSMS + "," + spLocation;
     }
 
+    // アプリ一覧画面で使用
     public String getPermissionName() {
         String spCamera = String.valueOf(pCamera);
         String spSMS = String.valueOf(pSMS);
         String spLocation = String.valueOf(pLocation);
+
+        String spWakeLock = String.valueOf(pWakeLock);
+        String spReceive = String.valueOf(pReceive);
 
         String resultPermission = "";
 
@@ -86,6 +94,12 @@ public class AppData implements Serializable {
         }
         if (spLocation.equals("0")) {
             resultPermission += "   位置情報";
+        }
+        if (spWakeLock.equals("0")) {
+            resultPermission += "   スリープ無効";
+        }
+        if (spReceive.equals("0")) {
+            resultPermission += "   常時実行";
         }
         return resultPermission;
     }
