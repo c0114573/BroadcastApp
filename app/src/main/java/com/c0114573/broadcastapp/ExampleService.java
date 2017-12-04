@@ -100,7 +100,6 @@ public class ExampleService extends Service implements LocationListener {
                 // ハンドラーをはさまないとToastでエラーでる
                 // UIスレッド内で処理をしないといけない
                 mHandler.post(new Runnable() {
-
                     @Override
                     public void run() {
                         mCount++;
@@ -428,12 +427,13 @@ public class ExampleService extends Service implements LocationListener {
 
         Log.i(TAG, "取得後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isRange);
 
-        if(windowShowed){
+        if(isRange){
+            windowShowed=true;
             startService(new Intent(getBaseContext(), WindowService.class));
         }
 
         //明示的にサービスの起動、停止が決められる場合の返り値
-        return START_STICKY;
+        return START_STICKY_COMPATIBILITY;
     }
 
     @Override

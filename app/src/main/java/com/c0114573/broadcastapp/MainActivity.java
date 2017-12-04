@@ -50,6 +50,10 @@ public class MainActivity extends Activity {
         tv2 = (TextView) findViewById(R.id.textView5);
         tv2.setText("テスト");
 
+
+
+
+
         // 初期起動時処理
         if (!(AppLaunchChecker.hasStartedFromLauncher(this))) {
             Log.d("AppLaunchChecker", "はじめてアプリを起動した");
