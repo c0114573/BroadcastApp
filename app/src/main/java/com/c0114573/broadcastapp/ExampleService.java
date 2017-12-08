@@ -50,7 +50,6 @@ public class ExampleService extends Service implements LocationListener {
     double myLatitude = 0;    // 現在の緯度
     double myLongitude = 0;   // 現在の経度
 
-
     String targetStr = "";    // 緯度経度を持ってくる
     String message = "";
 
@@ -83,7 +82,6 @@ public class ExampleService extends Service implements LocationListener {
     // スレッドを停止するために必要
     private boolean mThreadActive = true;
 
-
     // スレッド処理
     private Runnable mTask = new Runnable() {
         @Override
@@ -110,7 +108,7 @@ public class ExampleService extends Service implements LocationListener {
                         // 起動検知
                         usageStatsInfo();
 
-                        isPackage = false;
+//                        isPackage = false;
                         isLocationApp = false;
                         isLocked = false;
                         isUseCount = false;
@@ -135,7 +133,6 @@ public class ExampleService extends Service implements LocationListener {
     private void usageStatsInfo() {
         // UsageStats,UsageStatsManager : デバイスの使用履歴、統計情報を扱う
         UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-
         int intTime = UsageStatsManager.INTERVAL_BEST;
 
         Long end = System.currentTimeMillis(); // 現在の時間を取得 (ミリ秒)
@@ -171,26 +168,21 @@ public class ExampleService extends Service implements LocationListener {
             if (us.getTotalTimeInForeground() != 0) {
                 // 3秒前に使用されたアプリ
                 if (us.getLastTimeUsed() > end - 3000) {
-
                     for (AppData info : dataList) {
                         // 使用されたアプリがAppDataリストに存在しているか
                         if (info.getpackageName().equals(us.getPackageName())) {
-
                             // 権限を持ってない場合
                             if (info.getIsNotPermission()) {
                                 isNotPermission = true; //権限を持っていないアプリ
-
                                 // 5回以上か
                                 if (info.useCount > 4) {
                                     isUseCount = true;
                                 }
                             }
-
                             // 位置情報アプリか
                             if (info.getLocationPermission().equals("0")) {
                                 isLocationApp = true; //位置情報アプリだ
                             }
-
                             // 制限されているか
                             if (info.getLock() == true) {
                                 isLocked = true;   //制限されたアプリだ
@@ -231,10 +223,8 @@ public class ExampleService extends Service implements LocationListener {
             }
 
         } else if (isLocked) {
-
-            if (isLocationApp && isRange) {
-                warningDialog();
-
+            // 範囲内で位置情報権限を持つアプリが起動した
+            if (isPackage && isLocationApp && isRange && (!isUsed)) {
                 // バックグラウンドプロセスの終了
                 ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
                 for (int j = 0; j < dataList.size(); j++) {
@@ -242,33 +232,13 @@ public class ExampleService extends Service implements LocationListener {
                         activityManager.killBackgroundProcesses(dataList.get(j).packageName);
                 }
 
-            } else if (isPackage && (!isUsed)) {
+                warningDialog();
 
+             // 位置情報漏洩リストのアプリが起動した
+            } else if (isPackage && (!isUsed)) {
                 Log.i(TAG, "isRange:" + isRange + ",isLocationApp:" + isLocationApp);
 
-                // アプリ使用状況の変更
-                Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
-                startServiceIntent.putExtra("UPDATE", 40);
-                startServiceIntent.putExtra("APPNAME", PackageName);
-                startService(startServiceIntent);
-
                 appPlayDialog();
-
-                // ReceivedActivityを呼び出すインテントを作成
-                Intent i = new Intent(getApplicationContext(), ReceivedActivity.class);
-                i.putExtra("APPNAME", PackageName);
-                // ブロードキャストを投げるPendingIntentの作成
-                PendingIntent sender = PendingIntent.getBroadcast(ExampleService.this, appWidgetId, i, 0);
-//                appWidgetId++;
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(System.currentTimeMillis()); // 現在時刻を取得
-                calendar.add(Calendar.SECOND, 30); // 現時刻より15秒後を設定
-
-                // AlramManager取得
-                AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-                // AlramManagerにPendingIntentを登録
-                am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
             }
         }
     }
@@ -351,26 +321,45 @@ public class ExampleService extends Service implements LocationListener {
     }
 
     private void appPlayDialog() {
+        // isUsedの切り替え
+        Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
+        startServiceIntent.putExtra("UPDATE", 40);
+        startServiceIntent.putExtra("APPNAME", PackageName);
+        startService(startServiceIntent);
+
+        // 指定時間後にisUsedを元に戻すための処理
+        Intent i = new Intent(getApplicationContext(), ReceivedActivity.class);
+        i.putExtra("APPNAME", PackageName);
+        // ブロードキャストを投げるPendingIntentの作成
+        PendingIntent sender = PendingIntent.getBroadcast(ExampleService.this, appWidgetId, i, 0);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis()); // 現在時刻を取得
+        calendar.add(Calendar.SECOND, 15); // 現時刻より15秒後を設定
+
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
+
+        // ダイアログアクティビティに遷移
         Intent intent = new Intent(this, CallDialogActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
-
         intent.putExtra("LABEL", PackageLabel);
         intent.putExtra("PERMISSION", Permission);
-
         startActivity(intent);
+
     }
 
     private void warningDialog() {
         Intent intent = new Intent(this, WarningDialogActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
-        intent.putExtra("LABEL", PackageLabel);
-
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        intent.putExtra("LABEL", PackageLabel);
+        intent.putExtra("LABEL", PackageName);
         startActivity(intent);
+
     }
 
     private void locationDialog() {
         Intent intent = new Intent(this, LocationDialogActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);//新規起動の記述
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         startActivity(intent);
     }
@@ -390,7 +379,9 @@ public class ExampleService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
-        Log.i(TAG, "onStartCommand Received start isRange:" + isRange);
+        Log.i(TAG, "onStartCommand Received start isRange:" +isRange + "isPackage:"+isPackage);
+        Log.i(TAG, "□□□□□□□□□□□□□");
+        Log.i(TAG, "□□□□□□□□□□□□□");
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -418,6 +409,8 @@ public class ExampleService extends Service implements LocationListener {
         }
         this.mThread = new Thread(null, mTask, "NortifyingService");
         this.mThread.start();
+
+        isPackage = false;
 
         // TODO 位置情報と現在範囲内にいるかのデータを取得
         SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);

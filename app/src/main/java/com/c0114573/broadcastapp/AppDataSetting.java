@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.support.v4.app.AppLaunchChecker;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -437,8 +438,11 @@ public class AppDataSetting extends Service {
                 if (appData.getpackageName().equals(updateApp)) {
                     if (appData.getIsUsed()) {
                         appData.setIsUsed(false);
+
+                        Log.i("AppDataSetting","isUsed変更"+appData.isUsed);
                     } else {
                         appData.setIsUsed(true);
+                        Log.i("AppDataSetting","isUsed変更"+appData.isUsed);
                     }
                 }
             }
@@ -449,6 +453,8 @@ public class AppDataSetting extends Service {
             outObject.writeObject(dataList2);
             outObject.close();
             outFile.close();
+
+
 
         } catch (StreamCorruptedException e) {
             e.printStackTrace();
