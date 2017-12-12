@@ -11,13 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
-        android:text="アプリ一覧" />
+        android:text="アプリ一覧"
+        android:textColor="#696969"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/sub_header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="right"
+        android:textColor="#696969"
         android:text="制限設定" />
 
 </LinearLayout>

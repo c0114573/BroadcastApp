@@ -104,6 +104,7 @@ public class PermissionList extends Activity {
 
             LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             View header = inflater.inflate(R.layout.list_header_footer, listView, false);
+
             listView.addHeaderView(header, null, false);
 
             listView.setAdapter(new AppListAdapter(this, dataList2));
@@ -295,6 +296,7 @@ public class PermissionList extends Activity {
 
     // appDataクラスのアプリ制限のon/offを切り替える
     public void AppLockSwitch(int position) {
+        position+=1;
         try {
             // デシリアライズ
             FileInputStream inFile = openFileInput("appData.file");
@@ -330,5 +332,14 @@ public class PermissionList extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // アクティビティ再起動
+        Intent intent = getIntent();
+        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+
     }
 }

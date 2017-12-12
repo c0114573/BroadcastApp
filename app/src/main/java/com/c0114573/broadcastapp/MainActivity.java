@@ -92,8 +92,9 @@ public class MainActivity extends Activity {
                         str += appData.getpackageID() + ":";
                         str += appData.getpackageLabel();
 //                        str += appData.getpackageName();
-                        str += appData.getPermission() + ",isUsed:";
-                        str += String.valueOf(appData.isUsed)+",";
+                        str += appData.getPermission()+ "," ;
+                        str += "isUsed:"+String.valueOf(appData.isUsed)+",";
+                        str += "isLock:"+String.valueOf(appData.lock)+",";
                         str += appData.getUseCount() + "\n";
                     }
                     tv2.setText(str);
