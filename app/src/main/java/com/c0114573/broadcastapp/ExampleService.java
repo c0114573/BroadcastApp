@@ -4,11 +4,13 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -383,6 +385,11 @@ public class ExampleService extends Service implements LocationListener {
         Log.i(TAG, "□□□□□□□□□□□□□");
         Log.i(TAG, "□□□□□□□□□□□□□");
 
+        //ノーティフィケーションの表示
+        showNotification(this,
+                "自作サービス",
+                "自作サービスを操作します");
+
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         // 位置情報サービスの利用
@@ -428,6 +435,54 @@ public class ExampleService extends Service implements LocationListener {
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY_COMPATIBILITY;
     }
+
+
+    //ノーティフィケーションの表示
+    private void showNotification(Context context,
+                                  String title, String text) {
+        //ノーティフィケーションオブジェクトの生成(9)
+        Notification.Builder builder = new Notification.Builder(context);
+        builder.setWhen(System.currentTimeMillis());
+        builder.setContentTitle(title);
+        builder.setContentText(text);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+
+        startForeground(10, builder.build());
+
+        //ペンディングインテントの指定(10)
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setComponent(new ComponentName("net.npaka.serviceex",
+                "net.npaka.serviceex.ServiceEx"));
+        intent.removeCategory(Intent.CATEGORY_DEFAULT);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        builder.setContentIntent(PendingIntent.getActivity(context, 0,
+                intent, PendingIntent.FLAG_CANCEL_CURRENT));
+
+        //ノーティフィケーションの表示(11)
+        NotificationManager nm = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(1);
+        nm.notify(1, builder.build());
+    }
+
+    //
+//    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//    Intent notificationIntent = new Intent(this, MainActivity.class);
+//    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+//
+//    Notification notification = new NotificationCompat.Builder(this)
+//            .setSmallIcon(R.drawable.ic_launcher) // アイコン
+//            .setTicker("Hello") // 通知バーに表示する簡易メッセージ
+//            .setWhen(System.currentTimeMillis()) // 時間
+//            .setContentTitle("My notification") // 展開メッセージのタイトル
+//            .setContentText("Hello Notification!!") // 展開メッセージの詳細メッセージ
+//            .setContentIntent(contentIntent) // PendingIntent
+//            .build();
+//
+//        notificationManager.notify(1, notification);
+
 
     @Override
     public void onDestroy() {
