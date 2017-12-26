@@ -47,6 +47,11 @@ public class AppStateReceiver extends BroadcastReceiver {
             if (!intent.getExtras().getBoolean(Intent.EXTRA_DATA_REMOVED)
                     && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
                 Toast.makeText(context, str + "更新", Toast.LENGTH_LONG).show();
+
+                Intent startSeviceIntent = new Intent(context,AppDataSetting.class);
+                startSeviceIntent.putExtra("UPDATE" ,40);
+                startSeviceIntent.putExtra("APPNAME" ,str);
+                context.startService(startSeviceIntent);
             }
         }
 

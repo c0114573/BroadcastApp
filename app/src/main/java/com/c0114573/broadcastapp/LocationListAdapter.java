@@ -1,6 +1,7 @@
 package com.c0114573.broadcastapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +26,11 @@ public class LocationListAdapter extends ArrayAdapter<LocationData> {
         LocationData locationData = getItem(position);
 
         TextView tv = (TextView) convertView.findViewById(R.id.title);
+        tv.setTextColor(Color.GRAY);
         tv.setText(locationData.getLocationName());
 
         tv = (TextView) convertView.findViewById(R.id.sub);
-        tv.setText("登録位置 : ("+locationData.getLatlng()+")\n設定範囲 : "+locationData.distance+"km");
+        tv.setText(""+"登録位置 : ("+locationData.getLatlng()+")\n設定範囲 : "+locationData.distance+"km");
 
         return convertView;
     }

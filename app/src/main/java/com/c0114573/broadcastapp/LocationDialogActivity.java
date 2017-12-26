@@ -117,6 +117,12 @@ public class LocationDialogActivity extends Activity {
                 ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
                 activityManager.killBackgroundProcesses(label);
 
+                // ホームに戻る処理
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(homeIntent);
+
                 finish();
 
             }

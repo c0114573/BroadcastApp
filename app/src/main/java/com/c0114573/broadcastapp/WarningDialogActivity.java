@@ -34,7 +34,7 @@ public class WarningDialogActivity extends Activity {
         label = intent.getStringExtra("LABEL");
         it = getIntent();
 
-        MessageDialog.show(this, "アプリ制限", "設定範囲内にいるためこのアプリは制限されます\nGPSをOFFにするか制限の設定を行ってください\n");
+        MessageDialog.show(this, "アプリ制限", "設定範囲内にいるためこのアプリは制限されます\n");
 
 //        // サービスを起動isUsedを切り替える
 //        Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
@@ -91,13 +91,13 @@ public class WarningDialogActivity extends Activity {
         super.onPause();  // Always call the superclass method first
         Log.i(TAG,"onPause");
 
-        finish();
+//        finish();
 
-        // ホームに戻る処理
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(homeIntent);
+//        // ホームに戻る処理
+//        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+//        homeIntent.addCategory(Intent.CATEGORY_HOME);
+//        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(homeIntent);
     }
 
     //メッセージダイアログの定義(4)
@@ -133,12 +133,15 @@ public class WarningDialogActivity extends Activity {
             onPause();
 //            isDismiss = true;
 
-//            // ホームに戻る処理
-//            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-//            homeIntent.addCategory(Intent.CATEGORY_HOME);
-//            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity(homeIntent);
-
+            try {
+                // ホームに戻る処理
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(homeIntent);
+            } catch (IllegalStateException e){
+                Log.e("WarningDialogActivity", ""+e);
+            }
         }
     }
 

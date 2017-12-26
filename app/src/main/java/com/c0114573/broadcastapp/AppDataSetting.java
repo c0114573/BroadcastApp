@@ -142,6 +142,7 @@ public class AppDataSetting extends Service {
             int pWakeLock = getPackageManager().checkPermission(Manifest.permission.WAKE_LOCK, info.packageName);
             int pReceive = getPackageManager().checkPermission(Manifest.permission.RECEIVE_BOOT_COMPLETED, info.packageName);
 
+
             if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
 
             if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
@@ -453,8 +454,6 @@ public class AppDataSetting extends Service {
             outObject.writeObject(dataList2);
             outObject.close();
             outFile.close();
-
-
 
         } catch (StreamCorruptedException e) {
             e.printStackTrace();

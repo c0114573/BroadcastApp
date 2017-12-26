@@ -182,9 +182,10 @@ public class ExampleService extends Service implements LocationListener {
                                 }
                             }
                             // 位置情報アプリか
-                            if (info.getLocationPermission().equals("0")) {
-                                isLocationApp = true; //位置情報アプリだ
-                            }
+//                            if (info.getLocationPermission().equals("0")) {
+//                                isLocationApp = true; //位置情報アプリだ
+//                            }
+
                             // 制限されているか
                             if (info.getLock() == true) {
                                 isLocked = true;   //制限されたアプリだ
@@ -226,7 +227,8 @@ public class ExampleService extends Service implements LocationListener {
 
         } else if (isLocked) {
             // 範囲内で位置情報権限を持つアプリが起動した
-            if (isPackage && isLocationApp && isRange && (!isUsed)) {
+//            if (isPackage && isLocationApp && isRange && (!isUsed)) {
+              if (isPackage && isRange && (!isUsed)) {
                 // バックグラウンドプロセスの終了
                 ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
                 for (int j = 0; j < dataList.size(); j++) {
@@ -236,7 +238,7 @@ public class ExampleService extends Service implements LocationListener {
 
                 warningDialog();
 
-             // 位置情報漏洩リストのアプリが起動した
+                // 位置情報漏洩リストのアプリが起動した
             } else if (isPackage && (!isUsed)) {
                 Log.i(TAG, "isRange:" + isRange + ",isLocationApp:" + isLocationApp);
 
@@ -381,7 +383,7 @@ public class ExampleService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
-        Log.i(TAG, "onStartCommand Received start isRange:" +isRange + "isPackage:"+isPackage);
+        Log.i(TAG, "onStartCommand Received start isRange:" + isRange + "isPackage:" + isPackage);
         Log.i(TAG, "□□□□□□□□□□□□□");
         Log.i(TAG, "□□□□□□□□□□□□□");
 
@@ -427,8 +429,8 @@ public class ExampleService extends Service implements LocationListener {
 
         Log.i(TAG, "取得後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isRange);
 
-        if(isRange){
-            windowShowed=true;
+        if (isRange) {
+            windowShowed = true;
             startService(new Intent(getBaseContext(), WindowService.class));
         }
 
@@ -609,26 +611,21 @@ public class ExampleService extends Service implements LocationListener {
         }
 
         for (int i = 0; i < confLatitude.length; i++) {
-            float results2 = getDistanceBetween(confLatitude[i], confLongitude[i], myLatitude, myLongitude);
+            float results = getDistanceBetween(confLatitude[i], confLongitude[i], myLatitude, myLongitude);
             // 指定範囲内
-            if (results2 < confDistance[i]) {
-//                message = "範囲内";
+            if (results < confDistance[i]) {
                 isRange = true;
-
-                if(!windowShowed){
-                    windowShowed=true;
+                if (!windowShowed) {
+                    windowShowed = true;
                     startService(new Intent(getBaseContext(), WindowService.class));
                     locationDialog();
                 }
-
                 return;
             } else {
                 Log.i(TAG, "範囲外" + myLatitude);
-//                message = "範囲外";
                 isRange = false;
-
-                if(windowShowed){
-                    windowShowed=false;
+                if (windowShowed) {
+                    windowShowed = false;
                     stopService(new Intent(getBaseContext(), WindowService.class));
                 }
             }
