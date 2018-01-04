@@ -94,10 +94,10 @@ public class WarningDialogActivity extends Activity {
         finish();
 
         // ホームに戻る処理
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(homeIntent);
+//        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+//        homeIntent.addCategory(Intent.CATEGORY_HOME);
+//        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(homeIntent);
     }
 
     //メッセージダイアログの定義(4)
@@ -134,10 +134,14 @@ public class WarningDialogActivity extends Activity {
 //            isDismiss = true;
 
 //            // ホームに戻る処理
-//            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-//            homeIntent.addCategory(Intent.CATEGORY_HOME);
-//            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity(homeIntent);
+            try{
+            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+            homeIntent.addCategory(Intent.CATEGORY_HOME);
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(homeIntent);
+            }catch (IllegalStateException e){
+
+            }
 
         }
     }

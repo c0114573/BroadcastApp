@@ -73,9 +73,6 @@ public class ExampleService extends Service implements LocationListener {
 
     private final static String TAG2 = "";
 
-    // Toastを何回表示されたか数えるためのカウント
-    private int mCount = 0;
-
     // Toastを表示させるために使うハンドラ
     private Handler mHandler = new Handler();
 
@@ -100,8 +97,6 @@ public class ExampleService extends Service implements LocationListener {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mCount++;
-//                        showText("カウント:" + mCount);
                         // 登録位置情報取得
 //                        reqestGPS();
 
@@ -421,8 +416,9 @@ public class ExampleService extends Service implements LocationListener {
         Log.i(TAG, "取得後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isRange);
 
         if(isRange){
-            windowShowed=true;
-            startService(new Intent(getBaseContext(), WindowService.class));
+//            windowShowed=true;
+            Log.i(TAG,"前回範囲内に入っていた");
+//            startService(new Intent(getBaseContext(), WindowService.class));
         }
 
         //明示的にサービスの起動、停止が決められる場合の返り値
@@ -450,6 +446,7 @@ public class ExampleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Called_onLocationChanged");
+        Log.i(TAG, "isRange:"+isRange+",windowShowed:"+windowShowed);
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
 //        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
@@ -502,26 +499,26 @@ public class ExampleService extends Service implements LocationListener {
         */
 
 
-        // 判定結果の保存
-        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = data.edit();
-        editor.putLong("myLatitude", Double.doubleToRawLongBits(myLatitude));
-        editor.putLong("myLongitude", Double.doubleToRawLongBits(myLongitude));
-        editor.putBoolean("isRange", isRange);
-        editor.apply();
-
-        Log.i(TAG, "保存後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isRange);
-
-
-//        if (windowShowed) {
-//            startService(new Intent(getBaseContext(), WindowService.class));
-//            locationDialog();
+//        // 判定結果の保存
+//        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = data.edit();
+//        editor.putLong("myLatitude", Double.doubleToRawLongBits(myLatitude));
+//        editor.putLong("myLongitude", Double.doubleToRawLongBits(myLongitude));
+//        editor.putBoolean("isRange", isRange);
+//        editor.apply();
 //
-//        }else {
-//            stopService(new Intent(getBaseContext(), WindowService.class));
-//        }
-
-        Log.i(TAG, "Location_Info" + isRange);
+//        Log.i(TAG, "保存後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isRange);
+//
+//
+////        if (windowShowed) {
+////            startService(new Intent(getBaseContext(), WindowService.class));
+////            locationDialog();
+////
+////        }else {
+////            stopService(new Intent(getBaseContext(), WindowService.class));
+////        }
+//
+//        Log.i(TAG, "Location_Info:" + isRange);
 
     }
 
@@ -572,10 +569,10 @@ public class ExampleService extends Service implements LocationListener {
 //                message = "範囲外";
                 isRange = false;
 
-                if(windowShowed){
+//                if(windowShowed){
                     windowShowed=false;
                     stopService(new Intent(getBaseContext(), WindowService.class));
-                }
+//                }
             }
         }
     }
