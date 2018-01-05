@@ -11,6 +11,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,7 +29,12 @@ import java.util.List;
 public class LocationDialogActivity extends Activity {
 
     Intent it;
-    String label = "no title";
+    String[] array;
+
+    List<String> items = new ArrayList<>();
+
+    //    String[] items = {"item_0", "item_1", "item_2"};
+    ArrayList<Integer> checkedItems = new ArrayList<Integer>();
 
     @Override
     @TargetApi(21)
@@ -72,7 +79,7 @@ public class LocationDialogActivity extends Activity {
                     // よって一覧に同じアプリ名が複数存在することがある(getLastTimeStampは異なる)
 
                     // そのためこの部分で使われたアプリの抽出を行う
-                    if (us.getLastTimeUsed() > end - (60 * 60 * 1000)) {// 1時間
+                    if (us.getLastTimeUsed() > end - (3 * 60 * 60 * 1000)) {// 12時間
 
                         // リストに一覧データを格納する
 //                for (int m = 0; m < appList.size(); m++) {
@@ -80,10 +87,12 @@ public class LocationDialogActivity extends Activity {
                         for (AppData info : dataList) {
 //                            ApplicationInfo app = appList.get(m);
 
+
                             // インストール済みアプリであるか
                             if (info.packageName.equals(us.getPackageName())) {
 //                        array.add((n + 1) + "個目のアプリケーション");
-                                activityManager.killBackgroundProcesses(info.packageName);
+                                items.add(info.getpackageLabel());
+//                                activityManager.killBackgroundProcesses(info.packageName);
 
                             }
 
@@ -92,7 +101,7 @@ public class LocationDialogActivity extends Activity {
                     }
                 }
             }
-
+            array = (String[]) items.toArray(new String[0]);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -103,44 +112,114 @@ public class LocationDialogActivity extends Activity {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-        Intent intent = getIntent();
-        label = intent.getStringExtra("LABEL");
-        it = getIntent();
+//
+//        Intent intent = getIntent();
+//        label = intent.getStringExtra("LABEL");
+//        it = getIntent();
 
         final AlertDialog.Builder alert = new AlertDialog.Builder(this).setCancelable(false);
         alert.setTitle("アプリ制限");
-        alert.setMessage("設定範囲内に入ったよ\n");
+        alert.setMessage("制限範囲内に入りました\n範囲内では一部のアプリの使用が制限されます");
+
+//        alert.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+//                        if (isChecked) checkedItems.add(which);
+//                        else checkedItems.remove((Integer) which);
+//                    }
+//                });
+
+
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
-                ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
-                activityManager.killBackgroundProcesses(label);
-
-                // ホームに戻る処理
-                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                homeIntent.addCategory(Intent.CATEGORY_HOME);
-                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(homeIntent);
-
-                finish();
-
-            }
-        });
-        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                //Noボタンが押された時の処理
-//                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-
-                finish();
+//                ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
+//                activityManager.killBackgroundProcesses(label);
+//
+//                try {
+//                    // ホームに戻る処理
+//                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+//                    homeIntent.addCategory(Intent.CATEGORY_HOME);
+//                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(homeIntent);
+//                } catch (IllegalStateException e) {
+//
+//                }
+                ChoiceDialog();
+//
+//                finish();
 
             }
         });
+//        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int which) {
+//                //Noボタンが押された時の処理
+////                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
+//
+//                Intent intent = new Intent();
+//                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                startActivity(intent);
+//
+//                finish();
+//
+//            }
+//        });
         alert.show();
+
+    }
+
+
+    public void ChoiceDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("___、終了したいアプリを選択")
+                .setMultiChoiceItems(array, null, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        if (isChecked) checkedItems.add(which);
+                        else checkedItems.remove((Integer) which);
+                    }
+                })
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (Integer i : checkedItems) {
+                            // item_i checked
+
+                            Log.i("選択されたやつ", "" + array[i]);
+                            ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
+                            activityManager.killBackgroundProcesses(array[i]);
+
+                        }
+
+                        try {
+                            // ホームに戻る処理
+                            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                            homeIntent.addCategory(Intent.CATEGORY_HOME);
+                            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(homeIntent);
+                        } catch (IllegalStateException e) {
+
+                        }
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    // ホームに戻る処理
+                                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                                    homeIntent.addCategory(Intent.CATEGORY_HOME);
+                                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(homeIntent);
+                                } catch (IllegalStateException e) {
+
+                                }
+                                finish();
+
+                            }
+                        }
+                ).show();
 
     }
 

@@ -75,9 +75,6 @@ public class ExampleService extends Service implements LocationListener {
 
     private final static String TAG2 = "";
 
-    // Toastを何回表示されたか数えるためのカウント
-    private int mCount = 0;
-
     // Toastを表示させるために使うハンドラ
     private Handler mHandler = new Handler();
 
@@ -102,8 +99,7 @@ public class ExampleService extends Service implements LocationListener {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mCount++;
-//                        showText("カウント:" + mCount);
+
                         // 登録位置情報取得
 //                        reqestGPS();
 
@@ -185,7 +181,6 @@ public class ExampleService extends Service implements LocationListener {
 //                            if (info.getLocationPermission().equals("0")) {
 //                                isLocationApp = true; //位置情報アプリだ
 //                            }
-
                             // 制限されているか
                             if (info.getLock() == true) {
                                 isLocked = true;   //制限されたアプリだ
@@ -228,7 +223,7 @@ public class ExampleService extends Service implements LocationListener {
         } else if (isLocked) {
             // 範囲内で位置情報権限を持つアプリが起動した
 //            if (isPackage && isLocationApp && isRange && (!isUsed)) {
-              if (isPackage && isRange && (!isUsed)) {
+            if (isPackage && isRange && (!isUsed)) {
                 // バックグラウンドプロセスの終了
                 ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
                 for (int j = 0; j < dataList.size(); j++) {
@@ -431,6 +426,7 @@ public class ExampleService extends Service implements LocationListener {
 
         if (isRange) {
             windowShowed = true;
+            Log.i(TAG,"前回範囲内に入っていた");
             startService(new Intent(getBaseContext(), WindowService.class));
         }
 
@@ -507,6 +503,7 @@ public class ExampleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Called_onLocationChanged");
+        Log.i(TAG, "isRange:"+isRange+",windowShowed:"+windowShowed);
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
 //        Toast.makeText(this, "登録" + confLatitude + "," + confLongitude
