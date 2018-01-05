@@ -24,7 +24,6 @@ public class AppData implements Serializable {
     int pWakeLock; // 端末のスリープの無効化
     int pReceive; // ブロードキャストレシーバを使用しているか
 
-
     boolean lock;   // 制限の有無 有:true 無:false
     boolean isUsed; // 現在起動しているか
     int useCount;   // 使われた回数
