@@ -72,7 +72,6 @@ public class AppDataSetting extends Service {
             UpdateAppList(appName);
         }
 
-
         // サービスの終了
         stopSelf();
 
@@ -122,6 +121,9 @@ public class AppDataSetting extends Service {
 //
 //            // 安全なアプリを除外
             if (info.packageName.equals("com.android.settings")) continue;
+
+            // 安全なアプリを除外
+//            if (info.packageName.equals("com.android.settings")) continue;
 
             // 起動不可能なアプリを除外
             for (String app : appList) {
@@ -221,7 +223,6 @@ public class AppDataSetting extends Service {
             e.printStackTrace();
         }
     }
-
 
     // インストール時
     public void InstallAppList(String installApp) {
@@ -422,7 +423,6 @@ public class AppDataSetting extends Service {
         }
     }
 
-
     // アプリ使用更新
     public void UpdateAppList(String updateApp) {
         try {
@@ -465,6 +465,5 @@ public class AppDataSetting extends Service {
             e.printStackTrace();
         }
     }
-
 
 }

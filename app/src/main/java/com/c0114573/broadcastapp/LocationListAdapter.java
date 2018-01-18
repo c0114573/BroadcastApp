@@ -29,7 +29,17 @@ public class LocationListAdapter extends ArrayAdapter<LocationData> {
         tv.setTextColor(Color.GRAY);
         tv.setText(locationData.getLocationName());
 
+        tv = (TextView) convertView.findViewById(R.id.valid);
+        if(locationData.valid){
+            tv.setTextColor(Color.RED);
+        }else {
+            tv.setTextColor(Color.GRAY);
+        }
+        tv.setText(locationData.getValidText());
+
+
         tv = (TextView) convertView.findViewById(R.id.sub);
+        tv.setTextColor(Color.GRAY);
         tv.setText(""+"登録位置 : ("+locationData.getLatlng()+")\n設定範囲 : "+locationData.distance+"km");
 
         return convertView;

@@ -11,29 +11,49 @@ public class LocationData implements Serializable {
     double lat;
     double lng;
     int distance;
+    boolean valid;
 
-    public LocationData() {}
-
-    public void setLocationName(String l){
-        locationName=l;
+    public LocationData() {
     }
 
-    public void setLatlung(float la,float ln){
-        lat=la;
-        lng=ln;
+    public void setLocationName(String l) {
+        locationName = l;
+    }
+
+    public void setLatlung(float la, float ln) {
+        lat = la;
+        lng = ln;
     }
 
     public void setDistance(int d) {
-        distance=d;
+        distance = d;
     }
 
-    public String getLocationName(){
+    public void setValid(boolean val) {
+        valid = val;
+    }
+
+    public String getLocationName() {
         return locationName;
     }
 
-    public String getLatlng(){
-        return lat+","+ lng;
+    public String getLatlng() {
+        return lat + "," + lng;
     }
 
+    public String getValidText() {
+        if(valid){
+            return "有効";
+        }else {
+            return "無効";
+        }
+    }
 
+    public String getNotValidText() {
+        if(valid){
+            return "無効にする";
+        }else {
+            return "有効にする";
+        }
+    }
 }

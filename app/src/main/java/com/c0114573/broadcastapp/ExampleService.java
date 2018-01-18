@@ -590,10 +590,12 @@ public class ExampleService extends Service implements LocationListener {
 
             int i = 0;
             for (LocationData locationData : locationList2) {
-                confLatitude[i] = locationData.lat;
-                confLongitude[i] = locationData.lng;
-                confDistance[i] = locationData.distance * 1000;
-                i++;
+                if(locationData.valid) {
+                    confLatitude[i] = locationData.lat;
+                    confLongitude[i] = locationData.lng;
+                    confDistance[i] = locationData.distance * 1000;
+                    i++;
+                }
             }
         } catch (FileNotFoundException e) {
             System.out.println("登録されてないa");

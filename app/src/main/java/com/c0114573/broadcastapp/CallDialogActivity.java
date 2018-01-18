@@ -115,6 +115,7 @@ public class CallDialogActivity extends Activity {
             public void onDismiss(DialogInterface dialog){
                 //ここにdialogが閉じた時にしたいことを記述
                 Log.i("CallDialogActivity","ダイアログを閉じました");
+                finish();
 //                Toast.makeText(this, "ダイアログを閉じました。", Toast.LENGTH_SHORT).show; //←例
             }
         });
@@ -133,4 +134,4 @@ public class CallDialogActivity extends Activity {
 
 
 
-}
+    }
