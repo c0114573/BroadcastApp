@@ -107,6 +107,7 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                         } else {
                             locationDatas.get(position).setValid(true);
                         }
+                        adapter.notifyDataSetChanged();
 
                         try {
                             // シリアライズしてファイルに保存
@@ -123,15 +124,6 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        adapter.notifyDataSetChanged();
-
-                        // アクティビティ再起動
-//                        Intent intent2 = getIntent();
-//                        overridePendingTransition(0, 0);
-//                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                        finish();
-//                        overridePendingTransition(0, 0);
-//                        startActivity(intent2);
                         break;
 
                     case 1:
@@ -140,11 +132,13 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
 
                     case 2:
                         LocationData ld = locationDatas.get(position);
-                        adapter.remove(ld);
-                        adapter.notifyDataSetChanged();
+
 
                         // 選択されたアイテムをリストから削除
                         locationDatas.remove(position);
+
+                        adapter.remove(ld);
+                        adapter.notifyDataSetChanged();
 
                         try {
                             // シリアライズしてファイルに保存
@@ -153,17 +147,8 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                             outObject.writeObject(locationDatas);
                             outObject.close();
                             outFile.close();
-                            
-                            // デシリアライズ(読み込み)
-                            FileInputStream inFile = openFileInput("locationData.file");
-                            ObjectInputStream inObject = new ObjectInputStream(inFile);
-                            locationDatas = (ArrayList<LocationData>) inObject.readObject();
-                            inObject.close();
-                            inFile.close();
 
                         } catch (StreamCorruptedException e) {
-                            e.printStackTrace();
-                        } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -201,7 +186,6 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         builder.setPositiveButton("新規登録", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // OK ボタンクリック処理
-                // ID と PASSWORD を取得
                 EditText location = (EditText) layout.findViewById(R.id.customDlg_location);
                 EditText lat = (EditText) layout.findViewById(R.id.customDlg_lat);
                 EditText lng = (EditText) layout.findViewById(R.id.customDlg_lng);
@@ -215,11 +199,8 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                 String strLocation = location.getText().toString();
                 String strLat = lat.getText().toString();
                 String strLng = lng.getText().toString();
-
                 String item = (String) spinner.getSelectedItem();
                 int ret = Integer.parseInt(item.replaceAll("[^0-9]", ""));
-
-                LocationListAdapter adapter = new LocationListAdapter(getApplicationContext());
 
                 LocationData locationData = new LocationData();
                 locationData.locationName = strLocation;
@@ -229,16 +210,8 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                 locationData.valid = true;
 
                 locationDatas.add(locationData);
-
-                // リストビューにアダプタを設定
-                for (LocationData ld : locationDatas) {
-                    adapter.add(ld);
-                }
-                final ListView listView = (ListView) findViewById(R.id.card_list);
-                listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
-                listView.setDivider(null);
-                listView.setAdapter(adapter);
-                listView.setOnItemClickListener(LocationList.this);
+                adapter.add(locationData);
+                adapter.notifyDataSetChanged();
 
                 try {
                     // シリアライズしてファイルに保存
@@ -275,7 +248,7 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         final View layout = inflater.inflate(R.layout.location_dialog,
                 (ViewGroup) findViewById(R.id.layout_root));
 
-        // レイアウトのエディットなどのid取得
+        // レイアウトのエディット,スピナーなどのid取得
         EditText setlocation = (EditText) layout.findViewById(R.id.customDlg_location);
         EditText setlat = (EditText) layout.findViewById(R.id.customDlg_lat);
         EditText setlng = (EditText) layout.findViewById(R.id.customDlg_lng);
@@ -294,15 +267,13 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         builder.setView(layout);
         builder.setPositiveButton("更新", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                // OK ボタンクリック処理
-                // ID と PASSWORD を取得
                 EditText location = (EditText) layout.findViewById(R.id.customDlg_location);
                 EditText lat = (EditText) layout.findViewById(R.id.customDlg_lat);
                 EditText lng = (EditText) layout.findViewById(R.id.customDlg_lng);
                 Spinner spinner = (Spinner) layout.findViewById(R.id.spinner);
 
                 if (location.getText().length() == 0 || lat.getText().length() == 0 || lng.getText().length() == 0) {
-                    Toast.makeText(LocationList.this, "入力されていません", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LocationList.this, "未記入の項目があります", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -313,46 +284,14 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                 String item = (String) spinner.getSelectedItem();
                 int ret = Integer.parseInt(item.replaceAll("[^0-9]", ""));
 
-                LocationListAdapter adapter = new LocationListAdapter(getApplicationContext());
-
-                LocationData locationData = new LocationData();
+                LocationData locationData = locationDatas.get(position);
                 locationData.locationName = strLocation;
                 locationData.lat = Double.parseDouble(strLat);
                 locationData.lng = Double.parseDouble(strLng);
                 locationData.distance = ret;
                 locationData.valid = locationDatas.get(position).valid;
 
-                try {
-                    // デシリアライズ(読み込み)
-                    FileInputStream inFile = openFileInput("locationData.file");
-                    ObjectInputStream inObject = new ObjectInputStream(inFile);
-//            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
-                    locationDatas = (ArrayList<LocationData>) inObject.readObject();
-                    inObject.close();
-                    inFile.close();
-
-                } catch (StreamCorruptedException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                locationDatas.add(locationData);
-                locationDatas.remove(position);
-
-                // リストビューにアダプタを設定
-                for (LocationData ld : locationDatas) {
-                    adapter.add(ld);
-                }
-                final ListView listView = (ListView) findViewById(R.id.card_list);
-                listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
-                listView.setDivider(null);
-                listView.setAdapter(adapter);
-                listView.setOnItemClickListener(LocationList.this);
+                adapter.notifyDataSetChanged();
 
                 try {
                     // シリアライズしてファイルに保存
