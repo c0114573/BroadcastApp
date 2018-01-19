@@ -52,7 +52,6 @@ public class PermissionList extends Activity {
 
     TextView tv;
 
-
     // Switchボタンの設定
     Switch switchButton;
 

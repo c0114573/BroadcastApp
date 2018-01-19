@@ -4,17 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.v4.app.AppLaunchChecker;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -37,7 +30,7 @@ import java.util.List;
 
 public class LocationList extends Activity implements AdapterView.OnItemClickListener {
 
-    List<LocationData> locationDatas = new ArrayList<LocationData>();
+    List<LocationData> locationData = new ArrayList<LocationData>();
 
     LocationListAdapter adapter;
 
@@ -48,29 +41,29 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.locationlist);
 
+        // 独自のadapterを利用
+        adapter = new LocationListAdapter(getApplicationContext());
+
+        // ListViewにadapterを設定
+        listView = (ListView) findViewById(R.id.card_list);
+        listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
+        listView.setDivider(null);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
+
         try {
             // デシリアライズ(読み込み)
             FileInputStream inFile = openFileInput("locationData.file");
             ObjectInputStream inObject = new ObjectInputStream(inFile);
-            locationDatas = (ArrayList<LocationData>) inObject.readObject();
+            locationData = (ArrayList<LocationData>) inObject.readObject();
             inObject.close();
             inFile.close();
 
-            // 独自のアダプタを利用
-//            LocationListAdapter adapter = new LocationListAdapter(getApplicationContext());
-            adapter = new LocationListAdapter(getApplicationContext());
-            // ListViewにアダプタを設定
-            for (LocationData ld : locationDatas) {
+            // 登録内容をadapterに追加
+            for (LocationData ld : locationData) {
                 adapter.add(ld);
             }
-
-            // ListView表示
-//            final ListView listView = (ListView) findViewById(R.id.card_list);
-            listView = (ListView) findViewById(R.id.card_list);
-            listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
-            listView.setDivider(null);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(this);
+            adapter.notifyDataSetChanged();
 
         } catch (StreamCorruptedException e) {
             e.printStackTrace();
@@ -83,11 +76,18 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         }
     }
 
+    // 新規作成
+    public void onClick(View v) {
+        if (locationData.size() < 10) {
+            newCreateDialog();
+        } else {
+            Toast.makeText(this,"登録できる位置情報は10件までです",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onItemClick(final AdapterView<?> parent, View view, final int position, long id) {
-//        Toast.makeText(this, "こんにちは" + position, Toast.LENGTH_SHORT).show();
-
-        String validText = locationDatas.get(position).getNotValidText();
+        String validText = locationData.get(position).selectValidText();
 
         AlertDialog.Builder dlg = new AlertDialog.Builder(this);
         String[] items = {validText, "編集", "削除"};
@@ -95,66 +95,46 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = null;
-                Uri uri;
-                PackageManager pManager = getPackageManager();
-                switch (which) {
 
+                switch (which) {
+                    // 有効,無効設定
                     case 0:
-                        if (locationDatas.get(position).valid) {
-                            locationDatas.get(position).setValid(false);
+                        if (locationData.get(position).valid) {
+                            locationData.get(position).setValid(false);
 
                         } else {
-                            locationDatas.get(position).setValid(true);
+                            locationData.get(position).setValid(true);
                         }
                         adapter.notifyDataSetChanged();
 
-                        try {
-                            // シリアライズしてファイルに保存
-                            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
-                            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                            outObject.writeObject(locationDatas);
-                            outObject.close();
-                            outFile.close();
-
-                        } catch (StreamCorruptedException e) {
-                            e.printStackTrace();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        UpdateLocationData();
                         break;
 
+                    // 編集
                     case 1:
                         updateDialog(position);
                         break;
 
+                    // 削除
                     case 2:
-                        LocationData ld = locationDatas.get(position);
+                        AlertDialog.Builder deldlg = new AlertDialog.Builder(LocationList.this);
+                        deldlg.setTitle(locationData.get(position).locationName);
+                        deldlg.setMessage("この位置情報を削除しますか？");
+                        deldlg.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int which) {
+                                LocationData ld = locationData.get(position);
 
+                                // 選択されたアイテムをリストから削除
+                                locationData.remove(position);
+                                adapter.remove(ld);
+                                adapter.notifyDataSetChanged();
 
-                        // 選択されたアイテムをリストから削除
-                        locationDatas.remove(position);
-
-                        adapter.remove(ld);
-                        adapter.notifyDataSetChanged();
-
-                        try {
-                            // シリアライズしてファイルに保存
-                            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
-                            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                            outObject.writeObject(locationDatas);
-                            outObject.close();
-                            outFile.close();
-
-                        } catch (StreamCorruptedException e) {
-                            e.printStackTrace();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                                UpdateLocationData();
+                            }});
+                        deldlg.setNegativeButton("キャンセル", new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int which) {
+                            }});
+                        deldlg.show();
                         break;
 
                     default:
@@ -165,83 +145,61 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
         dlg.show();
     }
 
-
-    // 新規作成
-    public void onClick(View v) {
-        displayDialog();
-    }
-
-
-    private void displayDialog() {
+    private void newCreateDialog() {
         // カスタムビューを設定
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(
                 LAYOUT_INFLATER_SERVICE);
         final View layout = inflater.inflate(R.layout.location_dialog,
                 (ViewGroup) findViewById(R.id.layout_root));
 
-        // アラーとダイアログ を生成
+        // アラートダイアログを生成
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("位置情報設定");
         builder.setView(layout);
         builder.setPositiveButton("新規登録", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                // OK ボタンクリック処理
+                // レイアウトのエディット,スピナーなどのid取得
                 EditText location = (EditText) layout.findViewById(R.id.customDlg_location);
                 EditText lat = (EditText) layout.findViewById(R.id.customDlg_lat);
                 EditText lng = (EditText) layout.findViewById(R.id.customDlg_lng);
                 Spinner spinner = (Spinner) layout.findViewById(R.id.spinner);
 
                 if (location.getText().length() == 0 || lat.getText().length() == 0 || lng.getText().length() == 0) {
-                    Toast.makeText(LocationList.this, "入力されていません", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LocationList.this, "未記入の項目があります", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                // 入力された値の取得
                 String strLocation = location.getText().toString();
                 String strLat = lat.getText().toString();
                 String strLng = lng.getText().toString();
                 String item = (String) spinner.getSelectedItem();
                 int ret = Integer.parseInt(item.replaceAll("[^0-9]", ""));
 
-                LocationData locationData = new LocationData();
-                locationData.locationName = strLocation;
-                locationData.lat = Double.parseDouble(strLat);
-                locationData.lng = Double.parseDouble(strLng);
-                locationData.distance = ret;
-                locationData.valid = true;
+                // locationData, adapterに追加
+                LocationData ld = new LocationData();
+                ld.locationName = strLocation;
+                ld.lat = Double.parseDouble(strLat);
+                ld.lng = Double.parseDouble(strLng);
+                ld.distance = ret;
+                ld.valid = true;
 
-                locationDatas.add(locationData);
-                adapter.add(locationData);
+                locationData.add(ld);
+                adapter.add(ld);
                 adapter.notifyDataSetChanged();
 
-                try {
-                    // シリアライズしてファイルに保存
-                    FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
-                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                    outObject.writeObject(locationDatas);
-                    outObject.close();
-                    outFile.close();
-
-                } catch (StreamCorruptedException e) {
-                    e.printStackTrace();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                UpdateLocationData();
 
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                // Cancel ボタンクリック処理
             }
         });
-        // 表示
         builder.create().show();
     }
 
     private void updateDialog(final int position) {
-
         // カスタムビューを設定
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(
                 LAYOUT_INFLATER_SERVICE);
@@ -249,17 +207,17 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                 (ViewGroup) findViewById(R.id.layout_root));
 
         // レイアウトのエディット,スピナーなどのid取得
-        EditText setlocation = (EditText) layout.findViewById(R.id.customDlg_location);
-        EditText setlat = (EditText) layout.findViewById(R.id.customDlg_lat);
-        EditText setlng = (EditText) layout.findViewById(R.id.customDlg_lng);
-        Spinner setspinner = (Spinner) layout.findViewById(R.id.spinner);
+        EditText setLocation = (EditText) layout.findViewById(R.id.customDlg_location);
+        EditText setLat = (EditText) layout.findViewById(R.id.customDlg_lat);
+        EditText setLng = (EditText) layout.findViewById(R.id.customDlg_lng);
+        Spinner setSpinner = (Spinner) layout.findViewById(R.id.spinner);
 
         // 登録されている値をセット
-        setlocation.setText(locationDatas.get(position).locationName);
-        setlat.setText(String.valueOf(locationDatas.get(position).lat));
-        setlng.setText(String.valueOf(locationDatas.get(position).lng));
-        int ret = locationDatas.get(position).distance;
-        setspinner.setSelection(ret - 1);
+        setLocation.setText(locationData.get(position).locationName);
+        setLat.setText(String.valueOf(locationData.get(position).lat));
+        setLng.setText(String.valueOf(locationData.get(position).lng));
+        int ret = locationData.get(position).distance;
+        setSpinner.setSelection(ret - 1);
 
         // アラートダイアログを生成
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -277,48 +235,50 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
                     return;
                 }
 
+                // 入力された値の取得
                 String strLocation = location.getText().toString();
                 String strLat = lat.getText().toString();
                 String strLng = lng.getText().toString();
-
                 String item = (String) spinner.getSelectedItem();
                 int ret = Integer.parseInt(item.replaceAll("[^0-9]", ""));
 
-                LocationData locationData = locationDatas.get(position);
-                locationData.locationName = strLocation;
-                locationData.lat = Double.parseDouble(strLat);
-                locationData.lng = Double.parseDouble(strLng);
-                locationData.distance = ret;
-                locationData.valid = locationDatas.get(position).valid;
+                // locationData, adapterを更新
+                LocationData ld = locationData.get(position);
+                ld.locationName = strLocation;
+                ld.lat = Double.parseDouble(strLat);
+                ld.lng = Double.parseDouble(strLng);
+                ld.distance = ret;
+                ld.valid = locationData.get(position).valid;
 
                 adapter.notifyDataSetChanged();
 
-                try {
-                    // シリアライズしてファイルに保存
-                    FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
-                    ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                    outObject.writeObject(locationDatas);
-                    outObject.close();
-                    outFile.close();
-
-                } catch (StreamCorruptedException e) {
-                    e.printStackTrace();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                UpdateLocationData();
 
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                // Cancel ボタンクリック処理
             }
         });
-        // 表示
         builder.create().show();
     }
 
+    public void UpdateLocationData() {
+        try {
+            // シリアライズしてファイルに保存
+            FileOutputStream outFile = openFileOutput("locationData.file", Context.MODE_PRIVATE);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(locationData);
+            outObject.close();
+            outFile.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

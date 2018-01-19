@@ -16,19 +16,6 @@ public class LocationData implements Serializable {
     public LocationData() {
     }
 
-    public void setLocationName(String l) {
-        locationName = l;
-    }
-
-    public void setLatlung(float la, float ln) {
-        lat = la;
-        lng = ln;
-    }
-
-    public void setDistance(int d) {
-        distance = d;
-    }
-
     public void setValid(boolean val) {
         valid = val;
     }
@@ -49,7 +36,7 @@ public class LocationData implements Serializable {
         }
     }
 
-    public String getNotValidText() {
+    public String selectValidText() {
         if(valid){
             return "無効にする";
         }else {

@@ -25,19 +25,16 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class ExampleService extends Service implements LocationListener {
 
@@ -45,15 +42,12 @@ public class ExampleService extends Service implements LocationListener {
     private LocationManager mLocationManager;
     NotificationManager nm;
 
-    double[] confLatitude = new double[10];    // 設定緯度
-    double[] confLongitude = new double[10];   // 設定経度
+    double[] confLatitude = new double[10];    // 登録緯度
+    double[] confLongitude = new double[10];   // 登録経度
     int[] confDistance = new int[10];
 
     double myLatitude = 0;    // 現在の緯度
     double myLongitude = 0;   // 現在の経度
-
-    String targetStr = "";    // 緯度経度を持ってくる
-    String message = "";
 
     String PackageName = "";
     String PackageLabel = "";
