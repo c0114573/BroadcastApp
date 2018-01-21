@@ -50,8 +50,6 @@ import java.util.List;
 
 public class PermissionList extends Activity {
 
-    TextView tv;
-
     // Switchボタンの設定
     Switch switchButton;
 
@@ -96,7 +94,6 @@ public class PermissionList extends Activity {
             // リストビューにアプリケーションの一覧を表示する
             final ListView listView = new ListView(this);
             int padding = (int) (getResources().getDisplayMetrics().density * 8);
-
             listView.setPadding(padding, 0, padding, 0);
             listView.setScrollBarStyle(ListView.SCROLLBARS_OUTSIDE_OVERLAY);
             listView.setDivider(null);
@@ -105,7 +102,6 @@ public class PermissionList extends Activity {
             View header = inflater.inflate(R.layout.list_header_footer, listView, false);
 
             listView.addHeaderView(header, null, false);
-
             listView.setAdapter(new AppListAdapter(this, dataList2));
 
             //クリック処理
