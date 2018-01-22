@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.AppLaunchChecker;
 import android.util.Log;
 import android.view.View;
@@ -42,7 +41,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_boot_receiver);
+        setContentView(R.layout.activity_main);
 
         tv1 = (TextView) findViewById(R.id.textView3);
         tv1.setText("テスト");

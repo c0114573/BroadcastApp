@@ -31,12 +31,6 @@ public class WindowService extends Service {
     static final String TAG = "ExampleService";
 
     @Override
-    public void onCreate() {
-//        Toast.makeText(this, "バックグラウンドサービスを開始しました。", Toast.LENGTH_SHORT).show();
-//        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand Received start id " + startId + ": " + intent);
@@ -207,7 +201,7 @@ public class WindowService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "ウィンドウ終了します。", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "ウィンドウ終了します。", Toast.LENGTH_SHORT).show();
 //        mLocationManager.removeUpdates(this);
         try{
             wm.removeView(player_view);

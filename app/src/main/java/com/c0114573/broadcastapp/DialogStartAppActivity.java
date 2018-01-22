@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,7 +23,7 @@ import java.util.List;
  * Created by member on 2017/07/26.
  */
 
-public class CallDialogActivity extends Activity {
+public class DialogStartAppActivity extends Activity {
 
     Intent it;
     String label = "no title";
@@ -104,7 +103,7 @@ public class CallDialogActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 //Noボタンが押された時の処理
 //                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(CallDialogActivity.this, PermissionList.class);
+                Intent intent = new Intent(DialogStartAppActivity.this, PermissionList.class);
                 startActivity(intent);
                 dialog.dismiss();
 
@@ -114,8 +113,9 @@ public class CallDialogActivity extends Activity {
         alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
             public void onDismiss(DialogInterface dialog){
                 //ここにdialogが閉じた時にしたいことを記述
-                Log.i("CallDialogActivity","ダイアログを閉じました");
-                finish();
+                Log.i("DialogStartAppActivity","ダイアログを閉じました");
+//                finish();
+                finishAndRemoveTask();
 //                Toast.makeText(this, "ダイアログを閉じました。", Toast.LENGTH_SHORT).show; //←例
             }
         });
@@ -127,9 +127,9 @@ public class CallDialogActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();  // Always call the superclass method first
-        Log.i("CallDialogActivity","onPause");
-        finish();
-
+        Log.i("DialogStartAppActivity","onPause");
+//        finish();
+        finishAndRemoveTask();
     }
 
 

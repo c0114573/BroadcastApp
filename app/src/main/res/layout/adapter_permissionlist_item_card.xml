@@ -48,14 +48,14 @@
 
         </LinearLayout>
 
-        <Switch
-            android:id="@+id/switch1"
+        <TextView
+            android:id="@+id/locktext"
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
+            android:text="制限中"
+            android:textAlignment="center" />
     </LinearLayout>
 
     <View

@@ -20,7 +20,7 @@ public class LocationListAdapter extends ArrayAdapter<LocationData> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.adapter_list_item_card, parent, false);
+            convertView = mInflater.inflate(R.layout.adapter_locationlist_item_card, parent, false);
         }
 
         LocationData locationData = getItem(position);

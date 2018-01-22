@@ -43,21 +43,21 @@
 
 
         <activity
-            android:name=".CallDialogActivity"
+            android:name=".DialogStartAppActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">
         </activity>
 
         <activity
-            android:name=".WarningDialogActivity"
+            android:name=".DialogWarningActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">
         </activity>
 
         <activity
-            android:name=".LocationDialogActivity"
+            android:name=".DialogInRangeActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">

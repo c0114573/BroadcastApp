@@ -95,7 +95,7 @@ public class AppData implements Serializable {
             resultPermission += "   位置情報";
         }
         if (spWakeLock.equals("0")) {
-            resultPermission += "   スリープ無効";
+//            resultPermission += "   スリープ無効";
         }
         if (spReceive.equals("0")) {
             resultPermission += "   常時実行";
@@ -112,6 +112,12 @@ public class AppData implements Serializable {
         return String.valueOf(this.pLocation);
     }
 
-
+    public String getSelectText() {
+        if (lock) {
+            return "制限解除";
+        } else {
+            return "制限登録";
+        }
+    }
 }
 

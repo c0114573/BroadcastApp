@@ -22,7 +22,7 @@ public class AppStateReceiver extends BroadcastReceiver {
         // アプリのインストール
         if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
                 && !intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-            Toast.makeText(context, str + "インストール", Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, str + "インストール", Toast.LENGTH_LONG).show();
 
             Intent startServiceIntent = new Intent(context,AppDataSetting.class);
             startServiceIntent.putExtra("INSTALL",20);
@@ -35,7 +35,7 @@ public class AppStateReceiver extends BroadcastReceiver {
             // プリインアプリのアンインストール
             if (intent.getExtras().getBoolean(Intent.EXTRA_DATA_REMOVED)
                     && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-                Toast.makeText(context, str + "プリインアンイン", Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, str + "プリインアンイン", Toast.LENGTH_LONG).show();
 
                 Intent startServiceIntent = new Intent(context,AppDataSetting.class);
                 startServiceIntent.putExtra("UNINSTALL",30);
@@ -46,7 +46,7 @@ public class AppStateReceiver extends BroadcastReceiver {
             // アプリの更新
             if (!intent.getExtras().getBoolean(Intent.EXTRA_DATA_REMOVED)
                     && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-                Toast.makeText(context, str + "更新", Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, str + "更新", Toast.LENGTH_LONG).show();
 
                 Intent startSeviceIntent = new Intent(context,AppDataSetting.class);
                 startSeviceIntent.putExtra("UPDATE" ,40);
@@ -57,7 +57,7 @@ public class AppStateReceiver extends BroadcastReceiver {
 
         // アプリのアンインストール
         if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(intent.getAction())) {
-            Toast.makeText(context, str + "アンインスト", Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, str + "アンインスト", Toast.LENGTH_LONG).show();
 
             Intent startServiceIntent = new Intent(context,AppDataSetting.class);
             startServiceIntent.putExtra("UNINSTALL",30);

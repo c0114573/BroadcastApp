@@ -86,7 +86,7 @@ public class AppDataSetting extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "読み込み終わり", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "読み込み終わり", Toast.LENGTH_SHORT).show();
     }
 
     // 特定アプリ一覧を作成

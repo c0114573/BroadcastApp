@@ -39,7 +39,7 @@ public class LocationList extends Activity implements AdapterView.OnItemClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.locationlist);
+        setContentView(R.layout.activity_locationlist);
 
         // 独自のadapterを利用
         adapter = new LocationListAdapter(getApplicationContext());

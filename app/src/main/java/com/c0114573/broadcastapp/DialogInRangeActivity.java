@@ -26,7 +26,7 @@ import java.util.List;
  * Created by member on 2017/11/10.
  */
 
-public class LocationDialogActivity extends Activity {
+public class DialogInRangeActivity extends Activity {
 
     Intent it;
     String[] array;
@@ -121,49 +121,13 @@ public class LocationDialogActivity extends Activity {
         alert.setTitle("アプリ制限");
         alert.setMessage("制限範囲内に入りました\n範囲内では一部のアプリの使用が制限されます");
 
-//        alert.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-//                        if (isChecked) checkedItems.add(which);
-//                        else checkedItems.remove((Integer) which);
-//                    }
-//                });
-
-
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
-//                ActivityManager activityManager = ((ActivityManager) getSystemService(ACTIVITY_SERVICE));
-//                activityManager.killBackgroundProcesses(label);
-//
-//                try {
-//                    // ホームに戻る処理
-//                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-//                    homeIntent.addCategory(Intent.CATEGORY_HOME);
-//                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(homeIntent);
-//                } catch (IllegalStateException e) {
-//
-//                }
                 ChoiceDialog();
-//
-//                finish();
 
             }
         });
-//        alert.setNegativeButton("GPS設定", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                //Noボタンが押された時の処理
-////                Toast.makeText(MainActivity.this, "No Clicked!", Toast.LENGTH_LONG).show();
-//
-//                Intent intent = new Intent();
-//                intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                startActivity(intent);
-//
-//                finish();
-//
-//            }
-//        });
         alert.show();
 
     }
@@ -171,7 +135,7 @@ public class LocationDialogActivity extends Activity {
 
     public void ChoiceDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("___、終了したいアプリを選択")
+                .setTitle("終了したいアプリを選択")
                 .setMultiChoiceItems(array, null, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -200,7 +164,7 @@ public class LocationDialogActivity extends Activity {
                         } catch (IllegalStateException e) {
 
                         }
-                        finish();
+                        finishAndRemoveTask();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -215,7 +179,7 @@ public class LocationDialogActivity extends Activity {
                                 } catch (IllegalStateException e) {
 
                                 }
-                                finish();
+                                finishAndRemoveTask();
 
                             }
                         }
