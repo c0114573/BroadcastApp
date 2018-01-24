@@ -33,8 +33,6 @@ public class DialogWarningActivity extends Activity {
         label = intent.getStringExtra("LABEL");
         it = getIntent();
 
-//        MessageDialog.show(this, "アプリ制限", "設定範囲内にいるためこのアプリは制限されます\n");
-
         final AlertDialog.Builder alert = new AlertDialog.Builder(this).setCancelable(false);
         alert.setTitle("アプリ制限");
         alert.setMessage("設定範囲内にいるためこのアプリは制限されます");
@@ -53,48 +51,18 @@ public class DialogWarningActivity extends Activity {
                 finishAndRemoveTask();
             }
         });
-        alert.show();
-
+        try {
+            alert.show();
+        }catch (Exception e){
+            Log.e("DialogStart_alert_err",""+e);
+        }
     }
 
-
-    @Override
-    public void onPause() {
-        super.onPause();  // Always call the superclass method first
-        Log.i(TAG, "onPause");
-
-//        finish();
-
-//        // ホームに戻る処理
-//        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-//        homeIntent.addCategory(Intent.CATEGORY_HOME);
-//        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(homeIntent);
-    }
-
-//    //メッセージダイアログの定義(4)
-//    public static class MessageDialog extends DialogFragment {
-//        //ダイアログの表示(5)
-//        public static void show(
-//                Activity activity, String title, String text) {
-//            MessageDialog f = new MessageDialog();
-//            Bundle args = new Bundle();
-//            args.putString("title", title);
-//            args.putString("text", text);
-//            f.setArguments(args);
-//            f.show(activity.getFragmentManager(), "messageDialog");
-//        }
-//
-//        //ダイアログの生成(6)
-//        @Override
-//        public Dialog onCreateDialog(Bundle bundle) {
-//            AlertDialog.Builder ad = new AlertDialog.Builder(getActivity());
-//            ad.setTitle(getArguments().getString("title"));
-//            ad.setMessage(getArguments().getString("text"));
-//            ad.setPositiveButton("ホーム画面へ", null);
-//            this.setCancelable(false);
-//            return ad.create();
-//        }
-
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();  // Always call the superclass method first
+//        Log.i(TAG, "onDestroy");
+//        startService(new Intent(getBaseContext(), ExampleService.class));
+//    }
 
 }

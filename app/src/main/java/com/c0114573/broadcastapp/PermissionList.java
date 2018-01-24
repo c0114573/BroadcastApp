@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +40,8 @@ public class PermissionList extends Activity implements AdapterView.OnItemClickL
     List<AppData> appData = new ArrayList<AppData>();
 
     PermissionListAdapter adapter;
+
+    Bitmap bitmap;
 
     ListView listView;
 
@@ -79,8 +82,9 @@ public class PermissionList extends Activity implements AdapterView.OnItemClickL
                 if (!s.equals("")) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     byte[] b = Base64.decode(s, Base64.DEFAULT);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+//                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
                     // AppDataにアイコン情報を格納
+                    bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
                     ad.setIcon(new BitmapDrawable(bitmap));
                 }
             }
@@ -192,6 +196,34 @@ public class PermissionList extends Activity implements AdapterView.OnItemClickL
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("PermissionListActivity","called_onDestroy");
+        cleanup();
+        finish();
+    }
+
+    public void cleanup() {
+        if (bitmap != null) {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
+        if(listView!=null) {
+            listView.setAdapter(null);
+            listView=null;
+        }
+        if(adapter!=null){
+            adapter.clear();
+            adapter=null;
+        }
+        if(appData!=null) {
+            appData.clear();
+        }
+    }
+
 
     // アンインストール成功の判定はこれだとできない
     // アンインストールの完了(5秒くらい?)を待ってから再び一覧を取得し存在してなければ消すようにする?

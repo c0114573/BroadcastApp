@@ -120,7 +120,11 @@ public class DialogStartAppActivity extends Activity {
             }
         });
         // err
-        alert.show();
+        try {
+            alert.show();
+        }catch (Exception e){
+            Log.e("DialogStart_alert_err",""+e);
+        }
 
     }
 
@@ -129,7 +133,7 @@ public class DialogStartAppActivity extends Activity {
         super.onPause();  // Always call the superclass method first
         Log.i("DialogStartAppActivity","onPause");
 //        finish();
-        finishAndRemoveTask();
+//        finishAndRemoveTask();
     }
 
 

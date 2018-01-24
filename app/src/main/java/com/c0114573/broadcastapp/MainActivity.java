@@ -32,10 +32,10 @@ public class MainActivity extends Activity {
 
     private static final int REQUEST_SETTINGS = 1;
 
-    // テスト用テキスト
-    TextView tv1;
-    TextView tv2;
-    String str = "";
+//    // テスト用テキスト
+//    TextView tv1;
+//    TextView tv2;
+//    String str = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +43,11 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        tv1 = (TextView) findViewById(R.id.textView3);
-        tv1.setText("テスト");
-
-        tv2 = (TextView) findViewById(R.id.textView5);
-        tv2.setText("テスト");
+//        tv1 = (TextView) findViewById(R.id.textView3);
+//        tv1.setText("テスト");
+//
+//        tv2 = (TextView) findViewById(R.id.textView5);
+//        tv2.setText("テスト");
 
 
 
@@ -77,37 +77,37 @@ public class MainActivity extends Activity {
                 break;
 
 
-            // リストを読み込みテキストに表示
-            case R.id.file_read_button:
-                str = "";
-                try {
-                    FileInputStream inFile = openFileInput("appData.file");
-                    ObjectInputStream inObject = new ObjectInputStream(inFile);
-                    List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
-                    inObject.close();
-                    inFile.close();
-
-                    for (AppData appData : dataList2) {
-                        str += appData.getpackageID() + ":";
-                        str += appData.getpackageLabel();
-//                        str += appData.getpackageName();
-                        str += appData.getPermission()+ "," ;
-                        str += "isUsed:"+String.valueOf(appData.isUsed)+",";
-                        str += "isLock:"+String.valueOf(appData.lock)+",";
-                        str += appData.getUseCount() + "\n";
-                    }
-                    tv2.setText(str);
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (StreamCorruptedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                break;
+//            // リストを読み込みテキストに表示
+//            case R.id.file_read_button:
+//                str = "";
+//                try {
+//                    FileInputStream inFile = openFileInput("appData.file");
+//                    ObjectInputStream inObject = new ObjectInputStream(inFile);
+//                    List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+//                    inObject.close();
+//                    inFile.close();
+//
+//                    for (AppData appData : dataList2) {
+//                        str += appData.getpackageID() + ":";
+//                        str += appData.getpackageLabel();
+////                        str += appData.getpackageName();
+//                        str += appData.getPermission()+ "," ;
+//                        str += "isUsed:"+String.valueOf(appData.isUsed)+",";
+//                        str += "isLock:"+String.valueOf(appData.lock)+",";
+//                        str += appData.getUseCount() + "\n";
+//                    }
+//                    tv2.setText(str);
+//
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (StreamCorruptedException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//                break;
 
             case R.id.file_delete_button:
                 break;
@@ -211,4 +211,17 @@ public class MainActivity extends Activity {
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("PermissionListActivity","called_onDestroy");
+//        cleanup();
+
+        finish();
+    }
+
+    public void cleanup() {
+    }
+
 }

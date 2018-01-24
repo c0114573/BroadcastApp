@@ -290,7 +290,7 @@ public class AppDataSetting extends Service {
                 if (!s.equals("")) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     byte[] b = Base64.decode(s, Base64.DEFAULT);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
 
                     // AppDataにアイコン情報を格納
                     // 新しくインストールしたアプリをリストの最後に追加
@@ -374,7 +374,7 @@ public class AppDataSetting extends Service {
                     if (!s.equals("")) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         byte[] b = Base64.decode(s, Base64.DEFAULT);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_8888, true);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
                         // AppDataにアイコン情報を格納
                         appData.setIcon(new BitmapDrawable(bitmap));
                     }

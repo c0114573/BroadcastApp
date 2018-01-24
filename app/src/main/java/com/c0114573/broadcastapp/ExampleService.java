@@ -68,6 +68,7 @@ public class ExampleService extends Service implements LocationListener {
     boolean windowShowed = false;   // 範囲内Windowが表示されている
 
     boolean isUsed = false;
+    boolean isShowWarning =true;   // warningdialogが出せる状態か
 
     int appUsedCount = 0;
 
@@ -106,7 +107,7 @@ public class ExampleService extends Service implements LocationListener {
                 } else {
                     // このアプリが位置情報権限を持っている
                     // 通知のための最小時間間隔(ミリ秒),通知のための最小距離間隔(メートル)
-                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, this);
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 1, this);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -116,7 +117,7 @@ public class ExampleService extends Service implements LocationListener {
         // スレッドの開始
         this.mThread = new Thread(null, mTask, "NortifyingService");
         this.mThread.start();
-
+        isShowWarning=true;
         isPackage = false;
 
         // 位置情報と現在範囲内にいるかのデータを取得
@@ -300,7 +301,9 @@ public class ExampleService extends Service implements LocationListener {
         // 範囲内,制限されているか
         if (isInRange && isLocked && isLocationUsed) {
             // 制限ダイアログ表示
-            warningDialog();
+//            if(isShowWarning) {
+                warningDialog();
+//            }
         // 範囲外,制限されているか
         } else if (isLocked && !isUsed) {
             // GPSの状態取得
@@ -338,7 +341,7 @@ public class ExampleService extends Service implements LocationListener {
             windowShowed = false;
             stopService(new Intent(getBaseContext(), WindowService.class));
         }
-        Log.i(TAG, provider);
+//        Log.i(TAG, provider);
     }
 
     public void permissionCheck(String pName) {
@@ -425,12 +428,12 @@ public class ExampleService extends Service implements LocationListener {
     }
 
     private void warningDialog() {
+        isShowWarning = false;
         Intent intent = new Intent(this, DialogWarningActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //        intent.putExtra("LABEL", PackageLabel);
         intent.putExtra("LABEL", PackageName);
         startActivity(intent);
-
     }
 
     private void locationDialog() {

@@ -22,21 +22,14 @@
         android:id="@+id/wm_button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="設定"
+        android:text="設定画面"
         android:visibility="gone" />
 
     <Button
         android:id="@+id/wm_button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GPS"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/wm_button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="閉じる"
+        android:text="GPS設定"
         android:visibility="gone" />
 
 </LinearLayout>

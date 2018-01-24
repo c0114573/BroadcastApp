@@ -128,7 +128,11 @@ public class DialogInRangeActivity extends Activity {
 
             }
         });
-        alert.show();
+        try {
+            alert.show();
+        }catch (Exception e){
+            Log.e("DialogStart_alert_err",""+e);
+        }
 
     }
 
