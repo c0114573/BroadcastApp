@@ -47,7 +47,6 @@
 
         <EditText
             android:id="@+id/customDlg_lat"
-            android:hint="35.625122"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
@@ -55,7 +54,6 @@
 
         <EditText
             android:id="@+id/customDlg_lng"
-            android:hint="139.342143"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
