@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 /**
  * Created by member on 2017/10/27.
+ * AppStateReceiverの中に記入するようにする
  */
 
 public class ReceivedActivity extends BroadcastReceiver {

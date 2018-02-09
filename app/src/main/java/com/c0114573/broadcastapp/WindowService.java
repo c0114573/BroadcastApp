@@ -21,6 +21,8 @@ import static android.view.Gravity.TOP;
 
 /**
  * Created by member on 2017/06/20.
+ * 範囲内であるとき画面上に制限中であることを知らせる画面を表示するサービス
+ * レイアウト:window_test
  */
 
 public class WindowService extends Service {

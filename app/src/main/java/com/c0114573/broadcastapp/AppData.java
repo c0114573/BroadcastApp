@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 /**
  * Created by member on 2017/07/11.
+ * 位置情報漏洩の恐れのあるアプリ情報を保存するクラス
  */
 
 // アプリケーションデータ格納クラス

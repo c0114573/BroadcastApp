@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * Created by member on 2017/09/29.
+ * 登録位置情報を保存するクラス
  */
 
 public class LocationData implements Serializable {

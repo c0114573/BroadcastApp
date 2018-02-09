@@ -36,6 +36,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * Created by C011457331 on 2017/04/19.
+ * 位置情報漏洩防止サービス
+ * アプリ起動判定を行い,設定状況からそれに応じてアプリ起動ダイアログまたは制限ダイアログを表示する
+ * 位置情報判定を行い範囲内であれば範囲内ダイアログを表示する
+ */
+
 public class ExampleService extends Service implements LocationListener {
 
     static final String TAG = "ExampleService";

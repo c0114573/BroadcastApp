@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 /**
  * Created by member on 2017/07/26.
+ * アプリ使用制限ダイアログを表示する
  */
 
 public class DialogWarningActivity extends Activity {

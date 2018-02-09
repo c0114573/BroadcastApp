@@ -21,6 +21,7 @@ import java.util.List;
 
 /**
  * Created by member on 2017/07/26.
+ * 位置情報漏洩の恐れのあるアプリが起動ダイアログを表示する
  */
 
 public class DialogStartAppActivity extends Activity {

@@ -31,8 +31,10 @@ import java.util.List;
 
 /**
  * Created by member on 2017/08/02.
+ * AppDataを新規作成または更新するときに呼ばれるサービスクラス
+ * ここのコードは汚いのであまり参考にならないです
+ * すみません
  */
-
 public class AppDataSetting extends Service {
 
     // リスト作成
@@ -123,7 +125,7 @@ public class AppDataSetting extends Service {
             if (info.packageName.equals("com.android.settings")) continue;
 
             // 安全なアプリを除外
-//            if (info.packageName.equals("com.android.settings")) continue;
+            if (info.packageName.equals("com.android.settings")) continue;
 
             // 起動不可能なアプリを除外
             for (String app : appList) {
@@ -350,8 +352,6 @@ public class AppDataSetting extends Service {
             int appnum = 0;
             int appnum2 = 0;
             boolean isfound = false;
-//            deleteApp = "com.nianticlabs.pokemongo";
-
             for (AppData appData : dataList2) {
                 appcnt++;
                 // 削除したいアプリのリスト番号を取得
@@ -432,8 +432,6 @@ public class AppDataSetting extends Service {
             List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
             inObject.close();
             inFile.close();
-
-//            deleteApp = "com.nianticlabs.pokemongo";
 
             for (AppData appData : dataList2) {
                 if (appData.getpackageName().equals(updateApp)) {

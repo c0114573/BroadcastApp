@@ -32,6 +32,9 @@ import java.util.List;
 
 /**
  * Created by C011457331 on 2018/01/21.
+ * アプリ一覧表示画面
+ * リストアダプター:PermissionListAdapter
+ * レイアウト:activity_permissionlist
  */
 
 public class PermissionList extends Activity implements AdapterView.OnItemClickListener {

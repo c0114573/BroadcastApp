@@ -26,6 +26,9 @@ import java.util.List;
 
 /**
  * Created by member on 2017/10/08.
+ * 登録位置情報設定画面
+ * リストアダプター:LocationListAdapter
+ * レイアウト:activity_locationlist
  */
 
 public class LocationList extends Activity implements AdapterView.OnItemClickListener {

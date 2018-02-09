@@ -24,6 +24,7 @@ import java.util.List;
 
 /**
  * Created by member on 2017/11/10.
+ * 範囲内通知ダイアログを表示する
  */
 
 public class DialogInRangeActivity extends Activity {
