@@ -28,6 +28,8 @@ public class AppData implements Serializable {
     boolean isUsed; // 現在起動しているか
     int useCount;   // 使われた回数
 
+    boolean isPermissionCheck = false;
+
     public AppData(){
     }
 
@@ -58,11 +60,8 @@ public class AppData implements Serializable {
 
 
     // 制限ありtrue 制限なしfalse
-    public boolean getLock() {return  lock; }
-
     public boolean getIsUsed() {return  isUsed; }
 
-    public int getUseCount() { return this.useCount; }
 
     public int getpackageID() { return this.packageID; }
 
