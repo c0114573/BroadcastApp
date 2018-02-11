@@ -40,11 +40,9 @@ public class AppDataSetting extends Service {
 
     // リスト作成
     // 起動不可アプリ名リスト
-    ArrayList<String> appList = new ArrayList<String>();
+    ArrayList<String> notUseAppList = new ArrayList<String>();
     // 端末内特定アプリ情報リスト
-    List<AppData> dataListNew = new ArrayList<AppData>();
-    // 読み込み特定アプリ情報リスト
-    List<AppData> dataListLoad = new ArrayList<AppData>();
+    List<AppData> dataList = new ArrayList<AppData>();
 
     boolean appNew = true;
 
