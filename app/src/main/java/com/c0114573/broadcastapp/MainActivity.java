@@ -53,10 +53,6 @@ public class MainActivity extends Activity {
         tv2 = (TextView) findViewById(R.id.textView5);
         tv2.setText("テスト");
 
-
-
-
-
         // 初期起動時処理
         if (!(AppLaunchChecker.hasStartedFromLauncher(this))) {
             Log.d("AppLaunchChecker", "はじめてアプリを起動した");
@@ -64,7 +60,6 @@ public class MainActivity extends Activity {
             Intent startServiceIntent = new Intent(getBaseContext(), AppDataSetting.class);
             startServiceIntent.putExtra("AppFirstStart", 10);
             startService(startServiceIntent);
-
         }
         AppLaunchChecker.onActivityCreate(this);
     }
@@ -80,7 +75,6 @@ public class MainActivity extends Activity {
                 startService(startServiceIntent);
                 break;
 
-
             // リストを読み込みテキストに表示
             case R.id.file_read_button:
                 str = "";
@@ -93,12 +87,11 @@ public class MainActivity extends Activity {
 
                     for (AppData appData : dataList2) {
                         str += appData.getpackageID() + ":";
-                        str += appData.getpackageLabel();
-//                        str += appData.getpackageName();
+//                        str += appData.getpackageLabel();
+                        str += appData.getpackageName();
                         str += appData.getPermission()+ "," ;
                         str += "isUsed:"+String.valueOf(appData.isUsed)+",";
-                        str += "isLock:"+String.valueOf(appData.lock)+",";
-                        str += appData.getUseCount() + "\n";
+                        str += "isLock:"+String.valueOf(appData.lock)+"\n";
                     }
                     tv2.setText(str);
 

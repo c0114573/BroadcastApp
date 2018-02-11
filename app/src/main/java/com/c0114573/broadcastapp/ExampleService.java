@@ -47,11 +47,6 @@ public class ExampleService extends Service implements LocationListener {
 
     static final String TAG = "ExampleService";
     private LocationManager mLocationManager;
-    NotificationManager nm;
-
-//    double[] confLatitude = new double[10];    // 登録緯度
-//    double[] confLongitude = new double[10];   // 登録経度
-//    int[] confDistance = new int[10];
 
     double myLatitude = 0;    // 現在の緯度
     double myLongitude = 0;   // 現在の経度
@@ -66,12 +61,11 @@ public class ExampleService extends Service implements LocationListener {
     boolean isLocked = false;       // 使用制限を持ったアプリである
     boolean isInRange = false;      // 範囲内に入っている
     boolean isLocationUsed = false;     // 位置情報が利用できる
-//    boolean isLocationApp = false;  // 位置情報権限を持ったアプリである
+    //    boolean isLocationApp = false;  // 位置情報権限を持ったアプリである
     boolean isCameraorSMSApp = false;
 
-    boolean isNotPermission = false;    // 権限を持っていないアプリである
     boolean isUseCount = false;     // 5回以上使用されたアプリである
-
+    boolean isNotPermission = false;    // 権限を持っていないアプリである
     boolean windowShowed = false;   // 範囲内Windowが表示されている
 
     boolean isUsed = false;
@@ -127,30 +121,14 @@ public class ExampleService extends Service implements LocationListener {
         isShowWarning=true;
         isPackage = false;
 
-        // 位置情報と現在範囲内にいるかのデータを取得
-//        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-//        myLatitude = Double.longBitsToDouble(data.getLong("myLatitude", 0l));
-//        myLongitude = Double.longBitsToDouble(data.getLong("myLongitude", 0l));
-//        isInRange = data.getBoolean("isRange", false);
-
-//        Log.i(TAG, "取得後,myLatitude:" + myLatitude + ",myLongitude:" + myLongitude + ",isRange:" + isInRange);
-
-//        if (isInRange) {
-//            windowShowed = true;
-//            Log.i(TAG, "前回範囲内に入っていた");
-//            startService(new Intent(getBaseContext(), WindowService.class));
-//        }
-
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY_COMPATIBILITY;
     }
-
 
     // スレッド処理
     private Runnable mTask = new Runnable() {
         @Override
         public void run() {
-            // アクティブな間だけ処理をする
             while (mThreadActive) {
                 try {
                     Thread.sleep(3000); //3秒待つ
@@ -158,26 +136,18 @@ public class ExampleService extends Service implements LocationListener {
                     // TODO 自動生成された catch ブロック
                     e.printStackTrace();
                 }
-
-                // ハンドラーをはさまないとToastでエラーでる
-                // UIスレッド内で処理をしないといけない
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-
                         // GPSの状態取得
                         providerCheck();
-
                         // 起動したアプリがあるか
                         startAppCheck();
-
                         // ダイアログ表示
                         if (isPackage) {
                             showDialog();
                         }
-
                         isPackage = false;
-//                        isLocationApp = false;
                         isCameraorSMSApp = false;
                         isLocked = false;
                         isUseCount = false;
@@ -254,11 +224,6 @@ public class ExampleService extends Service implements LocationListener {
                         }
                         appUsedCount++;
 
-                        // 位置情報権限を持っているアプリか
-//                        if (ad.pLocation == 0) {
-//                            isLocationApp = true; //位置情報アプリだ
-//                        }
-
                         // カメラまたはSMS権限を持っているか
                         if(ad.pCamera == 0 || ad.pSMS == 0){
                             isCameraorSMSApp = true;
@@ -274,8 +239,6 @@ public class ExampleService extends Service implements LocationListener {
         // windowServiceを終了するかどうか
         // 範囲内であるか
         if (windowShowed) {
-            // 現在位置情報の利用状況取得
-//            providerCheck();
             // 現在位置情報の利用不可であるか
             if (!isLocationUsed) {
                 comparisonDistance();
@@ -288,7 +251,6 @@ public class ExampleService extends Service implements LocationListener {
 
     public void showDialog() {
         Log.i("!!showDialog!!","isInRange"+isInRange+",isLocked"+isLocked+",isUsed"+isUsed);
-//        Log.i("!!showDialog!!","isLocationApp"+isLocationApp+",isLocationUsed"+isLocationUsed);
         Log.i("!!showDialog!!","isCameraorSMSApp"+isCameraorSMSApp+",isLocationUsed"+isLocationUsed);
 
         // 権限を持っていない場合
@@ -308,13 +270,10 @@ public class ExampleService extends Service implements LocationListener {
         // 範囲内,制限されているか
         if (isInRange && isLocked && isLocationUsed) {
             // 制限ダイアログ表示
-//            if(isShowWarning) {
-                warningDialog();
-//            }
-        // 範囲外,制限されているか
+            warningDialog();
+//
+            // 範囲外,制限されているか
         } else if (isLocked && !isUsed) {
-            // GPSの状態取得
-//            providerCheck();
             // 位置情報権限を許可しているアプリで,現在位置取得を行っていない場合
             // (地図アプリなどを現在位置取得しないで使う場合)ダイアログ非表示
 
@@ -335,20 +294,16 @@ public class ExampleService extends Service implements LocationListener {
         String provider = "";
         if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             // GPSが利用可能
-            provider = "gps";
             isLocationUsed = true;
         } else if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             // ネットワークが利用可能
-            provider = "network";
             isLocationUsed = true;
         } else {
             // 位置情報の利用不可能
-            provider = "使えません";
             isLocationUsed = false;
             windowShowed = false;
             stopService(new Intent(getBaseContext(), WindowService.class));
         }
-//        Log.i(TAG, provider);
     }
 
     public void permissionCheck(String pName) {
@@ -459,8 +414,7 @@ public class ExampleService extends Service implements LocationListener {
     }
 
     //ノーティフィケーションの表示
-    private void showNotification(Context context,
-                                  String title, String text) {
+    private void showNotification(Context context, String title, String text) {
         //ノーティフィケーションオブジェクトの生成(9)
         Notification.Builder builder = new Notification.Builder(context);
         builder.setWhen(System.currentTimeMillis());
@@ -486,24 +440,6 @@ public class ExampleService extends Service implements LocationListener {
         nm.cancel(1);
         nm.notify(1, builder.build());
     }
-
-    //
-//    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//
-//    Intent notificationIntent = new Intent(this, MainActivity.class);
-//    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-//
-//    Notification notification = new NotificationCompat.Builder(this)
-//            .setSmallIcon(R.drawable.ic_launcher) // アイコン
-//            .setTicker("Hello") // 通知バーに表示する簡易メッセージ
-//            .setWhen(System.currentTimeMillis()) // 時間
-//            .setContentTitle("My notification") // 展開メッセージのタイトル
-//            .setContentText("Hello Notification!!") // 展開メッセージの詳細メッセージ
-//            .setContentIntent(contentIntent) // PendingIntent
-//            .build();
-//
-//        notificationManager.notify(1, notification);
-
 
     @Override
     public void onDestroy() {
@@ -565,12 +501,10 @@ public class ExampleService extends Service implements LocationListener {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("登録されてないa");
             e.printStackTrace();
         } catch (StreamCorruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("登録されてないc");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -580,7 +514,7 @@ public class ExampleService extends Service implements LocationListener {
             float results = getDistanceBetween(confLatitude[i], confLongitude[i], myLatitude, myLongitude);
             // 指定範囲内
             if (results < confDistance[i]) {
-                Log.i("AAAaa","範囲内" + myLatitude);
+                Log.i(TAG, "範囲内" + myLatitude);
                 isInRange = true;
                 if (!windowShowed && isLocationUsed) {
                     windowShowed = true;
@@ -610,11 +544,7 @@ public class ExampleService extends Service implements LocationListener {
         Location.distanceBetween(latitude1, longitude1, latitude2, longitude2, results);
 
         if (results.length < 1) {
-            // 取得に失敗した場合のコード
-        }
-
-        if (results.length < 3) {
-            // 方位角の値を取得した場合のコード
+            // 取得に失敗した場合
         }
 
         // ここでは距離（メートル）のみを返却

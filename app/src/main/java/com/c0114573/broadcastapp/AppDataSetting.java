@@ -35,21 +35,17 @@ import java.util.List;
  * ここのコードは汚いのであまり参考にならないです
  * すみません
  */
+
 public class AppDataSetting extends Service {
 
     // リスト作成
     // 起動不可アプリ名リスト
-    ArrayList<String> appList = new ArrayList<String>();
-    // 端末内特定アプリ情報リスト
-    List<AppData> dataListNew = new ArrayList<AppData>();
-    // 読み込み特定アプリ情報リスト
-    List<AppData> dataListLoad = new ArrayList<AppData>();
-
-    boolean appNew = true;
+    ArrayList<String> notUseAppList = new ArrayList<String>();
+    //    // アプリ情報リスト
+    List<AppData> dataList = new ArrayList<AppData>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         // 現在の端末内アプリから特定アプリをリストに追加,更新
         // get~Extra  キーがないとき第二引数の値となる
         if (intent != null && intent.getIntExtra("AppFirstStart", 0) == 10) {
@@ -58,20 +54,17 @@ public class AppDataSetting extends Service {
 
         // インストール時
         else if (intent != null && intent.getIntExtra("INSTALL", 0) == 20) {
-            String appName = intent.getStringExtra("APPNAME");
-            InstallAppList(appName);
+            InstallAppList(intent.getStringExtra("APPNAME"));
         }
 
         // アンインストール時
         else if (intent != null && intent.getIntExtra("UNINSTALL", 0) == 30) {
-            String appName = intent.getStringExtra("APPNAME");
-            UnInstallAppList(appName);
+            UnInstallAppList(intent.getStringExtra("APPNAME"));
         }
 
         // 更新時
         else if (intent != null && intent.getIntExtra("UPDATE", 0) == 40) {
-            String appName = intent.getStringExtra("APPNAME");
-            UpdateAppList(appName);
+            UpdateAppList(intent.getStringExtra("APPNAME"));
         }
 
         // サービスの終了
@@ -91,8 +84,9 @@ public class AppDataSetting extends Service {
 //        Toast.makeText(this, "読み込み終わり", Toast.LENGTH_SHORT).show();
     }
 
-    // 特定アプリ一覧を作成
+    // 位置情報漏洩の恐れのあるアプリ一覧を作成
     public void NewAppList() {
+//        List<AppData> dataList = new ArrayList<AppData>();
         // パッケージマネージャーの作成
         PackageManager packageManager = getPackageManager();
 
@@ -101,18 +95,16 @@ public class AppDataSetting extends Service {
         for (PackageInfo pckInfo : pckInfoList) {
             // インテントで起動できないものを格納
             if (packageManager.getLaunchIntentForPackage(pckInfo.packageName) == null) {
-                appList.add(pckInfo.packageName);
+                notUseAppList.add(pckInfo.packageName);
             }
         }
-
         // インストール済みアプリの情報を取得
         List<ApplicationInfo> applicationInfo = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
         int pSMS = -1;
         int pLocation = -1;
-
-        // リストにアプリデータを格納
         int i = 0;
+        // リストにアプリデータを格納
         appInfo:
         for (ApplicationInfo info : applicationInfo) {
             pSMS = -1;
@@ -120,15 +112,13 @@ public class AppDataSetting extends Service {
 
             // 自分自身を除外
             if (info.packageName.equals(this.getPackageName())) continue;
-//
-//            // 安全なアプリを除外
-            if (info.packageName.equals("com.android.settings")) continue;
 
-            // 安全なアプリを除外
+//          // 安全なアプリを除外, 設定,GooglePlay
             if (info.packageName.equals("com.android.settings")) continue;
+            if (info.packageName.equals("com.android.vending")) continue;
 
             // 起動不可能なアプリを除外
-            for (String app : appList) {
+            for (String app : notUseAppList) {
                 if ((info.packageName.equals(app))) continue appInfo;
             }
 
@@ -146,48 +136,46 @@ public class AppDataSetting extends Service {
             int pWakeLock = getPackageManager().checkPermission(Manifest.permission.WAKE_LOCK, info.packageName);
             int pReceive = getPackageManager().checkPermission(Manifest.permission.RECEIVE_BOOT_COMPLETED, info.packageName);
 
-
             if (pSMS1 == 0 || pSMS2 == 0 || pSMS3 == 0 || pSMS4 == 0 || pSMS5 == 0) pSMS = 0;
 
             if (pLocation1 == 0 || pLocation2 == 0) pLocation = 0;
 
-            // ネットワーク権限を持っているか
-            if (pNetwork == PackageManager.PERMISSION_GRANTED) {
-                // カメラ,SNS,位置権限を持ったアプリであるか
-                if (pCamera == PackageManager.PERMISSION_GRANTED ||
-                        pLocation == PackageManager.PERMISSION_GRANTED ||
-                        pSMS == PackageManager.PERMISSION_GRANTED) {
+//            if (pLocation == 0 && pNetwork == 0)
 
-                    // アプリ情報クラスにアプリ情報を追加
-                    AppData data = new AppData();
-                    data.packageID = i;
-                    i++;
+            // 位置情報漏洩の恐れのある権限を持っているか
+            if (pCamera == PackageManager.PERMISSION_GRANTED
+                    || pSMS == PackageManager.PERMISSION_GRANTED
+                    || (pNetwork == PackageManager.PERMISSION_GRANTED && pLocation == PackageManager.PERMISSION_GRANTED)) {
 
-                    data.packageLabel = info.loadLabel(packageManager).toString();
-                    data.packageName = info.packageName;
-                    data.icon = info.loadIcon(packageManager);
+                // アプリ情報クラスにアプリ情報を追加
+                AppData data = new AppData();
+                data.packageID = i;
+                i++;
 
-                    data.pNetwork = pNetwork;
-                    data.pCamera = pCamera;
-                    data.pSMS = pSMS;
-                    data.pLocation = pLocation;
-                    data.pWakeLock = pWakeLock;
-                    data.pReceive = pReceive;
+                data.packageLabel = info.loadLabel(packageManager).toString();
+                data.packageName = info.packageName;
+                data.icon = info.loadIcon(packageManager);
 
-                    data.isUsed = false;
-                    data.useCount = 0;
-                    data.lock = true;
+                data.pNetwork = pNetwork; // いらないかも
+                data.pCamera = pCamera;
+                data.pSMS = pSMS;
+                data.pLocation = pLocation;
+                data.pWakeLock = pWakeLock;  // いらないか,pReceiveとまとめるか
+                data.pReceive = pReceive;
 
-                    // アプリ情報クラスをリストに追加
-                    dataListNew.add(data);
-                }
+                data.isUsed = false;
+                data.useCount = 0;
+                data.lock = true;
+
+                // アプリ情報クラスをリストに追加
+                dataList.add(data);
             }
         }
 
         // アイコン情報を保存
         Drawable icon;
         int num = 0;
-        for (AppData info : dataListNew) {
+        for (AppData info : dataList) {
             num++;
             icon = info.getIcon();
             // ビットマップに変換
@@ -206,37 +194,19 @@ public class AppDataSetting extends Service {
             editor.apply();
         }
 
-        // シリアライズしてAppDataをファイルに保存
-        try {
-            // FileOutputStream outFile = new FileOutputStream(FILE_NAME);
-            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            if (appNew == true) {
-                outObject.writeObject(dataListNew);
-            } else {
-                outObject.writeObject(dataListLoad);
-            }
-            outObject.close();
-            outFile.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // AppDataをファイルに保存
+        UpdateAppData();
     }
 
     // インストール時
     public void InstallAppList(String installApp) {
-
         // パッケージマネージャーの作成
         PackageManager packageManager = getPackageManager();
-
         // 起動不可能なアプリをリストに格納
         List<PackageInfo> pckInfoList = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
         for (PackageInfo pckInfo : pckInfoList) {
             if (packageManager.getLaunchIntentForPackage(pckInfo.packageName) == null) {
-                appList.add(pckInfo.packageName);
+                notUseAppList.add(pckInfo.packageName);
             }
         }
         // インストール済みアプリの情報を取得
@@ -246,89 +216,10 @@ public class AppDataSetting extends Service {
             // デシリアライズ(読み込み)
             FileInputStream inFile = openFileInput("appData.file");
             ObjectInputStream inObject = new ObjectInputStream(inFile);
-            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            dataList = (ArrayList<AppData>) inObject.readObject();
             inObject.close();
             inFile.close();
 
-            // リストにアプリデータを格納
-            appInfo:
-            for (ApplicationInfo info : applicationInfo) {
-                // 自分自身を除外
-                if (info.packageName.equals(this.getPackageName())) continue;
-
-                // 起動不可能なアプリを除外
-                for (String app : appList) {
-                    if ((info.packageName.equals(app))) continue appInfo;
-                }
-
-                // 新しくインストールしたアプリをリストに追加
-                if (info.packageName.equals(installApp)) {
-                    // アプリ情報クラスにアプリ情報を追加
-                    AppData data = new AppData();
-                    data.packageID = dataList2.size();
-                    data.packageLabel = info.loadLabel(packageManager).toString();
-                    data.packageName = info.packageName;
-                    data.icon = info.loadIcon(packageManager);
-                    data.pNetwork = -1;
-                    data.pCamera = -1;
-                    data.pSMS = -1;
-                    data.pLocation = -1;
-                    data.isUsed = false;
-                    data.useCount = 0;
-                    data.lock = true;
-
-                    // アプリ情報クラスをリストに追加
-                    dataList2.add(data);
-                }
-            }
-
-            int num = 0;
-            // アイコン情報を読み取り
-            for (AppData appData : dataList2) {
-                num++;
-                // SharedPreferenceのインスタンスを生成
-                SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-                String s = pref.getString("ICON", "");
-                if (!s.equals("")) {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    byte[] b = Base64.decode(s, Base64.DEFAULT);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
-
-                    // AppDataにアイコン情報を格納
-                    // 新しくインストールしたアプリをリストの最後に追加
-                    if (dataList2.size() == num) {
-                        appData.setIcon(appData.getIcon());
-                    } else {
-                        appData.setIcon(new BitmapDrawable(bitmap));
-                    }
-                }
-            }
-
-            // アイコン情報を上書き保存
-            num = 0;
-            Drawable icon;
-            for (AppData info : dataList2) {
-                num++;
-                icon = info.getIcon();
-                Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-                SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("ICON", bitmapStr);
-                editor.apply();
-            }
-
-            // シリアライズしてファイルに保存
-            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            outObject.writeObject(dataList2);
-            outObject.close();
-            outFile.close();
-
-        } catch (StreamCorruptedException e) {
-            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -336,6 +227,77 @@ public class AppDataSetting extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // リストにアプリデータを格納
+        appInfo:
+        for (ApplicationInfo info : applicationInfo) {
+            // 自分自身を除外
+            if (info.packageName.equals(this.getPackageName())) continue;
+
+            // 起動不可能なアプリを除外
+            for (String app : notUseAppList) {
+                if ((info.packageName.equals(app))) continue appInfo;
+            }
+
+            // 新しくインストールしたアプリをリストに追加
+            if (info.packageName.equals(installApp)) {
+                // アプリ情報クラスにアプリ情報を追加
+                AppData data = new AppData();
+                data.packageID = dataList.size();
+                data.packageLabel = info.loadLabel(packageManager).toString();
+                data.packageName = info.packageName;
+                data.icon = info.loadIcon(packageManager);
+                data.pNetwork = -1;
+                data.pCamera = -1;
+                data.pSMS = -1;
+                data.pLocation = -1;
+                data.isUsed = false;
+                data.useCount = 0;
+                data.lock = true;
+
+                // アプリ情報クラスをリストに追加
+                dataList.add(data);
+            }
+        }
+
+        int num = 0;
+        // アイコン情報を読み取り
+        for (AppData appData : dataList) {
+            num++;
+            // SharedPreferenceのインスタンスを生成
+            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+            String s = pref.getString("ICON", "");
+            if (!s.equals("")) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                byte[] b = Base64.decode(s, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
+                // AppDataにアイコン情報を格納
+                // 新しくインストールしたアプリをリストの最後に追加
+                if (dataList.size() == num) {
+                    appData.setIcon(appData.getIcon());
+                } else {
+                    appData.setIcon(new BitmapDrawable(bitmap));
+                }
+            }
+        }
+
+        // アイコン情報を上書き保存
+        num = 0;
+        Drawable icon;
+        for (AppData info : dataList) {
+            num++;
+            icon = info.getIcon();
+            Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+            SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("ICON", bitmapStr);
+            editor.apply();
+        }
+        // 保存
+        UpdateAppData();
     }
 
     // アンインストール時
@@ -344,82 +306,75 @@ public class AppDataSetting extends Service {
             // デシリアライズ(読み込み)
             FileInputStream inFile = openFileInput("appData.file");
             ObjectInputStream inObject = new ObjectInputStream(inFile);
-            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            dataList = (ArrayList<AppData>) inObject.readObject();
             inObject.close();
             inFile.close();
 
-            int appcnt = 0;
-            int appnum = 0;
-            int appnum2 = 0;
-            boolean isfound = false;
-            for (AppData appData : dataList2) {
-                appcnt++;
-                // 削除したいアプリのリスト番号を取得
-                if (appData.getpackageName().equals(deleteApp)) {
-                    appnum = appcnt;
-                    appnum2 = appcnt;
-                    isfound = true; //見つかった
-                }
-            }
-
-            if (isfound == true) {
-
-                int num = 0;
-                // アイコン情報を読み取り
-                for (AppData appData : dataList2) {
-                    num++;
-                    // SharedPreferenceのインスタンスを生成
-                    SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-                    String s = pref.getString("ICON", "");
-                    if (!s.equals("")) {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        byte[] b = Base64.decode(s, Base64.DEFAULT);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
-                        // AppDataにアイコン情報を格納
-                        appData.setIcon(new BitmapDrawable(bitmap));
-                    }
-                }
-
-                // アイコン情報を上書き保存
-                num = 0;
-                Drawable icon;
-                for (AppData info : dataList2) {
-                    num++;
-                    // 削除したいアプリのリスト番号は保存しない
-                    if (num == appnum) {
-                        num -= 1;
-                        appnum = -1;
-                    } else {
-                        icon = info.getIcon();
-                        Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                        String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-                        SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putString("ICON", bitmapStr);
-                        editor.apply();
-                    }
-                }
-                // 削除したいアプリをリストから削除
-                dataList2.remove(appnum2 - 1);
-
-                // シリアライズしてファイルに保存
-                FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
-                ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-                outObject.writeObject(dataList2);
-                outObject.close();
-                outFile.close();
-            }
-
-        } catch (StreamCorruptedException e) {
-            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        int appcnt = 0;
+        int appnum = 0;
+        int appnum2 = 0;
+        boolean isfound = false;
+
+        for (AppData appData : dataList) {
+            appcnt++;
+            // 削除したいアプリのリスト番号を取得
+            if (appData.getpackageName().equals(deleteApp)) {
+                appnum = appcnt;
+                appnum2 = appcnt;
+                isfound = true; //見つかった
+            }
+        }
+
+        if (isfound == true) {
+            int num = 0;
+            // アイコン情報を読み取り
+            for (AppData appData : dataList) {
+                num++;
+                // SharedPreferenceのインスタンスを生成
+                SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+                String s = pref.getString("ICON", "");
+                if (!s.equals("")) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    byte[] b = Base64.decode(s, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length).copy(Bitmap.Config.ARGB_4444, true);
+                    // AppDataにアイコン情報を格納
+                    appData.setIcon(new BitmapDrawable(bitmap));
+                }
+            }
+
+            // アイコン情報を上書き保存
+            num = 0;
+            Drawable icon;
+            for (AppData info : dataList) {
+                num++;
+                // 削除したいアプリのリスト番号は保存しない
+                if (num == appnum) {
+                    num -= 1;
+                    appnum = -1;
+                } else {
+                    icon = info.getIcon();
+                    Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                    String bitmapStr = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                    SharedPreferences pref = getSharedPreferences("DATA" + num, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString("ICON", bitmapStr);
+                    editor.apply();
+                }
+            }
+            // 削除したいアプリをリストから削除
+            dataList.remove(appnum2 - 1);
+            // 保存
+            UpdateAppData();
         }
     }
 
@@ -429,32 +384,9 @@ public class AppDataSetting extends Service {
             // 読み込み
             FileInputStream inFile = openFileInput("appData.file");
             ObjectInputStream inObject = new ObjectInputStream(inFile);
-            List<AppData> dataList2 = (ArrayList<AppData>) inObject.readObject();
+            dataList = (ArrayList<AppData>) inObject.readObject();
             inObject.close();
             inFile.close();
-
-            for (AppData appData : dataList2) {
-                if (appData.getpackageName().equals(updateApp)) {
-                    if (appData.getIsUsed()) {
-                        appData.setIsUsed(false);
-
-                        Log.i("AppDataSetting","isUsed変更"+appData.isUsed);
-                    } else {
-                        appData.setIsUsed(true);
-                        Log.i("AppDataSetting","isUsed変更"+appData.isUsed);
-                    }
-                }
-            }
-
-            // 保存
-            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
-            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-            outObject.writeObject(dataList2);
-            outObject.close();
-            outFile.close();
-
-        } catch (StreamCorruptedException e) {
-            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -462,6 +394,37 @@ public class AppDataSetting extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        for (AppData appData : dataList) {
+            if (appData.getpackageName().equals(updateApp)) {
+                if (appData.getIsUsed()) {
+                    appData.isUsed = false;
+                    Log.i("AppDataSetting", "isUsed変更" + appData.isUsed);
+                } else {
+                    appData.isUsed = true;
+                    Log.i("AppDataSetting", "isUsed変更" + appData.isUsed);
+                }
+            }
+        }
+        // 保存
+        UpdateAppData();
     }
 
+
+    public void UpdateAppData() {
+        // シリアライズしてAppDataをファイルに保存
+        try {
+            FileOutputStream outFile = openFileOutput("appData.file", Context.MODE_PRIVATE);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(dataList);
+            outObject.close();
+            outFile.close();
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        dataList.clear();
+    }
 }
