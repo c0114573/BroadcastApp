@@ -375,7 +375,7 @@ public class ExampleService extends Service implements LocationListener {
         PendingIntent sender = PendingIntent.getBroadcast(ExampleService.this, appWidgetId, i, 0);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis()); // 現在時刻を取得
-        calendar.add(Calendar.SECOND, 30); // 現時刻より15秒後を設定
+        calendar.add(Calendar.HOUR, 6); // 現時刻より15秒後を設定
 
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);

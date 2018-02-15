@@ -44,8 +44,6 @@ public class AppDataSetting extends Service {
     // 端末内特定アプリ情報リスト
     List<AppData> dataList = new ArrayList<AppData>();
 
-    boolean appNew = true;
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // 現在の端末内アプリから特定アプリをリストに追加,更新
