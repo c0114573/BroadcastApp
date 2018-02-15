@@ -1,4 +1,4 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

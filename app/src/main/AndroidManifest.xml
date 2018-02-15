@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.c0114573.broadcastapp">
+    package="com.c0114573.LocationSaver">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -23,7 +23,7 @@
         android:label="自宅漏洩防止"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
-        <activity android:name=".MainActivity" >
+        <activity android:name="com.c0114573.LocationSaver.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,45 +32,45 @@
         </activity>
 
         <activity
-            android:name=".PermissionList"
+            android:name="com.c0114573.LocationSaver.PermissionList"
             android:label="@string/app_name" >
         </activity>
 
         <activity
-            android:name=".LocationList"
+            android:name="com.c0114573.LocationSaver.LocationList"
             android:label="@string/app_name" >
         </activity>
 
 
         <activity
-            android:name=".DialogStartAppActivity"
+            android:name="com.c0114573.LocationSaver.DialogStartAppActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">
         </activity>
 
         <activity
-            android:name=".DialogWarningActivity"
+            android:name="com.c0114573.LocationSaver.DialogWarningActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">
         </activity>
 
         <activity
-            android:name=".DialogInRangeActivity"
+            android:name="com.c0114573.LocationSaver.DialogInRangeActivity"
             android:label="activity_call_dialog"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleInstance">
         </activity>
 
-        <service android:name=".ExampleService"></service>
+        <service android:name="com.c0114573.LocationSaver.ExampleService"></service>
 
-        <service android:name=".WindowService"></service>
+        <service android:name="com.c0114573.LocationSaver.WindowService"></service>
 
-        <service android:name=".AppDataSetting"></service>
+        <service android:name="com.c0114573.LocationSaver.AppDataSetting"></service>
 
         <receiver
-            android:name=".AppStateReceiver"
+            android:name="com.c0114573.LocationSaver.AppStateReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
@@ -81,7 +81,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".ReceivedActivity" android:process=":remote" />
+        <receiver android:name="com.c0114573.LocationSaver.ReceivedActivity" android:process=":remote" />
 
         <meta-data
             android:name="com.google.android.gms.version"

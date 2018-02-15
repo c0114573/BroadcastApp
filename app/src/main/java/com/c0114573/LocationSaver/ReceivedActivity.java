@@ -1,4 +1,4 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

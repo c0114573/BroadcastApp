@@ -1,9 +1,8 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
 /**
  * Created by member on 2017/08/02.

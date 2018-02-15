@@ -1,4 +1,4 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -10,9 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

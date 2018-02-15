@@ -1,19 +1,11 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Created by member on 2017/07/26.

@@ -1,4 +1,4 @@
-package com.c0114573.broadcastapp;
+package com.c0114573.LocationSaver;
 
 import android.Manifest;
 import android.annotation.TargetApi;
